@@ -5,7 +5,8 @@ This works with [this version of esajpip](https://code.launchpad.net/~swhv/swhv/
 ##Installation
 First install esajpip. 
 Then do 
-    $git clone git://github.com/freekv/jpip.js
+
+    $ git clone git://github.com/freekv/jpip.js
 
 ##Example
 An example website can then be found in

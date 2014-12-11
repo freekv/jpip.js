@@ -4,11 +4,10 @@
 'use strict';
 function Pool(size) {
     var instance = this;
-    // set some defaults
     this.taskQueue = [];
     this.workerQueue = [];
     this.poolSize = size;
-    this.addWorkerTask = function (workerTask) {
+    this.addWorkerTask = function(workerTask) {
         if (instance.workerQueue.length > 0) {
             var workerThread = instance.workerQueue.shift();
             workerThread.run(workerTask);
@@ -16,13 +15,13 @@ function Pool(size) {
             instance.taskQueue.push(workerTask);
         }
     };
-    this.init = function () {
+    this.init = function() {
         var i;
         for (i = 0; i < size; i++) {
             instance.workerQueue.push(new WorkerThread(instance));
         }
     };
-    this.freeWorkerThread = function (workerThread) {
+    this.freeWorkerThread = function(workerThread) {
         if (instance.taskQueue.length > 0) {
             var workerTask = instance.taskQueue.shift();
             workerThread.run(workerTask);
@@ -39,7 +38,7 @@ function WorkerThread(parentPool) {
         instance.workerTask.callback(event);
         instance.parentPool.freeWorkerThread(instance);
     }
-    this.run = function (workerTask) {
+    this.run = function(workerTask) {
         this.workerTask = workerTask;
         if (this.workerTask.script !== null) {
             var worker = new Worker(workerTask.script);
@@ -56,16 +55,16 @@ function WorkerTask(script, callback, msg, msgExt) {
 }
 var pool = new Pool(4);
 pool.init();
-var fffp = false;
+
 var JPIP = function JPIPClosure() {
     function JPIP() {
     }
     JPIP.prototype = {
-        open: function openJPIP(baseurl, imgname, size, numberOfFrames) {
+        open : function openJPIP(baseurl, imgname, size, numberOfFrames) {
             var r = new XMLHttpRequest();
             r.open('get', baseurl + imgname + '?len=40000000&metareq=[*]!!&type=jpp-stream&cnew=http&tid=0', true);
             r.responseType = 'arraybuffer';
-            r.onreadystatechange = function (responseEvent) {
+            r.onreadystatechange = function(responseEvent) {
                 if (r.readyState === 4) {
                     if (r.status === 200) {
                         var jpip_cnew = r.getResponseHeader('JPIP-cnew');
@@ -91,19 +90,19 @@ var JPIP = function JPIPClosure() {
             };
             r.send();
         },
-        close: function closeJPIP(conn) {
+        close : function closeJPIP(conn) {
             var r = new XMLHttpRequest();
             r.open('get', conn.baseurl + 'jpip?cclose=' + conn.cid + '&len=0', true);
-            r.onload = function (responseEvent) {
+            r.onload = function(responseEvent) {
                 console.log('Closing connection');
             };
             r.send();
         },
-        download: function downloadJPIP(conn, responseList, size, curr, numberOfFrames) {
+        download : function downloadJPIP(conn, responseList, size, curr, numberOfFrames) {
             var r = new XMLHttpRequest();
             r.open('get', conn.baseurl + '/jpip?cid=' + conn.cid + '&fsiz=' + size + ',' + size + '&roff=0,0&rsiz=' + size + ',' + size + '&len=40000&context=jpxl<' + curr + '-' + curr + '>', true);
             r.responseType = 'arraybuffer';
-            r.onreadystatechange = function (responseEvent) {
+            r.onreadystatechange = function(responseEvent) {
                 if (r.readyState === 4) {
                     if (r.status === 200) {
                         var byteArray = new Uint8Array(r.response);
@@ -114,7 +113,7 @@ var JPIP = function JPIPClosure() {
                             if (curr < numberOfFrames - 1) {
                                 JPIP.prototype.decode(responseList, size, curr);
                                 curr = curr + 1;
-                                var newresponseList = [responseList[0]];
+                                var newresponseList = [ responseList[0] ];
                                 JPIP.prototype.download(conn, newresponseList, size, curr, numberOfFrames);
                             }
                         }
@@ -126,7 +125,7 @@ var JPIP = function JPIPClosure() {
             };
             r.send();
         },
-        decode: function decode(responseList, size, curr) {
+        decode : function decode(responseList, size, curr) {
             var precinctList = [];
             var headerList = [];
             var mainHeaderList = [];
@@ -153,46 +152,46 @@ var JPIP = function JPIPClosure() {
                         vbasDict.ind = ind;
                         vbasDict.binidAdditional = binidAdditional;
                         switch (binidAdditional) {
-                        case 1:
-                            vbasDict['class'] = vbasClass;
-                            offset = this.readVBAS(responseList[ind], offset, vbasDict, 'message_offset');
-                            offset = this.readVBAS(responseList[ind], offset, vbasDict, 'message_length');
-                            break;
-                        case 2:
-                            offset = this.readVBAS(responseList[ind], offset, vbasDict, 'class');
-                            offset = this.readVBAS(responseList[ind], offset, vbasDict, 'message_offset');
-                            offset = this.readVBAS(responseList[ind], offset, vbasDict, 'message_length');
-                            break;
-                        case 3:
-                            offset = this.readVBAS(responseList[ind], offset, vbasDict, 'class');
-                            offset = this.readVBAS(responseList[ind], offset, vbasDict, 'CSN');
-                            offset = this.readVBAS(responseList[ind], offset, vbasDict, 'message_offset');
-                            offset = this.readVBAS(responseList[ind], offset, vbasDict, 'message_length');
-                            break;
+                            case 1:
+                                vbasDict['class'] = vbasClass;
+                                offset = this.readVBAS(responseList[ind], offset, vbasDict, 'message_offset');
+                                offset = this.readVBAS(responseList[ind], offset, vbasDict, 'message_length');
+                                break;
+                            case 2:
+                                offset = this.readVBAS(responseList[ind], offset, vbasDict, 'class');
+                                offset = this.readVBAS(responseList[ind], offset, vbasDict, 'message_offset');
+                                offset = this.readVBAS(responseList[ind], offset, vbasDict, 'message_length');
+                                break;
+                            case 3:
+                                offset = this.readVBAS(responseList[ind], offset, vbasDict, 'class');
+                                offset = this.readVBAS(responseList[ind], offset, vbasDict, 'CSN');
+                                offset = this.readVBAS(responseList[ind], offset, vbasDict, 'message_offset');
+                                offset = this.readVBAS(responseList[ind], offset, vbasDict, 'message_length');
+                                break;
                         }
                         vbasClass = vbasDict['class'];
                         vbasDict.beginOffsetNoHeader = offset;
                         vbasDict.responseListIndex = ind;
                         switch (vbasDict['class']) {
-                        case 0:
-                            // Data messages
-                            if (!(vbasDict.binid in precinctList)) {
-                                precinctList[vbasDict.binid] = [];
-                            }
-                            precinctList[vbasDict.binid].push(vbasDict);
-                            break;
-                        case 2:
-                            // Tile header
-                            headerList.push(vbasDict);
-                            break;
-                        case 6:
-                            // Main header
-                            headerList.push(vbasDict);
-                            break;
-                        case 8:
-                            // Metadata
-                            headerList.push(vbasDict);
-                            break;
+                            case 0:
+                                // Data messages
+                                if (!(vbasDict.binid in precinctList)) {
+                                    precinctList[vbasDict.binid] = [];
+                                }
+                                precinctList[vbasDict.binid].push(vbasDict);
+                                break;
+                            case 2:
+                                // Tile header
+                                headerList.push(vbasDict);
+                                break;
+                            case 6:
+                                // Main header
+                                headerList.push(vbasDict);
+                                break;
+                            case 8:
+                                // Metadata
+                                headerList.push(vbasDict);
+                                break;
                         }
                         offset = offset + vbasDict.message_length;
                         vbasDict.endOffsetNoHeader = offset;
@@ -201,53 +200,34 @@ var JPIP = function JPIPClosure() {
                     }
                 } while (offset < responseList[ind].length);
             }
-            if (!fffp) {
-                console.log(headerList);
-                fffp = true;
-            }
+
             var fullheaderdata = this.concatenateHeaderData(headerList, responseList);
             var fulldata = this.concatenateData(precinctList, responseList);
             var alldata = this.concatenateHeaderAndData(fullheaderdata, fulldata);
-            var callback = function (e) {
+            var callback = function(e) {
                 JPIP.prototype.onload(e.data);
             };
             var msg;
             var msgExt;
             if (curr === 0) {
-                msg = [
-                    'meta',
-                    alldata.buffer,
-                    size,
-                    curr
-                ];
-                msgExt = [alldata.buffer];
+                msg = [ 'meta', alldata.buffer, size, curr ];
+                msgExt = [ alldata.buffer ];
             } else {
-                msg = [
-                    'data',
-                    alldata.buffer,
-                    size,
-                    curr
-                ];
-                msgExt = [alldata.buffer];
+                msg = [ 'data', alldata.buffer, size, curr ];
+                msgExt = [ alldata.buffer ];
             }
             var workerTask = new WorkerTask('../src/js/jpxcombined.js', callback, msg, msgExt);
             pool.addWorkerTask(workerTask);
         },
-        concatenateHeaderAndData: function concatenateHeaderAndData(fullheaderdata, fulldata) {
+        concatenateHeaderAndData : function concatenateHeaderAndData(fullheaderdata, fulldata) {
             var alldata = new Uint8Array(fulldata.length + fullheaderdata.length + 4);
             alldata.set(fullheaderdata, 0);
-            alldata.set([
-                255,
-                147
-            ], fullheaderdata.length);
+            alldata.set([ 255, 147 ], fullheaderdata.length);
             alldata.set(fulldata, fullheaderdata.length + 2);
-            alldata.set([
-                255,
-                217
-            ], fulldata.length + fullheaderdata.length + 2);
+            alldata.set([ 255, 217 ], fulldata.length + fullheaderdata.length + 2);
             return alldata;
         },
-        concatenateData: function concatenateData(precinctList, responseList) {
+        getDataLength : function getDataLength(precinctList, responseList) {
             var lenn = 0;
             var helparr, prec, data, realdata;
             for (var i = 0; i < precinctList.length; i++) {
@@ -259,12 +239,17 @@ var JPIP = function JPIPClosure() {
                     lenn += realdata.length;
                 }
             }
+            return lenn;
+        },
+        concatenateData : function concatenateData(precinctList, responseList) {
+            var lenn = JPIP.prototype.getDataLength(precinctList, responseList);
+            var helparr, prec, data, realdata;
             var fulldata = new Uint8Array(lenn);
             lenn = 0;
-            for (var ii = 0; ii < precinctList.length; ii++) {
+            for (var i = 0; i < precinctList.length; i++) {
                 helparr = precinctList[ii];
-                for (var jj = 0; jj < helparr.length; jj++) {
-                    prec = helparr[jj];
+                for (var j = 0; j < helparr.length; j++) {
+                    prec = helparr[j];
                     data = responseList[prec.responseListIndex];
                     realdata = data.subarray(prec.beginOffsetNoHeader, prec.endOffsetNoHeader);
                     fulldata.set(realdata, lenn);
@@ -273,7 +258,7 @@ var JPIP = function JPIPClosure() {
             }
             return fulldata;
         },
-        concatenateHeaderData: function concatenateHeaderData(headerList, responseList) {
+        concatenateHeaderData : function concatenateHeaderData(headerList, responseList) {
             var lenn = 0;
             var realdata;
             var headerel, data, tbox;
@@ -306,7 +291,7 @@ var JPIP = function JPIPClosure() {
             }
             return fullheaderdata;
         },
-        readVBAS: function readVBAS(responseList, offset, vbasDict, key) {
+        readVBAS : function readVBAS(responseList, offset, vbasDict, key) {
             var length = 0;
             do {
                 b = readUINT8(responseList[offset]);

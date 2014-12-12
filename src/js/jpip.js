@@ -259,8 +259,8 @@ var JPIP = function JPIPClosure() {
             }
             return fulldata;
         },
-        concatenateHeaderData : function concatenateHeaderData(headerList, responseList) {
-            var lenn = 0;
+        getHeaderDataLength : function getHeaderDataLength(headerList, responseList) {
+            var length = 0;
             var realdata;
             var headerel, data, tbox;
             for (var i = 0; i < headerList.length; i++) {
@@ -274,10 +274,17 @@ var JPIP = function JPIPClosure() {
                     warn('xUnsupported header type ' + tbox + ' (' + headerType + ')');
                     realdata = data.subarray(headerel.beginOffsetNoHeader + 20, headerel.beginOffsetNoHeader + 28);
                 }
-                lenn += realdata.length;
+                length += realdata.length;
             }
-            var fullheaderdata = new Uint8Array(lenn);
-            lenn = 0;
+            return length;
+        },
+        concatenateHeaderData : function concatenateHeaderData(headerList, responseList) {
+            var temporaryLength = 0;
+            var realdata;
+            var headerel, data, tbox;
+            var headerLength = JPIP.prototype.getHeaderDataLength(headerList, responseList);
+            var fullheaderdata = new Uint8Array(headerLength);
+            temporaryLength = 0;
             for (var ii = 0; ii < headerList.length; ii++) {
                 headerel = headerList[ii];
                 data = responseList[headerel.responseListIndex];
@@ -287,8 +294,8 @@ var JPIP = function JPIPClosure() {
                 } else {
                     realdata = data.subarray(headerel.beginOffsetNoHeader + 20, headerel.beginOffsetNoHeader + 28);
                 }
-                fullheaderdata.set(realdata, lenn);
-                lenn += realdata.length;
+                fullheaderdata.set(realdata, temporaryLength);
+                temporaryLength += realdata.length;
             }
             return fullheaderdata;
         },

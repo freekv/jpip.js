@@ -60,7 +60,6 @@ function drawScene() {
     loadIdentity();
     mvTranslate([ -0.0, 0.0, -1.0 ]);
     mvPushMatrix();
-    // mvRotate(cubeRotation, [ 1, 0, 1 ]);
 
     for (var i = 0; i < objectList.length; i++) {
         object = objectList[i];

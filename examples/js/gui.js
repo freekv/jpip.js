@@ -61,12 +61,12 @@ gui.prototype.createCombobox = function(controlpanel, name, data) {
         comboDataListOption.setAttribute("value", index);
         comboDataListOption.innerHTML = key;
         comboDataList.appendChild(comboDataListOption);
-        comboDataList.onchange = gui.prototype.datasetSelected;
         if (gui.prototype.datasetGUIObject[name] == key) {
             foundindex = index;
         }
         index++;
     }
+    comboDataList.onchange = gui.prototype.datasetSelected;
     gui.prototype.datasetGUIObject[name + "HtmlElement"] = comboDataList;
     comboDataList.selectIndex = foundindex;
     comboDataList.value = foundindex;

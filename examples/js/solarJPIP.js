@@ -47,6 +47,8 @@ solarJPIP.prototype.render = function(perspectiveMatrix, mvMatrix) {
 
         gl.uniform1i(gl.getUniformLocation(this.shaderProgram, "uSampler"), 0);
         gl.uniform1i(gl.getUniformLocation(this.shaderProgram, "uColormap"), 1);
+        gl.uniform1f(gl.getUniformLocation(this.shaderProgram, "colorTableValue"), this.colorTableValue);
+
         gl.uniform3f(gl.getUniformLocation(this.shaderProgram, "center"), 2. * this.texturesAndMetadata[this.currentIndex].plottingMetadata.x0 - 1., 2. * this.texturesAndMetadata[this.currentIndex].plottingMetadata.y0 - 1., 0);
         gl.uniform3f(gl.getUniformLocation(this.shaderProgram, "stretch"), this.texturesAndMetadata[this.currentIndex].plottingMetadata.solarRadiiX, this.texturesAndMetadata[this.currentIndex].plottingMetadata.solarRadiiY, 1.);
 
@@ -81,12 +83,34 @@ solarJPIP.prototype.init = function(gl) {
     }
     if (!this.initialized && this.colormapInitialized) {
         this.loadColormapTexture(gl);
+        this.loadColormapGui();
         this.initShaders(gl);
         this.initBuffers(gl);
         this.initTextures(gl);
         this.initialized = true;
     }
 }
+solarJPIP.prototype.colormapSelected = function(e) {
+    var controlpanel = document.getElementById("comboColormap");
+
+    var comboColormap = e.srcElement;
+    var selectedIndex = comboColormap.selectedIndex;
+    this.colorTableValue = comboColormap.children[selectedIndex].value;
+}
+solarJPIP.prototype.loadColormapGui = function() {
+    var colorTableNames = [ 'Blue/Green/Red/Yellow', 'Blue/Red', 'Blue/White Linear', 'Gray', 'Green/White Exponential', 'Green/White Linear', 'Rainbow 1', 'Rainbow 2', 'Red Temperature', 'SDO-AIA 131', 'SDO-AIA 1600', 'SDO-AIA 1700', 'SDO-AIA 171', 'SDO-AIA 193', 'SDO-AIA 211', 'SDO-AIA 304', 'SDO-AIA 335', 'SDO-AIA 4500', 'SDO-AIA 94', 'SOHO EIT 171', 'SOHO EIT 195', 'SOHO EIT 284', 'SOHO EIT 304', 'STEREO EUVI 171', 'STEREO EUVI 195', 'STEREO EUVI 284', 'STEREO EUVI 304' ];
+    var comboColormap = document.createElement("select");
+    comboColormap.setAttribute("id", "comboColormap");
+    for (var i = 0; i < colorTableNames.length; i++) {
+        var comboColormapOption = document.createElement("option");
+        comboColormapOption.setAttribute("value", (i + 0.5) / 256.);
+        comboColormapOption.innerHTML = colorTableNames[i];
+        comboColormap.appendChild(comboColormapOption);
+    }
+    document.getElementById("imagepanel").appendChild(comboColormap);
+    comboColormap.onchange = solarJPIP.prototype.colormapSelected;
+}
+
 solarJPIP.prototype.initBuffers = function(gl) {
     this.initVerticesBuffers(gl);
     this.initTextureCoordBuffers(gl);

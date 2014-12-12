@@ -74,7 +74,7 @@ solarJPIP.prototype.updateGUI = function() {
 solarJPIP.prototype.init = function(gl) {
     if (!this.colormapInitialized) {
         var image = new Image();
-        ref = this;
+        var ref = this;
         image.onload = function() {
             ref.colormapImage = image;
             ref.colormapInitialized = true;
@@ -90,14 +90,23 @@ solarJPIP.prototype.init = function(gl) {
         this.initialized = true;
     }
 }
+
+solarJPIP.prototype.handleEvent = function(e) {
+    switch (e.type) {
+        case "change":
+            this.colormapSelected(e);
+    }
+}
+
 solarJPIP.prototype.colormapSelected = function(e) {
     var controlpanel = document.getElementById("comboColormap");
 
     var comboColormap = e.srcElement;
     var selectedIndex = comboColormap.selectedIndex;
     var solarJPIPinstance = comboColormap.getAttribute("data-solarJPIP");
-    ref.colorTableValue = comboColormap.children[selectedIndex].value;
+    this.colorTableValue = comboColormap.children[selectedIndex].value;
 }
+
 solarJPIP.prototype.loadColormapGui = function() {
     var colorTableNames = [ 'Blue/Green/Red/Yellow', 'Blue/Red', 'Blue/White Linear', 'Gray', 'Green/White Exponential', 'Green/White Linear', 'Rainbow 1', 'Rainbow 2', 'Red Temperature', 'SDO-AIA 131', 'SDO-AIA 1600', 'SDO-AIA 1700', 'SDO-AIA 171', 'SDO-AIA 193', 'SDO-AIA 211', 'SDO-AIA 304', 'SDO-AIA 335', 'SDO-AIA 4500', 'SDO-AIA 94', 'SOHO EIT 171', 'SOHO EIT 195', 'SOHO EIT 284', 'SOHO EIT 304', 'STEREO EUVI 171', 'STEREO EUVI 195', 'STEREO EUVI 284', 'STEREO EUVI 304' ];
     var comboColormap = document.createElement("select");
@@ -110,7 +119,7 @@ solarJPIP.prototype.loadColormapGui = function() {
     }
     document.getElementById("imagepanel").appendChild(comboColormap);
     comboColormap.setAttribute("data-solarJPIP", this);
-    comboColormap.onchange = solarJPIP.prototype.colormapSelected;
+    comboColormap.addEventListener("change", this, false);
 }
 
 solarJPIP.prototype.initBuffers = function(gl) {
@@ -136,7 +145,7 @@ solarJPIP.prototype.initIndicesBuffers = function(gl) {
     this.vertexIndices = [ 0, 1, 2, 0, 2, 3, ]
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.vertexIndices), gl.STATIC_DRAW);
 }
-var ref;
+
 solarJPIP.prototype.initTextures = function() {
     td = this;
     JPIP.prototype.onload = function(data) {

@@ -19,4 +19,5 @@ Webgl is needed to see this example.
 This is work in progress.
 Currently works with Chrome, Safari and Firefox.
 It is not possible to use multiple browser tabs in Chrome currently.
+A live example for testing can be found [here](http://swhv.oma.be/jpipjpxtests/jpip.js/examples/webgl.html).
 

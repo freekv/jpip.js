@@ -21,6 +21,7 @@ function solarJPIP(baseurl, imgname, numberOfFrames, size) {
     this.colormapTexture;
     this.colormapImage;
     this.colormapInitialized = false;
+    this.colorTableValue = 1.;
 }
 
 solarJPIP.prototype.render = function(perspectiveMatrix, mvMatrix) {

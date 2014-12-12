@@ -30,6 +30,7 @@ function Pool(size) {
         }
     };
 }
+
 function WorkerThread(parentPool) {
     var instance = this;
     this.parentPool = parentPool;
@@ -247,7 +248,7 @@ var JPIP = function JPIPClosure() {
             var fulldata = new Uint8Array(lenn);
             lenn = 0;
             for (var i = 0; i < precinctList.length; i++) {
-                helparr = precinctList[ii];
+                helparr = precinctList[i];
                 for (var j = 0; j < helparr.length; j++) {
                     prec = helparr[j];
                     data = responseList[prec.responseListIndex];

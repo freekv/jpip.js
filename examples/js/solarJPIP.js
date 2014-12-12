@@ -74,7 +74,7 @@ solarJPIP.prototype.updateGUI = function() {
 solarJPIP.prototype.init = function(gl) {
     if (!this.colormapInitialized) {
         var image = new Image();
-        var ref = this;
+        ref = this;
         image.onload = function() {
             ref.colormapImage = image;
             ref.colormapInitialized = true;
@@ -95,7 +95,8 @@ solarJPIP.prototype.colormapSelected = function(e) {
 
     var comboColormap = e.srcElement;
     var selectedIndex = comboColormap.selectedIndex;
-    this.colorTableValue = comboColormap.children[selectedIndex].value;
+    var solarJPIPinstance = comboColormap.getAttribute("data-solarJPIP");
+    ref.colorTableValue = comboColormap.children[selectedIndex].value;
 }
 solarJPIP.prototype.loadColormapGui = function() {
     var colorTableNames = [ 'Blue/Green/Red/Yellow', 'Blue/Red', 'Blue/White Linear', 'Gray', 'Green/White Exponential', 'Green/White Linear', 'Rainbow 1', 'Rainbow 2', 'Red Temperature', 'SDO-AIA 131', 'SDO-AIA 1600', 'SDO-AIA 1700', 'SDO-AIA 171', 'SDO-AIA 193', 'SDO-AIA 211', 'SDO-AIA 304', 'SDO-AIA 335', 'SDO-AIA 4500', 'SDO-AIA 94', 'SOHO EIT 171', 'SOHO EIT 195', 'SOHO EIT 284', 'SOHO EIT 304', 'STEREO EUVI 171', 'STEREO EUVI 195', 'STEREO EUVI 284', 'STEREO EUVI 304' ];
@@ -108,6 +109,7 @@ solarJPIP.prototype.loadColormapGui = function() {
         comboColormap.appendChild(comboColormapOption);
     }
     document.getElementById("imagepanel").appendChild(comboColormap);
+    comboColormap.setAttribute("data-solarJPIP", this);
     comboColormap.onchange = solarJPIP.prototype.colormapSelected;
 }
 
@@ -160,9 +162,9 @@ solarJPIP.prototype.loadColormapTexture = function(gl) {
     this.colormapTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, this.colormapTexture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.colormapImage);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
-    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    // gl.generateMipmap(gl.TEXTURE_2D);
     gl.bindTexture(gl.TEXTURE_2D, null);
 }
 

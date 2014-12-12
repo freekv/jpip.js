@@ -13,32 +13,49 @@
 
     <script id="shader-fs" type="x-shader/x-fragment">
       varying highp vec2 vTextureCoord;
-      
+      varying highp vec2 vTextureCoordDiff;
+
       uniform sampler2D uSampler;
+      uniform sampler2D uSamplerDiff;
+
       uniform sampler2D uColormap;
 	  uniform highp float colorTableValue;
+	  uniform int isDiff;
       
       void main(void) {
-        gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
-        gl_FragColor = texture2D(uColormap, vec2(gl_FragColor.r, colorTableValue));
+	    if(isDiff==1){
+          gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t)) - texture2D(uSamplerDiff, vec2(vTextureCoordDiff.s, vTextureCoordDiff.t));
+		  highp float val = clamp((clamp(gl_FragColor.x, -0.5, 0.5)/0.5 + 1.)/2., 0. , 1.);
+		  gl_FragColor.xyz = vec3(val,val,val);
+		}
+        else{
+		  gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+          gl_FragColor = texture2D(uColormap, vec2(gl_FragColor.r, colorTableValue));
+		}
         gl_FragColor.a = 1.0;
       }
     </script>
-    
+     
     <script id="shader-vs" type="x-shader/x-vertex">
       attribute vec3 aVertexPosition;
       attribute vec2 aTextureCoord;
+
     
       uniform mat4 uMVMatrix;
       uniform mat4 uPMatrix;
-      uniform vec3 center;
-      uniform vec3 stretch;
+      uniform vec2 center;
+      uniform vec2 centerDiff;
+      uniform vec2 stretch;
+      uniform vec2 stretchDiff;
       
       varying highp vec2 vTextureCoord;
-    
+      varying highp vec2 vTextureCoordDiff;
+   
       void main(void) {
-        gl_Position = uPMatrix * uMVMatrix * vec4(((aVertexPosition-center)) , 1.0);
-        vTextureCoord = aTextureCoord;
+        gl_Position =  vec4(aVertexPosition , 1.0);
+        vTextureCoord = aTextureCoord + vec2(center.x, -center.y);
+        vTextureCoordDiff = aTextureCoord + vec2(centerDiff.x, -centerDiff.y);
+
       }
     </script>
   </head>

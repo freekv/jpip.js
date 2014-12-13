@@ -109,47 +109,47 @@ gui.prototype.buildUrl = function() {
 gui.prototype.initGui = function(data) {
     gui.prototype.datasetGUIObject.data = data;
     gui.prototype.datasetGUIObject.baseurl = "http://swhv.oma.be/hv/api/index.php?action=getJPX";
-    var controlpanel = document.getElementById("controlpanel");
+    var local_controlpanel = document.getElementById("local_controlpanel");
 
     var serverLabel = document.createElement("label");
     serverLabel.setAttribute("for", "serverExternal");
     serverLabel.innerHTML = "Server: ";
-    controlpanel.appendChild(serverLabel);
+    local_controlpanel.appendChild(serverLabel);
 
     var serverInput = document.createElement("input");
     serverInput.id = "serverExternal";
     serverInput.setAttribute("type", "text");
     serverInput.setAttribute("size", "40");
     serverInput.setAttribute("value", "http://127.0.0.1:8090/");
-    controlpanel.appendChild(serverInput);
-    controlpanel.appendChild(document.createElement("br"));
+    local_controlpanel.appendChild(serverInput);
+    local_controlpanel.appendChild(document.createElement("br"));
 
     var imageInputLabel = document.createElement("label");
     imageInputLabel.setAttribute("for", "imageExternal");
     imageInputLabel.innerHTML = "JPX: ";
-    controlpanel.appendChild(imageInputLabel);
+    local_controlpanel.appendChild(imageInputLabel);
     var imageInput = document.createElement("input");
     imageInput.id = "imageExternal";
     imageInput.setAttribute("type", "text");
     imageInput.setAttribute("size", "120");
     imageInput.setAttribute("value", "SWAP.jpx");
-    controlpanel.appendChild(imageInput);
-    controlpanel.appendChild(document.createElement("br"));
+    local_controlpanel.appendChild(imageInput);
+    local_controlpanel.appendChild(document.createElement("br"));
 
     var numberOfFramesLabel = document.createElement("label");
     numberOfFramesLabel.setAttribute("for", "imageExternal");
     numberOfFramesLabel.innerHTML = "Max number of frames: ";
-    controlpanel.appendChild(numberOfFramesLabel);
+    local_controlpanel.appendChild(numberOfFramesLabel);
     var numberOfFramesInput = document.createElement("input");
     numberOfFramesInput.id = "numberOfFrames";
     numberOfFramesInput.setAttribute("type", "text");
     numberOfFramesInput.setAttribute("value", "48");
-    controlpanel.appendChild(numberOfFramesInput);
-    controlpanel.appendChild(document.createElement("br"));
+    local_controlpanel.appendChild(numberOfFramesInput);
+    local_controlpanel.appendChild(document.createElement("br"));
 
     var externalbutton = document.createElement("button");
     externalbutton.innerHTML = "Load external";
-    controlpanel.appendChild(externalbutton);
+    local_controlpanel.appendChild(externalbutton);
     externalbutton.onclick = function() {
         var serverName = document.getElementById("serverExternal").value;
         var imageName = document.getElementById("imageExternal").value;
@@ -158,8 +158,7 @@ gui.prototype.initGui = function(data) {
         objectList.push(new solarJPIP(serverName, imageName, frameCount, 512));
     }
 
-    controlpanel.appendChild(document.createElement("br"));
-    controlpanel.appendChild(document.createElement("br"));
+    var controlpanel = document.getElementById("controlpanel");
 
     var button = document.createElement("button");
     button.innerHTML = "Load";

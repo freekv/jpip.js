@@ -27,6 +27,7 @@
           gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t)) - texture2D(uSamplerDiff, vec2(vTextureCoordDiff.s, vTextureCoordDiff.t));
 		  highp float val = clamp((clamp(gl_FragColor.x, -0.5, 0.5)/0.5 + 1.)/2., 0. , 1.);
 		  gl_FragColor.xyz = vec3(val,val,val);
+          gl_FragColor = texture2D(uColormap, vec2(gl_FragColor.r, colorTableValue));
 		}
         else{
 		  gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
@@ -62,8 +63,17 @@
   
   <body onload="start()">
   <div id="top" style="clear:both;">
-      <div id ="controlpanel">
-      </div>  
+      <input type="checkbox" id="read_more" role="button">
+      <label for="read_more" onclick="">
+      	  <span>
+	      		<div class="togglelabel">Click to choose your own server</div>
+	            <div id ="controlpanel"></div> 
+	      </span>
+	      <span>
+	      		<div class="togglelabel">Click to load from classical server</div>
+	            <div id ="local_controlpanel"></div>
+	      </span>
+      </label>  
   </div>
 
   

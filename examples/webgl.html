@@ -62,18 +62,19 @@
   </head>
   
   <body onload="start()">
-  <div id="top" style="clear:both;">
+  <div id="top">
       <input type="checkbox" id="read_more" role="button">
-      <label for="read_more" onclick="">
-      	  <span>
-	      		<div class="togglelabel">Click to choose your own server</div>
-	            <div id ="controlpanel"></div> 
+      <label class="togglelabel" for="read_more" onclick="">
+          <span>
+	      		Click to choose your own server
 	      </span>
 	      <span>
-	      		<div class="togglelabel">Click to load from classical server</div>
-	            <div id ="local_controlpanel"></div>
+	      		Click to load from classical server
 	      </span>
-      </label>  
+      </label>
+      <br style="clear:both;" />
+	  <div id ="controlpanel"></div> 
+	  <div id ="local_controlpanel"></div>
   </div>
 
   

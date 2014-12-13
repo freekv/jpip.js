@@ -27,14 +27,14 @@ function solarJPIP(baseurl, imgname, numberOfFrames, size) {
 
 solarJPIP.prototype.render = function(perspectiveMatrix, mvMatrix) {
     if (this.parsedMetadata.length > 0) {
-        this.currentIndex = (this.currentIndex + 1) % this.parsedMetadata.length;
+        this.currentIndex = (this.currentIndex + 1) % (this.parsedMetadata.length);
     }
     if (this.texturesAndMetadata[this.currentIndex] === undefined) {
         this.currentIndex = 0;
     }
-    if (this.initialized && this.visible && this.texturesAndMetadata[this.currentIndex] !== undefined && this.texturesAndMetadata[this.currentIndex + 1] !== undefined) {
-        // gl.enable(gl.BLEND);
-        // gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+    if (this.initialized && this.visible && this.texturesAndMetadata[this.currentIndex] !== undefined) {
+        console.log(this.texturesAndMetadata[this.currentIndex]);
+
         gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
         gl.vertexAttribPointer(this.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 
@@ -44,8 +44,13 @@ solarJPIP.prototype.render = function(perspectiveMatrix, mvMatrix) {
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.texturesAndMetadata[this.currentIndex].texture);
 
-        gl.activeTexture(gl.TEXTURE1);
-        gl.bindTexture(gl.TEXTURE_2D, this.texturesAndMetadata[this.currentIndex + 1].texture);
+        if (this.isDiff && this.texturesAndMetadata[this.currentIndex + 1] !== undefined) {
+            gl.activeTexture(gl.TEXTURE1);
+            gl.bindTexture(gl.TEXTURE_2D, this.texturesAndMetadata[this.currentIndex + 1].texture);
+            gl.uniform2f(gl.getUniformLocation(this.shaderProgram, "centerDiff"), this.texturesAndMetadata[this.currentIndex + 1].plottingMetadata.x0, this.texturesAndMetadata[this.currentIndex + 1].plottingMetadata.y0);
+            gl.uniform2f(gl.getUniformLocation(this.shaderProgram, "stretchDiff"), this.texturesAndMetadata[this.currentIndex + 1].plottingMetadata.solarRadiiX, this.texturesAndMetadata[this.currentIndex + 1].plottingMetadata.solarRadiiY);
+        }
+        gl.uniform1i(gl.getUniformLocation(this.shaderProgram, "isDiff"), this.isDiff);
 
         gl.activeTexture(gl.TEXTURE2);
         gl.bindTexture(gl.TEXTURE_2D, this.colormapTexture);
@@ -55,12 +60,9 @@ solarJPIP.prototype.render = function(perspectiveMatrix, mvMatrix) {
 
         gl.uniform1i(gl.getUniformLocation(this.shaderProgram, "uColormap"), 2);
         gl.uniform1f(gl.getUniformLocation(this.shaderProgram, "colorTableValue"), this.colorTableValue);
-        gl.uniform1i(gl.getUniformLocation(this.shaderProgram, "isDiff"), this.isDiff);
 
         gl.uniform2f(gl.getUniformLocation(this.shaderProgram, "center"), this.texturesAndMetadata[this.currentIndex].plottingMetadata.x0, this.texturesAndMetadata[this.currentIndex].plottingMetadata.y0);
         gl.uniform2f(gl.getUniformLocation(this.shaderProgram, "stretch"), this.texturesAndMetadata[this.currentIndex].plottingMetadata.solarRadiiX, this.texturesAndMetadata[this.currentIndex].plottingMetadata.solarRadiiY);
-        gl.uniform2f(gl.getUniformLocation(this.shaderProgram, "centerDiff"), this.texturesAndMetadata[this.currentIndex + 1].plottingMetadata.x0, this.texturesAndMetadata[this.currentIndex + 1].plottingMetadata.y0);
-        gl.uniform2f(gl.getUniformLocation(this.shaderProgram, "stretchDiff"), this.texturesAndMetadata[this.currentIndex + 1].plottingMetadata.solarRadiiX, this.texturesAndMetadata[this.currentIndex + 1].plottingMetadata.solarRadiiY);
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.verticesIndexBuffer);
         var pUniform = gl.getUniformLocation(this.shaderProgram, "uPMatrix");

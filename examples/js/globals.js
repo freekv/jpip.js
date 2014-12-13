@@ -1,9 +1,10 @@
+//Experimental write to file
 function writeUint8ToFile(uint8array, filename) {
     window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
     window.requestFileSystem(window.TEMPORARY, 1024 * 1024, function(fs) {
         fs.root.getFile(filename, {
             create : true
-        }, function(fileEntry) { // test.bin is filename
+        }, function(fileEntry) {
             fileEntry.createWriter(function(fileWriter) {
                 var blob = new Blob([ uint8array ]);
                 fileWriter.addEventListener("writeend", function() {

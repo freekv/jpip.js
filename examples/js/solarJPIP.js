@@ -22,6 +22,7 @@ function solarJPIP(baseurl, imgname, numberOfFrames, size) {
     this.colormapImage;
     this.colormapInitialized = false;
     this.colorTableValue = 1.;
+    this.boostboxValue = 0.8;
     this.isDiff = 0;
 }
 
@@ -60,6 +61,7 @@ solarJPIP.prototype.render = function(perspectiveMatrix, mvMatrix) {
 
         gl.uniform1i(gl.getUniformLocation(this.shaderProgram, "uColormap"), 2);
         gl.uniform1f(gl.getUniformLocation(this.shaderProgram, "colorTableValue"), this.colorTableValue);
+        gl.uniform1f(gl.getUniformLocation(this.shaderProgram, "boostboxValue"), 1. - this.boostboxValue);
 
         gl.uniform2f(gl.getUniformLocation(this.shaderProgram, "center"), this.texturesAndMetadata[this.currentIndex].plottingMetadata.x0, this.texturesAndMetadata[this.currentIndex].plottingMetadata.y0);
         gl.uniform2f(gl.getUniformLocation(this.shaderProgram, "stretch"), this.texturesAndMetadata[this.currentIndex].plottingMetadata.solarRadiiX, this.texturesAndMetadata[this.currentIndex].plottingMetadata.solarRadiiY);
@@ -116,7 +118,10 @@ solarJPIP.prototype.handleEvent = function(e) {
                 } else {
                     this.isDiff = 0;
                 }
+            } else if (elementType == "boostboxDifference") {
+                this.boostboxValue = e.srcElement.value;
             }
+
     }
 }
 

@@ -82,6 +82,25 @@ function parseDate(input) {
     var date = Date.UTC(year, month, day, hours, minutes, seconds, 0);
     return date;
 }
+
+function formatDate(setDate) {
+    var dateStr = "";
+    dateStr += setDate.getUTCFullYear() + "-";
+    dateStr += pad(setDate.getUTCMonth() + 1, 2);
+    dateStr += "-" + pad(setDate.getUTCDate(), 2);
+    dateStr += "T" + pad(setDate.getUTCHours(), 2);
+    dateStr += ":" + pad(setDate.getUTCMinutes(), 2);
+    dateStr += ":" + pad(setDate.getUTCSeconds(), 2);
+    return dateStr;
+}
+// Integer padding
+function pad(num, size) {
+    var s = num + "";
+    while (s.length < size)
+        s = "0" + s;
+    return s;
+}
+
 // Conversion of units functions
 function arcsecondsToRadians(arcsec) {
     var radians;

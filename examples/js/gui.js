@@ -78,7 +78,7 @@ gui.prototype.createDatebox = function(controlpanel, id, number) {
     dateEl.setAttribute("type", "textarea");
     var setDate = new Date;
     setDate.setDate(setDate.getDate() - number);
-    dateEl.value = setDate.getUTCFullYear() + "-" + (setDate.getUTCMonth() + 1) + "-" + setDate.getUTCDate() + "T" + setDate.getUTCHours() + ":" + setDate.getUTCMinutes() + ":" + setDate.getUTCSeconds();
+    dateEl.value = setDate.getUTCFullYear() + "-" + pad(setDate.getUTCMonth() + 1, 2) + "-" + pad(setDate.getUTCDate(), 2) + "T" + pad(setDate.getUTCHours(), 2) + ":" + pad(setDate.getUTCMinutes(), 2) + ":" + pad(setDate.getUTCSeconds(), 2);
     dateEl.addEventListener("scroll", function(e) {
         console.log("EVENT" + e);
     });

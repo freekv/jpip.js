@@ -151,6 +151,9 @@ solarJPIP.prototype.loadDifferenceCheckbox = function() {
     var differenceCheckboxLabel = document.createElement("label");
     differenceCheckboxLabel.innerHTML = "Difference Image:";
 
+    var differenceBoostboxLabel = document.createElement("label");
+    differenceBoostboxLabel.innerHTML = "Boost value:";
+
     var differenceCheckbox = document.createElement("input");
     differenceCheckbox.setAttribute("type", "checkbox");
     differenceCheckbox.setAttribute("data-type", "checkboxDifference");
@@ -158,6 +161,18 @@ solarJPIP.prototype.loadDifferenceCheckbox = function() {
     var imagePanel = document.getElementById("imagepanel");
     imagePanel.appendChild(differenceCheckboxLabel);
     imagePanel.appendChild(differenceCheckbox);
+
+    var differenceBoostbox = document.createElement("input");
+    differenceBoostbox.setAttribute("type", "number");
+    differenceBoostbox.setAttribute("data-type", "boostboxDifference");
+    differenceBoostbox.setAttribute("min", 0);
+    differenceBoostbox.setAttribute("max", 1);
+    differenceBoostbox.setAttribute("step", 0.01);
+    differenceBoostbox.value = 0.8;
+
+    differenceBoostbox.addEventListener("change", this, false);
+    imagePanel.appendChild(differenceBoostboxLabel);
+    imagePanel.appendChild(differenceBoostbox);
     imagePanel.appendChild(document.createElement("br"));
 }
 

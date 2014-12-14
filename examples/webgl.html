@@ -25,15 +25,16 @@
       
       void main(void) {
 	    if(isDiff==1){
-          gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t)) - texture2D(uSamplerDiff, vec2(vTextureCoordDiff.s, vTextureCoordDiff.t));
+          gl_FragColor = texture2D(uSampler, vTextureCoord) - texture2D(uSamplerDiff, vTextureCoordDiff);
 		  highp float val = clamp((clamp(gl_FragColor.x, -boostboxValue, boostboxValue)/boostboxValue + 1.)/2., 0. , 1.);
 		  gl_FragColor.xyz = vec3(val,val,val);
-          gl_FragColor = texture2D(uColormap, vec2(gl_FragColor.r, colorTableValue));
 		}
         else{
 		  gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
-          gl_FragColor = texture2D(uColormap, vec2(gl_FragColor.r, colorTableValue));
 		}
+
+        gl_FragColor = texture2D(uColormap, vec2(gl_FragColor.r, colorTableValue));
+
         gl_FragColor.a = 1.0;
       }
     </script>

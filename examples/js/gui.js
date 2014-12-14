@@ -72,11 +72,13 @@ gui.prototype.createCombobox = function(controlpanel, name, data) {
     comboDataList.value = foundindex;
     controlpanel.appendChild(comboDataList);
 }
-gui.prototype.createDatebox = function(controlpanel, id) {
+gui.prototype.createDatebox = function(controlpanel, id, number) {
     var dateEl = document.createElement("input");
     dateEl.id = id;
     dateEl.setAttribute("type", "textarea");
-    dateEl.value = "2014-11-01T12:12:12";
+    var setDate = new Date;
+    setDate.setDate(setDate.getDate() - number);
+    dateEl.value = setDate.getUTCFullYear() + "-" + (setDate.getUTCMonth() + 1) + "-" + setDate.getUTCDate() + "T" + setDate.getUTCHours() + ":" + setDate.getUTCMinutes() + ":" + setDate.getUTCSeconds();
     dateEl.addEventListener("scroll", function(e) {
         console.log("EVENT" + e);
     });
@@ -178,9 +180,11 @@ gui.prototype.initGui = function(data) {
     }
     controlpanel.appendChild(document.createElement("br"));
 
-    gui.prototype.createDatebox(controlpanel, "startTime");
+    var dateNumber = 1;
+    gui.prototype.createDatebox(controlpanel, "startTime", dateNumber);
     controlpanel.appendChild(document.createElement("br"));
-    gui.prototype.createDatebox(controlpanel, "endTime");
+    dateNumber--;
+    gui.prototype.createDatebox(controlpanel, "endTime", dateNumber);
     controlpanel.appendChild(document.createElement("br"));
     var nextel = gui.prototype.datasetGUIObject.data;
     gui.prototype.datasetGUIObject["observatory"] = "SDO";

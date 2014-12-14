@@ -67,6 +67,10 @@ input[type=checkbox] {
     visibility: hidden;
     
 }
+#local_controlpanel {
+    display: none;
+    visibility: hidden;
+}
 
 input[type=checkbox]:checked ~ [for="read_more"] span:first-of-type {
     display: none;

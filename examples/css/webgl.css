@@ -89,3 +89,19 @@ input[type=checkbox]:checked + label + br+ #controlpanel + #local_controlpanel {
     display: inline;
     visibility: visible;
 }
+
+.video{
+    height:50px; 
+    background:#FF0000; 
+    display:inline-block;
+    margin:0;
+    padding:0;
+    
+}
+#videoBar{
+	width: 412px;
+}
+
+#videoPlayButton, #videoEnd{
+	width: 50px;
+}

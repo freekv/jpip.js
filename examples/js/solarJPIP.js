@@ -24,6 +24,7 @@ function solarJPIP(baseurl, imgname, numberOfFrames, size) {
     this.colorTableValue = 1.;
     this.boostboxValue = 0.8;
     this.isDiff = 0;
+    this.alphaValue = 1.;
 }
 
 solarJPIP.prototype.render = function(perspectiveMatrix, mvMatrix) {
@@ -34,8 +35,8 @@ solarJPIP.prototype.render = function(perspectiveMatrix, mvMatrix) {
         this.currentIndex = 0;
     }
     if (this.initialized && this.visible && this.texturesAndMetadata[this.currentIndex] !== undefined) {
-        console.log(this.texturesAndMetadata[this.currentIndex]);
-
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
         gl.vertexAttribPointer(this.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 
@@ -62,6 +63,7 @@ solarJPIP.prototype.render = function(perspectiveMatrix, mvMatrix) {
         gl.uniform1i(gl.getUniformLocation(this.shaderProgram, "uColormap"), 2);
         gl.uniform1f(gl.getUniformLocation(this.shaderProgram, "colorTableValue"), this.colorTableValue);
         gl.uniform1f(gl.getUniformLocation(this.shaderProgram, "boostboxValue"), 1. - this.boostboxValue);
+        gl.uniform1f(gl.getUniformLocation(this.shaderProgram, "alphaValue"), this.alphaValue);
 
         gl.uniform2f(gl.getUniformLocation(this.shaderProgram, "center"), this.texturesAndMetadata[this.currentIndex].plottingMetadata.x0, this.texturesAndMetadata[this.currentIndex].plottingMetadata.y0);
         gl.uniform2f(gl.getUniformLocation(this.shaderProgram, "stretch"), this.texturesAndMetadata[this.currentIndex].plottingMetadata.solarRadiiX, this.texturesAndMetadata[this.currentIndex].plottingMetadata.solarRadiiY);
@@ -99,6 +101,7 @@ solarJPIP.prototype.init = function(gl) {
         this.loadColormapTexture(gl);
         this.loadColormapGui();
         this.loadDifferenceCheckbox();
+        this.loadAlphaValue();
         this.initShaders(gl);
         this.initBuffers(gl);
         this.initTextures(gl);
@@ -120,8 +123,9 @@ solarJPIP.prototype.handleEvent = function(e) {
                 }
             } else if (elementType == "boostboxDifference") {
                 this.boostboxValue = e.srcElement.value;
+            } else if (elementType == "alphabox") {
+                this.alphaValue = e.srcElement.value;
             }
-
     }
 }
 
@@ -178,6 +182,22 @@ solarJPIP.prototype.loadDifferenceCheckbox = function() {
     differenceBoostbox.addEventListener("change", this, false);
     imagePanel.appendChild(differenceBoostboxLabel);
     imagePanel.appendChild(differenceBoostbox);
+    imagePanel.appendChild(document.createElement("br"));
+}
+solarJPIP.prototype.loadAlphaValue = function() {
+    var alphaLabel = document.createElement("label");
+    alphaLabel.innerHTML = "Alpha value:";
+    var alphaBox = document.createElement("input");
+    alphaBox.setAttribute("type", "number");
+    alphaBox.setAttribute("data-type", "alphabox");
+    alphaBox.setAttribute("min", 0);
+    alphaBox.setAttribute("max", 1);
+    alphaBox.setAttribute("step", 0.01);
+    alphaBox.value = 1.;
+    alphaBox.addEventListener("change", this, false);
+    var imagePanel = document.getElementById("imagepanel");
+    imagePanel.appendChild(alphaLabel);
+    imagePanel.appendChild(alphaBox);
     imagePanel.appendChild(document.createElement("br"));
 }
 

@@ -195,8 +195,12 @@ gui.prototype.initGui = function(data) {
     gui.prototype.createCombobox(controlpanel, "detector", nextel);
     nextel = nextel[gui.prototype.datasetGUIObject.detector].children;
     gui.prototype.createCombobox(controlpanel, "measurement", nextel);
-
+    gui.prototype.createVideoBar();
 };
+
+gui.prototype.createVideoBar = function() {
+
+}
 
 Element.prototype.remove = function() {
     this.parentElement.removeChild(this);

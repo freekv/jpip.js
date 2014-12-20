@@ -19,9 +19,10 @@
       uniform sampler2D uSamplerDiff;
 
       uniform sampler2D uColormap;
-	  uniform highp float colorTableValue;
-	  uniform highp float boostboxValue;
-	  uniform int isDiff;
+      uniform highp float colorTableValue;
+      uniform highp float boostboxValue;
+      uniform highp float alphaValue;
+      uniform int isDiff;
       
       void main(void) {
 	    if(isDiff==1){
@@ -35,7 +36,7 @@
 
         gl_FragColor = texture2D(uColormap, vec2(gl_FragColor.r, colorTableValue));
 
-        gl_FragColor.a = 1.0;
+        gl_FragColor.a = alphaValue;
       }
     </script>
      
@@ -81,6 +82,10 @@
 
   
   <div style="float:left;">
+  	<div id ="videoPlayButton" class="video"><img src="images/play"/></div>
+  	<div class="video" id="videobar"><img src="images/bar"/> </div>
+  	<div class="video" id="videoEnd"><img src="images/play"/></div> 
+  	<div></div> 	
     <canvas id="glcanvas" width="512" height="512">
       Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
     </canvas>

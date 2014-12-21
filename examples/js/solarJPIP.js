@@ -25,6 +25,7 @@ function solarJPIP(baseurl, imgname, numberOfFrames, size) {
     this.boostboxValue = 0.8;
     this.isDiff = 0;
     this.alphaValue = 1.;
+    this.viewportIndex = 0;
 }
 
 solarJPIP.prototype.render = function(perspectiveMatrix, mvMatrix, time) {
@@ -100,6 +101,7 @@ solarJPIP.prototype.init = function(gl) {
     if (!this.initialized && this.colormapInitialized) {
         this.loadColormapTexture(gl);
         this.loadColormapGui();
+        this.loadViewport();
         this.loadDifferenceCheckbox();
         this.loadAlphaValue();
         this.initShaders(gl);
@@ -125,15 +127,22 @@ solarJPIP.prototype.handleEvent = function(e) {
                 this.boostboxValue = e.srcElement.value;
             } else if (elementType == "alphabox") {
                 this.alphaValue = e.srcElement.value;
+            } else if (elementType == "comboViewportmap") {
+                this.viewportSelected(e);
             }
     }
 }
 
 solarJPIP.prototype.colormapSelected = function(e) {
-    var controlpanel = document.getElementById("comboColormap");
     var comboColormap = e.srcElement;
     var selectedIndex = comboColormap.selectedIndex;
     this.colorTableValue = comboColormap.children[selectedIndex].value;
+}
+
+solarJPIP.prototype.viewportSelected = function(e) {
+    var comboViewportmap = e.srcElement;
+    var selectedIndex = comboViewportmap.selectedIndex;
+    this.viewportIndex = comboViewportmap.children[selectedIndex].value;
 }
 
 solarJPIP.prototype.loadColormapGui = function() {
@@ -199,6 +208,25 @@ solarJPIP.prototype.loadAlphaValue = function() {
     imagePanel.appendChild(alphaLabel);
     imagePanel.appendChild(alphaBox);
     imagePanel.appendChild(document.createElement("br"));
+}
+solarJPIP.prototype.loadViewport = function() {
+    var viewportNames = [ '0', '1' ];
+    var comboViewportmap = document.createElement("select");
+    comboViewportmap.setAttribute("id", "comboViewportmap");
+    for (var i = 0; i < viewportNames.length; i++) {
+        var comboViewportOption = document.createElement("option");
+        comboViewportOption.setAttribute("value", i);
+        comboViewportOption.innerHTML = viewportNames[i];
+        comboViewportmap.appendChild(comboViewportOption);
+    }
+    var comboViewportLabel = document.createElement("label");
+    comboViewportLabel.innerHTML = "Viewport:";
+    var imagePanel = document.getElementById("imagepanel");
+    imagePanel.appendChild(comboViewportLabel);
+    imagePanel.appendChild(comboViewportmap);
+    imagePanel.appendChild(document.createElement("br"));
+    comboViewportmap.setAttribute("data-type", "comboViewportmap");
+    comboViewportmap.addEventListener("change", this, false);
 }
 
 solarJPIP.prototype.initBuffers = function(gl) {

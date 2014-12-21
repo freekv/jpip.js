@@ -19,6 +19,8 @@ var beginDate = 0;
 var endDate = 0;
 var currentDate = 0;
 var cadence = 25 * 60 * 1000;
+var running = false;
+var loop = true;
 
 function initWebGL() {
     gl = null;
@@ -40,54 +42,65 @@ function start() {
         gl.depthFunc(gl.LEQUAL);
         setInterval(function() {
             requestAnimationFrame(drawScene)
-        }, 20);
+        }, 30);
     }
 }
 
 var count = 0;
 var bt = Date.now();
 function drawScene() {
-    currentDate += cadence;
-    if (currentDate > endDate) {
-        currentDate = beginDate;
-    }
-    for (var i = 0; i < objectList.length; i++) {
-        object = objectList[i];
-        if (!object.initialized) {
-            object.init(gl);
-        }
-    }
-
-    for (var i = 0; i < objectList.length; i++) {
-        object = objectList[i];
-        object.prerender(gl);
-    }
-
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     perspectiveMatrix = makePerspective(90, 1024.0 / 1024.0, 0.1, 100.0);
     loadIdentity();
     mvTranslate([ -0.0, 0.0, -1.0 ]);
     mvPushMatrix();
+    for (var ll = 0; ll < 2; ll++) {
+        gl.viewport(ll * 512, 0, 512, 512);
 
-    for (var i = 0; i < objectList.length; i++) {
-        object = objectList[i];
-        object.render(perspectiveMatrix, mvMatrix, currentDate);
+        if (running) {
+            currentDate += cadence;
+        }
+        if (currentDate > endDate && loop) {
+            currentDate = beginDate;
+        }
+
+        for (var i = 0; i < objectList.length; i++) {
+            object = objectList[i];
+            if (!object.initialized) {
+                object.init(gl);
+            }
+        }
+
+        for (var i = 0; i < objectList.length; i++) {
+            object = objectList[i];
+            if (object.viewportIndex == ll) {
+                object.prerender(gl);
+            }
+        }
+
+        for (var i = 0; i < objectList.length; i++) {
+            object = objectList[i];
+            if (object.viewportIndex == ll) {
+                object.render(perspectiveMatrix, mvMatrix, currentDate);
+            }
+        }
+
+        /*
+         * var currentTime = (new Date).getTime(); if (lastCubeUpdateTime) { var
+         * delta = currentTime - lastCubeUpdateTime; cubeRotation += (30 *
+         * delta) / 1000.0; }
+         * 
+         * lastCubeUpdateTime = currentTime;
+         */
+        for (var i = 0; i < objectList.length; i++) {
+            object = objectList[i];
+            object.updateGUI();
+        }
+        elapsed = Date.now() - bt;
+        bt = Date.now();
     }
-
     mvPopMatrix();
-    /*
-     * var currentTime = (new Date).getTime(); if (lastCubeUpdateTime) { var
-     * delta = currentTime - lastCubeUpdateTime; cubeRotation += (30 * delta) /
-     * 1000.0; }
-     * 
-     * lastCubeUpdateTime = currentTime;
-     */
-    for (var i = 0; i < objectList.length; i++) {
-        object = objectList[i];
-        object.updateGUI();
-    }
-    elapsed = Date.now() - bt;
-    bt = Date.now();
+
 }
 
 function loadIdentity() {

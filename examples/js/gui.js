@@ -205,13 +205,17 @@ gui.prototype.initGui = function(data) {
 };
 
 gui.prototype.createVideoBar = function() {
+    var videoButton = document.getElementById("videoPlayButton");
+    videoButton.addEventListener("click", function() {
+        running = !running;
+        var el = this.childNodes[0];
+        if (running) {
+            el.src = "images/pause.png";
+        } else {
+            el.src = "images/play.png";
+        }
+    });
 
-}
-
-Element.prototype.remove = function() {
-    this.parentElement.removeChild(this);
-}
-NodeList.prototype.remove = HTMLCollection.prototype.remove = function() {
 }
 
 document.addEventListener("DOMContentLoaded", function(event) {

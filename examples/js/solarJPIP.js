@@ -277,10 +277,13 @@ solarJPIP.prototype.loadNewTextures = function(gl) {
 }
 
 solarJPIP.prototype.initShaders = function(gl) {
+    if (solarJPIP.prototype.shaderProgram !== undefined) {
+        return;
+    }
     var fragmentShader = getShader(gl, "shader-fs");
     var vertexShader = getShader(gl, "shader-vs");
 
-    this.shaderProgram = gl.createProgram();
+    solarJPIP.prototype.shaderProgram = gl.createProgram();
     gl.attachShader(this.shaderProgram, vertexShader);
     gl.attachShader(this.shaderProgram, fragmentShader);
     gl.linkProgram(this.shaderProgram);

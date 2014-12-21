@@ -27,10 +27,12 @@ function solarJPIP(baseurl, imgname, numberOfFrames, size) {
     this.alphaValue = 1.;
 }
 
-solarJPIP.prototype.render = function(perspectiveMatrix, mvMatrix) {
+solarJPIP.prototype.render = function(perspectiveMatrix, mvMatrix, time) {
     if (this.parsedMetadata.length > 0) {
-        this.currentIndex = (this.currentIndex + 1) % (this.parsedMetadata.length);
+        this.currentIndex = this.binarySearch(time);
     }
+    console.log(this.currentIndex);
+
     if (this.texturesAndMetadata[this.currentIndex] === undefined) {
         this.currentIndex = 0;
     }
@@ -270,8 +272,11 @@ solarJPIP.prototype.loadNewTextures = function(gl) {
         tAndM.texture = texture;
         tAndM.parsedMetadata = this.parsedMetadata[image.index];
         tAndM.plottingMetadata = this.plottingMetadata[image.index];
-        // tAndM.sort(function(a,b){a.parsedMetadata, b.parsedMetadata});
-        this.texturesAndMetadata[image.index] = tAndM;
+
+        this.texturesAndMetadata.push(tAndM);
+        this.texturesAndMetadata.sort(function(a, b) {
+            return (a.plottingMetadata.dateObs - b.plottingMetadata.dateObs);
+        });
         document.getElementById("info").innerHTML = "Loaded " + this.texturesAndMetadata.length + "/" + (this.parsedMetadata.length - 1);
     }
 }
@@ -390,7 +395,7 @@ solarJPIP.prototype.parseXML = function(metadata) {
         plotMetadata.x0 = (plotMetadata.crpix1 - 0.5) / naxis1 - 0.5;
         plotMetadata.y0 = (plotMetadata.crpix2 - 0.5) / naxis2 - 0.5;
         try {
-            plotMetadata.dateObs = parseDate(keywords["DATE-OBS"]);
+            plotMetadata.dateObs = parseDate(keywords["DATE-OBS"], 1);
         } catch (err) {
             if (keywords["DATE-OBS"] !== undefined) {
                 console.log(keywords["DATE-OBS"]);
@@ -401,6 +406,23 @@ solarJPIP.prototype.parseXML = function(metadata) {
         }
         this.plottingMetadata.push(plotMetadata);
     }
+}
+
+solarJPIP.prototype.binarySearch = function(key) {
+    var array = this.texturesAndMetadata;
+    var lo = 0, hi = array.length - 1, mid, element;
+    while (lo <= hi) {
+        mid = ((lo + hi) >> 1);
+        element = array[mid].plottingMetadata.dateObs;
+        if (element < key) {
+            lo = mid + 1;
+        } else if (element > key) {
+            hi = mid - 1;
+        } else {
+            return mid;
+        }
+    }
+    return mid;
 }
 function printMetadata(keywords) {
     var metadataHtml = "<ul>";

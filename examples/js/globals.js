@@ -72,13 +72,13 @@ var getJSON = function(url, successHandler, errorHandler) {
 };
 
 // Parsing dates
-function parseDate(input) {
-    var year = parseInt(input.substr(1, 4), 10);
-    var month = parseInt(input.substr(6, 2), 10);
-    var day = parseInt(input.substr(9, 2), 10);
-    var hours = parseInt(input.substr(12, 2), 10);
-    var minutes = parseInt(input.substr(15, 2), 10);
-    var seconds = parseInt(input.substr(18, 2), 10);
+function parseDate(input, offset) {
+    var year = parseInt(input.substr(0 + offset, 4), 10);
+    var month = parseInt(input.substr(5 + offset, 2), 10);
+    var day = parseInt(input.substr(8 + offset, 2), 10);
+    var hours = parseInt(input.substr(11 + offset, 2), 10);
+    var minutes = parseInt(input.substr(14 + offset, 2), 10);
+    var seconds = parseInt(input.substr(17 + offset, 2), 10);
     var date = Date.UTC(year, month, day, hours, minutes, seconds, 0);
     return date;
 }

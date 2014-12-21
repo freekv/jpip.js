@@ -15,6 +15,10 @@ var shaderProgram;
 var vertexPositionAttribute;
 var textureCoordAttribute;
 var perspectiveMatrix;
+var beginDate = 0;
+var endDate = 0;
+var currentDate = 0;
+var cadence = 5 * 60 * 1000;
 
 function initWebGL() {
     gl = null;
@@ -36,13 +40,17 @@ function start() {
         gl.depthFunc(gl.LEQUAL);
         setInterval(function() {
             requestAnimationFrame(drawScene)
-        }, 100);
+        }, 20);
     }
 }
 
 var count = 0;
 var bt = Date.now();
 function drawScene() {
+    currentDate += cadence;
+    if (currentDate > endDate) {
+        currentDate = beginDate;
+    }
     for (var i = 0; i < objectList.length; i++) {
         object = objectList[i];
         if (!object.initialized) {
@@ -63,19 +71,17 @@ function drawScene() {
 
     for (var i = 0; i < objectList.length; i++) {
         object = objectList[i];
-        object.render(perspectiveMatrix, mvMatrix);
+        object.render(perspectiveMatrix, mvMatrix, currentDate);
     }
 
     mvPopMatrix();
-
-    var currentTime = (new Date).getTime();
-    if (lastCubeUpdateTime) {
-        var delta = currentTime - lastCubeUpdateTime;
-        cubeRotation += (30 * delta) / 1000.0;
-    }
-
-    lastCubeUpdateTime = currentTime;
-
+    /*
+     * var currentTime = (new Date).getTime(); if (lastCubeUpdateTime) { var
+     * delta = currentTime - lastCubeUpdateTime; cubeRotation += (30 * delta) /
+     * 1000.0; }
+     * 
+     * lastCubeUpdateTime = currentTime;
+     */
     for (var i = 0; i < objectList.length; i++) {
         object = objectList[i];
         object.updateGUI();

@@ -108,6 +108,12 @@ gui.prototype.buildUrl = function() {
     return url;
 }
 
+gui.prototype.setBeginAndEndDate = function() {
+    beginDate = parseDate(gui.prototype.datasetGUIObject["startTime"].value, 0);
+    endDate = parseDate(gui.prototype.datasetGUIObject["endTime"].value, 0);
+    currentDate = beginDate;
+}
+
 gui.prototype.initGui = function(data) {
     gui.prototype.datasetGUIObject.data = data;
     gui.prototype.datasetGUIObject.baseurl = "http://swhv.oma.be/hv/api/index.php?action=getJPX";
@@ -173,10 +179,10 @@ gui.prototype.initGui = function(data) {
             // objectList.push(new solarJPIP("http://localhost:8090/", "movies"
             // + jpxparts[1], data.frames.length, 512));
         };
-        console.log(gui.prototype.buildUrl());
         getJSON(gui.prototype.buildUrl(), success, function(e) {
             console.log();
         });
+        gui.prototype.setBeginAndEndDate();
     }
     controlpanel.appendChild(document.createElement("br"));
 

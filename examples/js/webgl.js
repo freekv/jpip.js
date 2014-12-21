@@ -18,7 +18,7 @@ var perspectiveMatrix;
 var beginDate = 0;
 var endDate = 0;
 var currentDate = 0;
-var cadence = 5 * 60 * 1000;
+var cadence = 25 * 60 * 1000;
 
 function initWebGL() {
     gl = null;

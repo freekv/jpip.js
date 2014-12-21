@@ -31,8 +31,6 @@ solarJPIP.prototype.render = function(perspectiveMatrix, mvMatrix, time) {
     if (this.parsedMetadata.length > 0) {
         this.currentIndex = this.binarySearch(time);
     }
-    console.log(this.currentIndex);
-
     if (this.texturesAndMetadata[this.currentIndex] === undefined) {
         this.currentIndex = 0;
     }
@@ -289,21 +287,21 @@ solarJPIP.prototype.initShaders = function(gl) {
     var vertexShader = getShader(gl, "shader-vs");
 
     solarJPIP.prototype.shaderProgram = gl.createProgram();
-    gl.attachShader(this.shaderProgram, vertexShader);
-    gl.attachShader(this.shaderProgram, fragmentShader);
-    gl.linkProgram(this.shaderProgram);
+    gl.attachShader(solarJPIP.prototype.shaderProgram, vertexShader);
+    gl.attachShader(solarJPIP.prototype.shaderProgram, fragmentShader);
+    gl.linkProgram(solarJPIP.prototype.shaderProgram);
 
-    if (!gl.getProgramParameter(this.shaderProgram, gl.LINK_STATUS)) {
+    if (!gl.getProgramParameter(solarJPIP.prototype.shaderProgram, gl.LINK_STATUS)) {
         alert("Unable to initialize the shader program.");
     }
 
-    gl.useProgram(this.shaderProgram);
+    gl.useProgram(solarJPIP.prototype.shaderProgram);
 
-    this.vertexPositionAttribute = gl.getAttribLocation(this.shaderProgram, "aVertexPosition");
-    gl.enableVertexAttribArray(this.vertexPositionAttribute);
+    solarJPIP.prototype.vertexPositionAttribute = gl.getAttribLocation(solarJPIP.prototype.shaderProgram, "aVertexPosition");
+    gl.enableVertexAttribArray(solarJPIP.prototype.vertexPositionAttribute);
 
-    this.textureCoordAttribute = gl.getAttribLocation(this.shaderProgram, "aTextureCoord");
-    gl.enableVertexAttribArray(this.textureCoordAttribute);
+    solarJPIP.prototype.textureCoordAttribute = gl.getAttribLocation(solarJPIP.prototype.shaderProgram, "aTextureCoord");
+    gl.enableVertexAttribArray(solarJPIP.prototype.textureCoordAttribute);
 }
 
 getShader = function(gl, id) {
@@ -408,21 +406,21 @@ solarJPIP.prototype.parseXML = function(metadata) {
     }
 }
 
-solarJPIP.prototype.binarySearch = function(key) {
+solarJPIP.prototype.binarySearch = function(time) {
     var array = this.texturesAndMetadata;
-    var lo = 0, hi = array.length - 1, mid, element;
-    while (lo <= hi) {
-        mid = ((lo + hi) >> 1);
-        element = array[mid].plottingMetadata.dateObs;
-        if (element < key) {
-            lo = mid + 1;
-        } else if (element > key) {
-            hi = mid - 1;
+    var arrlen = array.length;
+    var foundindex = 0;
+    while (foundindex < arrlen) {
+        if (array[foundindex].plottingMetadata.dateObs < time) {
+            foundindex++;
         } else {
-            return mid;
+            break;
         }
     }
-    return mid;
+    if (foundindex == arrlen) {
+        foundindex--;
+    }
+    return foundindex;
 }
 function printMetadata(keywords) {
     var metadataHtml = "<ul>";

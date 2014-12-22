@@ -26,6 +26,7 @@ function solarJPIP(baseurl, imgname, numberOfFrames, size) {
     this.isDiff = 0;
     this.alphaValue = 1.;
     this.viewportIndex = 0;
+    this.optionsPanel = document.createElement("div");
 }
 
 solarJPIP.prototype.render = function(perspectiveMatrix, mvMatrix, time) {
@@ -100,135 +101,13 @@ solarJPIP.prototype.init = function(gl) {
     }
     if (!this.initialized && this.colormapInitialized) {
         this.loadColormapTexture(gl);
-        this.loadColormapGui();
-        this.loadViewport();
-        this.loadDifferenceCheckbox();
-        this.loadAlphaValue();
+        this.loadGUIElements();
         this.initShaders(gl);
         this.initBuffers(gl);
         this.initTextures(gl);
         this.initialized = true;
     }
 }
-
-solarJPIP.prototype.handleEvent = function(e) {
-    switch (e.type) {
-        case "change":
-            var elementType = e.srcElement.attributes["data-type"].value;
-            if (elementType == "comboColormap") {
-                this.colormapSelected(e);
-            } else if (elementType == "checkboxDifference") {
-                if (e.srcElement.checked) {
-                    this.isDiff = 1;
-                } else {
-                    this.isDiff = 0;
-                }
-            } else if (elementType == "boostboxDifference") {
-                this.boostboxValue = e.srcElement.value;
-            } else if (elementType == "alphabox") {
-                this.alphaValue = e.srcElement.value;
-            } else if (elementType == "comboViewportmap") {
-                this.viewportSelected(e);
-            }
-    }
-}
-
-solarJPIP.prototype.colormapSelected = function(e) {
-    var comboColormap = e.srcElement;
-    var selectedIndex = comboColormap.selectedIndex;
-    this.colorTableValue = comboColormap.children[selectedIndex].value;
-}
-
-solarJPIP.prototype.viewportSelected = function(e) {
-    var comboViewportmap = e.srcElement;
-    var selectedIndex = comboViewportmap.selectedIndex;
-    this.viewportIndex = comboViewportmap.children[selectedIndex].value;
-}
-
-solarJPIP.prototype.loadColormapGui = function() {
-    var colorTableNames = [ 'Blue/Green/Red/Yellow', 'Blue/Red', 'Blue/White Linear', 'Gray', 'Green/White Exponential', 'Green/White Linear', 'Rainbow 1', 'Rainbow 2', 'Red Temperature', 'SDO-AIA 131', 'SDO-AIA 1600', 'SDO-AIA 1700', 'SDO-AIA 171', 'SDO-AIA 193', 'SDO-AIA 211', 'SDO-AIA 304', 'SDO-AIA 335', 'SDO-AIA 4500', 'SDO-AIA 94', 'SOHO EIT 171', 'SOHO EIT 195', 'SOHO EIT 284', 'SOHO EIT 304', 'STEREO EUVI 171', 'STEREO EUVI 195', 'STEREO EUVI 284', 'STEREO EUVI 304' ];
-    var comboColormap = document.createElement("select");
-    comboColormap.setAttribute("id", "comboColormap");
-    for (var i = 0; i < colorTableNames.length; i++) {
-        var comboColormapOption = document.createElement("option");
-        comboColormapOption.setAttribute("value", (i + 0.5) / 256.);
-        comboColormapOption.innerHTML = colorTableNames[i];
-        comboColormap.appendChild(comboColormapOption);
-    }
-    var comboColormapLabel = document.createElement("label");
-    comboColormapLabel.innerHTML = "Colormap:";
-    var imagePanel = document.getElementById("imagepanel");
-    imagePanel.appendChild(comboColormapLabel);
-    imagePanel.appendChild(comboColormap);
-    imagePanel.appendChild(document.createElement("br"));
-    comboColormap.setAttribute("data-type", "comboColormap");
-    comboColormap.addEventListener("change", this, false);
-}
-
-solarJPIP.prototype.loadDifferenceCheckbox = function() {
-    var differenceCheckboxLabel = document.createElement("label");
-    differenceCheckboxLabel.innerHTML = "Difference Image:";
-
-    var differenceBoostboxLabel = document.createElement("label");
-    differenceBoostboxLabel.innerHTML = "Boost value:";
-
-    var differenceCheckbox = document.createElement("input");
-    differenceCheckbox.setAttribute("type", "checkbox");
-    differenceCheckbox.setAttribute("data-type", "checkboxDifference");
-    differenceCheckbox.addEventListener("change", this, false);
-    var imagePanel = document.getElementById("imagepanel");
-    imagePanel.appendChild(differenceCheckboxLabel);
-    imagePanel.appendChild(differenceCheckbox);
-
-    var differenceBoostbox = document.createElement("input");
-    differenceBoostbox.setAttribute("type", "number");
-    differenceBoostbox.setAttribute("data-type", "boostboxDifference");
-    differenceBoostbox.setAttribute("min", 0);
-    differenceBoostbox.setAttribute("max", 1);
-    differenceBoostbox.setAttribute("step", 0.01);
-    differenceBoostbox.value = 0.8;
-
-    differenceBoostbox.addEventListener("change", this, false);
-    imagePanel.appendChild(differenceBoostboxLabel);
-    imagePanel.appendChild(differenceBoostbox);
-    imagePanel.appendChild(document.createElement("br"));
-}
-solarJPIP.prototype.loadAlphaValue = function() {
-    var alphaLabel = document.createElement("label");
-    alphaLabel.innerHTML = "Alpha value:";
-    var alphaBox = document.createElement("input");
-    alphaBox.setAttribute("type", "number");
-    alphaBox.setAttribute("data-type", "alphabox");
-    alphaBox.setAttribute("min", 0);
-    alphaBox.setAttribute("max", 1);
-    alphaBox.setAttribute("step", 0.01);
-    alphaBox.value = 1.;
-    alphaBox.addEventListener("change", this, false);
-    var imagePanel = document.getElementById("imagepanel");
-    imagePanel.appendChild(alphaLabel);
-    imagePanel.appendChild(alphaBox);
-    imagePanel.appendChild(document.createElement("br"));
-}
-solarJPIP.prototype.loadViewport = function() {
-    var viewportNames = [ '0', '1' ];
-    var comboViewportmap = document.createElement("select");
-    comboViewportmap.setAttribute("id", "comboViewportmap");
-    for (var i = 0; i < viewportNames.length; i++) {
-        var comboViewportOption = document.createElement("option");
-        comboViewportOption.setAttribute("value", i);
-        comboViewportOption.innerHTML = viewportNames[i];
-        comboViewportmap.appendChild(comboViewportOption);
-    }
-    var comboViewportLabel = document.createElement("label");
-    comboViewportLabel.innerHTML = "Viewport:";
-    var imagePanel = document.getElementById("imagepanel");
-    imagePanel.appendChild(comboViewportLabel);
-    imagePanel.appendChild(comboViewportmap);
-    imagePanel.appendChild(document.createElement("br"));
-    comboViewportmap.setAttribute("data-type", "comboViewportmap");
-    comboViewportmap.addEventListener("change", this, false);
-}
-
 solarJPIP.prototype.initBuffers = function(gl) {
     this.initVerticesBuffers(gl);
     this.initTextureCoordBuffers(gl);
@@ -467,4 +346,125 @@ function printMetadata(keywords) {
     metadataHtml += "<li>" + "test" + "</li>";
     metadataHtml += "</ul>";
     return metadataHtml;
+}
+// GUI section
+solarJPIP.prototype.loadGUIElements = function(e) {
+    var imagePanel = document.getElementById("imagepanel");
+    imagePanel.appendChild(this.optionsPanel);
+    this.loadViewport();
+    this.loadDifferenceCheckbox();
+    this.loadAlphaValue();
+}
+solarJPIP.prototype.handleEvent = function(e) {
+    switch (e.type) {
+        case "change":
+            var elementType = e.srcElement.attributes["data-type"].value;
+            if (elementType == "comboColormap") {
+                this.colormapSelected(e);
+            } else if (elementType == "checkboxDifference") {
+                if (e.srcElement.checked) {
+                    this.isDiff = 1;
+                } else {
+                    this.isDiff = 0;
+                }
+            } else if (elementType == "boostboxDifference") {
+                this.boostboxValue = e.srcElement.value;
+            } else if (elementType == "alphabox") {
+                this.alphaValue = e.srcElement.value;
+            } else if (elementType == "comboViewportmap") {
+                this.viewportSelected(e);
+            }
+    }
+}
+
+solarJPIP.prototype.colormapSelected = function(e) {
+    var comboColormap = e.srcElement;
+    var selectedIndex = comboColormap.selectedIndex;
+    this.colorTableValue = comboColormap.children[selectedIndex].value;
+}
+
+solarJPIP.prototype.viewportSelected = function(e) {
+    var comboViewportmap = e.srcElement;
+    var selectedIndex = comboViewportmap.selectedIndex;
+    this.viewportIndex = comboViewportmap.children[selectedIndex].value;
+}
+
+solarJPIP.prototype.loadColormapGui = function() {
+    var colorTableNames = [ 'Blue/Green/Red/Yellow', 'Blue/Red', 'Blue/White Linear', 'Gray', 'Green/White Exponential', 'Green/White Linear', 'Rainbow 1', 'Rainbow 2', 'Red Temperature', 'SDO-AIA 131', 'SDO-AIA 1600', 'SDO-AIA 1700', 'SDO-AIA 171', 'SDO-AIA 193', 'SDO-AIA 211', 'SDO-AIA 304', 'SDO-AIA 335', 'SDO-AIA 4500', 'SDO-AIA 94', 'SOHO EIT 171', 'SOHO EIT 195', 'SOHO EIT 284', 'SOHO EIT 304', 'STEREO EUVI 171', 'STEREO EUVI 195', 'STEREO EUVI 284', 'STEREO EUVI 304' ];
+    var comboColormap = document.createElement("select");
+    comboColormap.setAttribute("id", "comboColormap");
+    for (var i = 0; i < colorTableNames.length; i++) {
+        var comboColormapOption = document.createElement("option");
+        comboColormapOption.setAttribute("value", (i + 0.5) / 256.);
+        comboColormapOption.innerHTML = colorTableNames[i];
+        comboColormap.appendChild(comboColormapOption);
+    }
+    var comboColormapLabel = document.createElement("label");
+    comboColormapLabel.innerHTML = "Colormap:";
+    this.optionsPanel.appendChild(comboColormapLabel);
+    this.optionsPanel.appendChild(comboColormap);
+    this.optionsPanel.appendChild(document.createElement("br"));
+    comboColormap.setAttribute("data-type", "comboColormap");
+    comboColormap.addEventListener("change", this, false);
+}
+
+solarJPIP.prototype.loadDifferenceCheckbox = function() {
+    var differenceCheckboxLabel = document.createElement("label");
+    differenceCheckboxLabel.innerHTML = "Difference Image:";
+
+    var differenceBoostboxLabel = document.createElement("label");
+    differenceBoostboxLabel.innerHTML = "Boost value:";
+
+    var differenceCheckbox = document.createElement("input");
+    differenceCheckbox.setAttribute("type", "checkbox");
+    differenceCheckbox.setAttribute("data-type", "checkboxDifference");
+    differenceCheckbox.addEventListener("change", this, false);
+    this.optionsPanel.appendChild(differenceCheckboxLabel);
+    this.optionsPanel.appendChild(differenceCheckbox);
+
+    var differenceBoostbox = document.createElement("input");
+    differenceBoostbox.setAttribute("type", "number");
+    differenceBoostbox.setAttribute("data-type", "boostboxDifference");
+    differenceBoostbox.setAttribute("min", 0);
+    differenceBoostbox.setAttribute("max", 1);
+    differenceBoostbox.setAttribute("step", 0.01);
+    differenceBoostbox.value = 0.8;
+
+    differenceBoostbox.addEventListener("change", this, false);
+    this.optionsPanel.appendChild(differenceBoostboxLabel);
+    this.optionsPanel.appendChild(differenceBoostbox);
+    this.optionsPanel.appendChild(document.createElement("br"));
+}
+solarJPIP.prototype.loadAlphaValue = function() {
+    var alphaLabel = document.createElement("label");
+    alphaLabel.innerHTML = "Alpha value:";
+    var alphaBox = document.createElement("input");
+    alphaBox.setAttribute("type", "number");
+    alphaBox.setAttribute("data-type", "alphabox");
+    alphaBox.setAttribute("min", 0);
+    alphaBox.setAttribute("max", 1);
+    alphaBox.setAttribute("step", 0.01);
+    alphaBox.value = 1.;
+    alphaBox.addEventListener("change", this, false);
+    this.optionsPanel.appendChild(alphaLabel);
+    this.optionsPanel.appendChild(alphaBox);
+    this.optionsPanel.appendChild(document.createElement("br"));
+}
+solarJPIP.prototype.loadViewport = function() {
+    var viewportNames = [ '0', '1' ];
+    var comboViewportmap = document.createElement("select");
+    comboViewportmap.setAttribute("id", "comboViewportmap");
+    for (var i = 0; i < viewportNames.length; i++) {
+        var comboViewportOption = document.createElement("option");
+        comboViewportOption.setAttribute("value", i);
+        comboViewportOption.innerHTML = viewportNames[i];
+        comboViewportmap.appendChild(comboViewportOption);
+    }
+    var comboViewportLabel = document.createElement("label");
+    comboViewportLabel.innerHTML = "Viewport:";
+    this.optionsPanel.appendChild(comboViewportLabel);
+    this.optionsPanel.appendChild(comboViewportmap);
+    this.optionsPanel.appendChild(document.createElement("br"));
+    comboViewportmap.setAttribute("data-type", "comboViewportmap");
+    comboViewportmap.addEventListener("change", this, false);
 }

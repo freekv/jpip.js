@@ -27,6 +27,7 @@ function solarJPIP(baseurl, imgname, numberOfFrames, size) {
     this.alphaValue = 1.;
     this.viewportIndex = 0;
     this.optionsPanel = document.createElement("div");
+    this.metadataPanel;
 }
 
 solarJPIP.prototype.render = function(perspectiveMatrix, mvMatrix, time) {
@@ -86,7 +87,7 @@ solarJPIP.prototype.prerender = function(gl) {
 }
 solarJPIP.prototype.updateGUI = function() {
     if (this.texturesAndMetadata[this.currentIndex] !== undefined) {
-        document.getElementById("metadata").innerHTML = this.texturesAndMetadata[this.currentIndex].parsedMetadata;
+        this.metadataPanel.innerHTML = this.texturesAndMetadata[this.currentIndex].parsedMetadata;
     }
 }
 solarJPIP.prototype.init = function(gl) {
@@ -354,6 +355,7 @@ solarJPIP.prototype.loadGUIElements = function(e) {
     this.loadViewport();
     this.loadDifferenceCheckbox();
     this.loadAlphaValue();
+    this.loadMetadataPanel();
 }
 solarJPIP.prototype.handleEvent = function(e) {
     switch (e.type) {
@@ -366,6 +368,14 @@ solarJPIP.prototype.handleEvent = function(e) {
                     this.isDiff = 1;
                 } else {
                     this.isDiff = 0;
+                }
+            } else if (elementType == "checkboxMetadata") {
+                if (e.srcElement.checked) {
+                    this.metadataPanel.style.visibility = 'visible';
+                    this.metadataPanel.style.display = 'inline'
+                } else {
+                    this.metadataPanel.style.visibility = 'hidden';
+                    this.metadataPanel.style.display = 'none';
                 }
             } else if (elementType == "boostboxDifference") {
                 this.boostboxValue = e.srcElement.value;
@@ -467,4 +477,23 @@ solarJPIP.prototype.loadViewport = function() {
     this.optionsPanel.appendChild(document.createElement("br"));
     comboViewportmap.setAttribute("data-type", "comboViewportmap");
     comboViewportmap.addEventListener("change", this, false);
+}
+solarJPIP.prototype.loadMetadataPanel = function() {
+    this.metadataPanel = document.createElement("div");
+
+    var metadataCheckboxLabel = document.createElement("label");
+    metadataCheckboxLabel.innerHTML = "Show metadata: ";
+
+    var metadataCheckbox = document.createElement("input");
+    metadataCheckbox.setAttribute("type", "checkbox");
+    metadataCheckbox.setAttribute("data-type", "checkboxMetadata");
+    metadataCheckbox.addEventListener("change", this, false);
+    this.optionsPanel.appendChild(metadataCheckboxLabel);
+    this.optionsPanel.appendChild(metadataCheckbox);
+    this.optionsPanel.appendChild(document.createElement("br"));
+
+    this.metadataPanel.style.visibility = 'hidden';
+    this.metadataPanel.style.display = 'none';
+    this.optionsPanel.appendChild(this.metadataPanel);
+
 }

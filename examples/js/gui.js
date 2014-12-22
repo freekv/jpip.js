@@ -4,8 +4,9 @@ gui = function() {
     this.datasetGUIObject;
     this.controlpanel = document.getElementById("controlpanel");
     this.local_controlpanel = document.getElementById("local_controlpanel");
-
+    this.datePanel = document.getElementById("datePanel");
 };
+
 gui.prototype.datasetGUIObject = {};
 gui.prototype.reinsertCombo = function(name, nextel) {
     this.datasetGUIObject[name] = undefined;
@@ -87,7 +88,7 @@ gui.prototype.createDatebox = function(id, number) {
         console.log("EVENT" + e);
     });
     this.datasetGUIObject[id] = dateEl;
-    this.controlpanel.appendChild(dateEl);
+    this.datePanel.appendChild(dateEl);
 }
 
 gui.prototype.buildUrl = function() {
@@ -179,10 +180,10 @@ gui.prototype.initGui = function(data) {
 
     var dateNumber = 1;
     this.createDatebox("startTime", dateNumber);
-    this.controlpanel.appendChild(document.createElement("br"));
+    this.datePanel.appendChild(document.createElement("br"));
     dateNumber--;
     this.createDatebox("endTime", dateNumber);
-    this.controlpanel.appendChild(document.createElement("br"));
+    this.datePanel.appendChild(document.createElement("br"));
     var nextel = this.datasetGUIObject.data;
     this.datasetGUIObject["observatory"] = "SDO";
     this.createCombobox("observatory", nextel);

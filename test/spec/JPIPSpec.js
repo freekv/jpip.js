@@ -19,7 +19,6 @@ describe("LOADSWAP", function() {
         }
     }
     JPIP.prototype.onclose = function(){
-        console.log("HERERE");
     }
     var jpipConn = jpip.open("http://localhost:8090/", "SWAP.jpx", 256, 3);
   });
@@ -54,7 +53,6 @@ describe("LOADAIA", function() {
         }
     }
     JPIP.prototype.onclose = function(){
-        console.log("HERERE");
     }
     var jpipConn = jpip.open("http://localhost:8090/", "AIA.jpx", 256, 3);
   });

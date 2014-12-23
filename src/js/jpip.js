@@ -99,6 +99,9 @@ JPIP.prototype = {
             console.log('Closing connection');
         };
         r.send();
+        if (JPIP.prototype.onclose !== undefined) {
+            JPIP.prototype.onclose();
+        }
     },
     download : function downloadJPIP(conn, responseList, size, curr, numberOfFrames) {
         var r = new XMLHttpRequest();
@@ -209,7 +212,9 @@ JPIP.prototype = {
         var fulldata = this.concatenateData(precinctList, responseList);
         var alldata = this.concatenateHeaderAndData(fullheaderdata, fulldata);
         var callback = function(e) {
-            JPIP.prototype.onload(e.data);
+            if (JPIP.prototype.onload !== undefined) {
+                JPIP.prototype.onload(e.data);
+            }
         };
         var msg;
         var msgExt;

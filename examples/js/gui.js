@@ -119,7 +119,7 @@ gui.prototype.setBeginAndEndDate = function() {
     currentDate = beginDate;
 }
 
-gui.prototype.initGui = function(data) {
+gui.prototype.createServerPanel = function(data) {
     this.datasetGUIObject.data = data;
     this.datasetGUIObject.baseurl = "http://swhv.oma.be/hv/api/index.php?action=getJPX";
 
@@ -177,13 +177,6 @@ gui.prototype.initGui = function(data) {
     loadButton.setAttribute("data-type", "loadButton");
 
     this.controlpanel.appendChild(document.createElement("br"));
-
-    var dateNumber = 1;
-    this.createDatebox("startTime", dateNumber);
-    this.datePanel.appendChild(document.createElement("br"));
-    dateNumber--;
-    this.createDatebox("endTime", dateNumber);
-    this.datePanel.appendChild(document.createElement("br"));
     var nextel = this.datasetGUIObject.data;
     this.datasetGUIObject["observatory"] = "SDO";
     this.createCombobox("observatory", nextel);
@@ -193,6 +186,20 @@ gui.prototype.initGui = function(data) {
     this.createCombobox("detector", nextel);
     nextel = nextel[this.datasetGUIObject.detector].children;
     this.createCombobox("measurement", nextel);
+}
+
+gui.prototype.createDatePanel = function() {
+    var dateNumber = 1;
+    this.createDatebox("startTime", dateNumber);
+    this.datePanel.appendChild(document.createElement("br"));
+    dateNumber--;
+    this.createDatebox("endTime", dateNumber);
+    this.datePanel.appendChild(document.createElement("br"));
+}
+
+gui.prototype.initGui = function(data) {
+    this.createServerPanel(data);
+    this.createDatePanel();
     this.createVideoBar();
 };
 

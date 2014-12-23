@@ -74,7 +74,7 @@ input[type=checkbox]:checked ~ [for="read_more"] span:first-of-type {
     display: none;
     visibility: hidden;
 }
-input[type=checkbox]:checked + label + br+ #controlpanel {
+input[type=checkbox]:checked ~ #controlpanel {
     display: none;
     visibility: hidden;
 }
@@ -83,7 +83,7 @@ input[type=checkbox]:checked ~ [for="read_more"] span:last-of-type {
     display: inline;
     visibility: visible;
 }
-input[type=checkbox]:checked + label + br+ #controlpanel + #local_controlpanel {
+input[type=checkbox]:checked ~ #local_controlpanel {
     display: inline;
     visibility: visible;
 }

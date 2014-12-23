@@ -361,16 +361,17 @@ solarJPIP.prototype.handleEvent = function(e) {
     switch (e.type) {
         case "change":
             var elementType = e.srcElement.attributes["data-type"].value;
+            var element = e.target || e.srcElement;
             if (elementType == "comboColormap") {
                 this.colormapSelected(e);
             } else if (elementType == "checkboxDifference") {
-                if (e.srcElement.checked) {
+                if (element.checked) {
                     this.isDiff = 1;
                 } else {
                     this.isDiff = 0;
                 }
             } else if (elementType == "checkboxMetadata") {
-                if (e.srcElement.checked) {
+                if (element.checked) {
                     this.metadataPanel.style.visibility = 'visible';
                     this.metadataPanel.style.display = 'inline'
                 } else {
@@ -378,9 +379,9 @@ solarJPIP.prototype.handleEvent = function(e) {
                     this.metadataPanel.style.display = 'none';
                 }
             } else if (elementType == "boostboxDifference") {
-                this.boostboxValue = e.srcElement.value;
+                this.boostboxValue = element.value;
             } else if (elementType == "alphabox") {
-                this.alphaValue = e.srcElement.value;
+                this.alphaValue = element.value;
             } else if (elementType == "comboViewportmap") {
                 this.viewportSelected(e);
             }
@@ -388,13 +389,13 @@ solarJPIP.prototype.handleEvent = function(e) {
 }
 
 solarJPIP.prototype.colormapSelected = function(e) {
-    var comboColormap = e.srcElement;
+    var comboColormap = e.target || e.srcElement;
     var selectedIndex = comboColormap.selectedIndex;
     this.colorTableValue = comboColormap.children[selectedIndex].value;
 }
 
 solarJPIP.prototype.viewportSelected = function(e) {
-    var comboViewportmap = e.srcElement;
+    var comboViewportmap = e.target || e.srcElement;
     var selectedIndex = comboViewportmap.selectedIndex;
     this.viewportIndex = comboViewportmap.children[selectedIndex].value;
 }

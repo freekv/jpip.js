@@ -15,7 +15,7 @@ gui.prototype.reinsertCombo = function(name, nextel) {
     this.createCombobox(name, nextel);
 }
 gui.prototype.datasetSelected = function(e) {
-    var comboDataList = e.srcElement;
+    var comboDataList = e.target || e.srcElement;
     var selectedIndex = comboDataList.selectedIndex;
     var selectedText = comboDataList.children[selectedIndex].childNodes[0].data;
     if (comboDataList.id == "observatoryComboDataList") {
@@ -206,7 +206,8 @@ gui.prototype.initGui = function(data) {
 gui.prototype.handleEvent = function(e) {
     switch (e.type) {
         case "click":
-            var elementType = e.srcElement.attributes["data-type"].value;
+            var element = e.target || e.srcElement;
+            var elementType = element.attributes["data-type"].value;
             if (elementType == "loadButton") {
                 var success = function(data) {
                     var jpxfile = data.uri;

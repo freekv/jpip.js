@@ -28,10 +28,10 @@ function solarJPIP(baseurl, imgname, numberOfFrames, size) {
     this.viewportIndices = [ 0 ];
     this.optionsPanel = document.createElement("div");
     this.metadataPanel;
-    vviewport.addListener(this);
+    core.viewport.addListener(this);
 }
 
-solarJPIP.prototype.render = function(perspectiveMatrix, mvMatrix, time) {
+solarJPIP.prototype.render = function(gl, perspectiveMatrix, mvMatrix, time) {
     if (this.parsedMetadata.length > 0) {
         this.currentIndex = this.binarySearch(time);
     }
@@ -465,7 +465,10 @@ solarJPIP.prototype.loadAlphaValue = function() {
     this.optionsPanel.appendChild(document.createElement("br"));
 }
 solarJPIP.prototype.loadViewport = function() {
-    var viewportNames = [ '0' ];
+    var viewportNames = [];
+    for (var j = 0; j < core.viewport.rows * core.viewport.columns; j++) {
+        viewportNames.push("" + j);
+    }
     var comboViewportmap = document.createElement("select");
     comboViewportmap.setAttribute("class", "comboViewportmap");
     comboViewportmap.setAttribute("multiple", "multiple");

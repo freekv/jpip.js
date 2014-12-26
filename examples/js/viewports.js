@@ -104,6 +104,3 @@ viewport.prototype.viewportChanged = function() {
         this.listeners[i].fireViewportChanged(this);
     }
 }
-document.addEventListener("DOMContentLoaded", function(event) {
-
-});

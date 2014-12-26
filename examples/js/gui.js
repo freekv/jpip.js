@@ -212,7 +212,7 @@ gui.prototype.handleEvent = function(e) {
                 var success = function(data) {
                     var jpxfile = data.uri;
                     var jpxparts = jpxfile.split("movies");
-                    objectList.push(new solarJPIP("http" + jpxparts[0].substring(4, jpxparts[0].length), "movies" + jpxparts[1], data.frames.length, 512));
+                    core.objectList.push(new solarJPIP("http" + jpxparts[0].substring(4, jpxparts[0].length), "movies" + jpxparts[1], data.frames.length, 512));
                 };
                 getJSON(this.buildUrl(), success, function(e) {
                 });
@@ -239,14 +239,3 @@ gui.prototype.createVideoBar = function() {
     });
 
 }
-document.addEventListener("DOMContentLoaded", function(event) {
-    base_url = "http://swhv.oma.be/hv/";
-    var success = function(data) {
-        vgui = new gui();
-        vgui.initGui(data);
-        vviewport = new viewport();
-        vviewport.initGui();
-        viewport = vviewport;
-    };
-    getJSON(base_url + "api/?action=getDataSources&verbose=true&enable=[STEREO_A,STEREO_B,PROBA2]", success, success);
-});

@@ -3,141 +3,140 @@ solarConstants.radiusMeter = 6.955e8;
 solarConstants.radiusKiloMeter = solarConstants.radiusMeter / 1000.;
 solarConstants.radiusOpenGL = 1.;
 
-var core;
-
 _core = function() {
-    _core.prototype.canvas;
-    _core.prototype.objectList = [];
-    _core.prototype.plottingMetadata = [];
-    _core.prototype.cubeRotation = 0.0;
-    _core.prototype.lastCubeUpdateTime = 0;
-    _core.prototype.mvMatrix;
-    _core.prototype.shaderProgram;
-    _core.prototype.vertexPositionAttribute;
-    _core.prototype.textureCoordAttribute;
-    _core.prototype.perspectiveMatrix;
-    _core.prototype.beginDate = 0;
-    _core.prototype.endDate = 0;
-    _core.prototype.currentDate = 0;
-    _core.prototype.cadence = 25 * 60 * 1000;
-    _core.prototype.running = false;
-    _core.prototype.loop = true;
-    _core.prototype.viewport;
-    _core.prototype.count = 0;
-    _core.prototype.bt = Date.now();
-    _core.prototype.elapsed;
-    _core.prototype.mvMatrixStack = [];
-    _core.prototype.gl = null;
+    this.canvas;
+    this.objectList = [];
+    this.plottingMetadata = [];
+    this.cubeRotation = 0.0;
+    this.lastCubeUpdateTime = 0;
+    this.mvMatrix;
+    this.shaderProgram;
+    this.vertexPositionAttribute;
+    this.textureCoordAttribute;
+    this.perspectiveMatrix;
+    this.beginDate = 0;
+    this.endDate = 0;
+    this.currentDate = 0;
+    this.cadence = 25 * 60 * 1000;
+    this.running = false;
+    this.loop = true;
+    this.viewport;
+    this.count = 0;
+    this.bt = Date.now();
+    this.elapsed;
+    this.mvMatrixStack = [];
+    this.gl = null;
 }
+var core = new _core();
 
-_core.prototype.initWebGL = function() {
+core.initWebGL = function() {
     try {
-        _core.prototype.gl = _core.prototype.canvas.getContext("experimental-webgl");
+        core.gl = core.canvas.getContext("experimental-webgl");
     } catch (e) {
     }
-    if (!_core.prototype.gl) {
+    if (!core.gl) {
         alert("Unable to initialize WebGL. Your browser may not support it.");
     }
 }
-_core.prototype.start = function() {
-    _core.prototype.canvas = document.getElementById("glcanvas");
-    _core.prototype.initWebGL(_core.prototype.canvas);
-    if (_core.prototype.gl) {
-        _core.prototype.gl.clearColor(1.0, 0.0, 0.0, 1.0);
-        _core.prototype.gl.clearDepth(1.0);
-        _core.prototype.gl.enable(_core.prototype.gl.DEPTH_TEST);
-        _core.prototype.gl.depthFunc(_core.prototype.gl.LEQUAL);
+core.start = function() {
+    core.canvas = document.getElementById("glcanvas");
+    core.initWebGL(core.canvas);
+    if (core.gl) {
+        core.gl.clearColor(1.0, 0.0, 0.0, 1.0);
+        core.gl.clearDepth(1.0);
+        core.gl.enable(core.gl.DEPTH_TEST);
+        core.gl.depthFunc(core.gl.LEQUAL);
         setInterval(function() {
-            requestAnimationFrame(_core.prototype.drawScene)
+            requestAnimationFrame(core.drawScene)
         }, 30);
     }
 }
 
-_core.prototype.drawScene = function() {
-    _core.prototype.gl.clear(_core.prototype.gl.COLOR_BUFFER_BIT | _core.prototype.gl.DEPTH_BUFFER_BIT);
-    _core.prototype.perspectiveMatrix = makePerspective(90, 1024.0 / 1024.0, 0.1, 100.0);
-    _core.prototype.loadIdentity();
-    _core.prototype.mvTranslate([ -0.0, 0.0, -1.0 ]);
-    _core.prototype.mvPushMatrix();
-    var vcl = _core.prototype.viewport.totalWidth / _core.prototype.viewport.columns;
-    var vrl = _core.prototype.viewport.totalHeight / _core.prototype.viewport.rows;
+core.drawScene = function() {
+    core.gl.clear(core.gl.COLOR_BUFFER_BIT | core.gl.DEPTH_BUFFER_BIT);
+    core.perspectiveMatrix = makePerspective(90, 1024.0 / 1024.0, 0.1, 100.0);
+    core.loadIdentity();
+    core.mvTranslate([ -0.0, 0.0, -1.0 ]);
+    core.mvPushMatrix();
+    var vcl = core.viewport.totalWidth / core.viewport.columns;
+    var vrl = core.viewport.totalHeight / core.viewport.rows;
 
-    for (var ll = 0; ll < _core.prototype.viewport.columns; ll++) {
-        for (var rr = 0; rr < _core.prototype.viewport.rows; rr++) {
-            var index = _core.prototype.viewport.columns * (_core.prototype.viewport.rows - 1 - rr) + ll;
-            _core.prototype.gl.viewport(ll * vcl, rr * vrl, vcl, vrl);
+    for (var ll = 0; ll < core.viewport.columns; ll++) {
+        for (var rr = 0; rr < core.viewport.rows; rr++) {
+            var index = core.viewport.columns * (core.viewport.rows - 1 - rr) + ll;
+            core.gl.viewport(ll * vcl, rr * vrl, vcl, vrl);
 
-            if (_core.prototype.running) {
-                _core.prototype.currentDate += _core.prototype.cadence;
+            if (core.running) {
+                core.currentDate += core.cadence;
             }
-            if (_core.prototype.currentDate > _core.prototype.endDate && _core.prototype.loop) {
-                _core.prototype.currentDate = _core.prototype.beginDate;
+            if (core.currentDate > core.endDate && core.loop) {
+                core.currentDate = core.beginDate;
             }
 
-            for (var i = 0; i < _core.prototype.objectList.length; i++) {
-                var object = _core.prototype.objectList[i];
+            for (var i = 0; i < core.objectList.length; i++) {
+                var object = core.objectList[i];
                 if (!object.initialized) {
-                    object.init(_core.prototype.gl);
+                    object.init(core.gl);
                 }
             }
 
-            for (var i = 0; i < _core.prototype.objectList.length; i++) {
-                var object = _core.prototype.objectList[i];
+            for (var i = 0; i < core.objectList.length; i++) {
+                var object = core.objectList[i];
                 if (object.viewportIndices.indexOf(index) !== -1) {
-                    object.prerender(_core.prototype.gl);
+                    object.prerender(core.gl);
                 }
             }
 
-            for (var i = 0; i < _core.prototype.objectList.length; i++) {
-                var object = _core.prototype.objectList[i];
+            for (var i = 0; i < core.objectList.length; i++) {
+                var object = core.objectList[i];
                 if (object.viewportIndices.indexOf(index) !== -1) {
-                    object.render(_core.prototype.gl, _core.prototype.perspectiveMatrix, _core.prototype.mvMatrix, _core.prototype.currentDate);
+                    object.render(core.gl, core.perspectiveMatrix, core.mvMatrix, core.currentDate);
                 }
             }
 
-            for (var i = 0; i < _core.prototype.objectList.length; i++) {
-                var object = _core.prototype.objectList[i];
+            for (var i = 0; i < core.objectList.length; i++) {
+                var object = core.objectList[i];
                 object.updateGUI();
             }
-            _core.prototype.elapsed = Date.now() - _core.prototype.bt;
-            _core.prototype.bt = Date.now();
+            core.elapsed = Date.now() - core.bt;
+            core.bt = Date.now();
         }
     }
-    _core.prototype.mvPopMatrix();
+    core.mvPopMatrix();
 
 }
 
-_core.prototype.loadIdentity = function() {
-    _core.prototype.mvMatrix = Matrix.I(4);
+core.loadIdentity = function() {
+    core.mvMatrix = Matrix.I(4);
 }
 
-_core.prototype.multMatrix = function(m) {
-    _core.prototype.mvMatrix = _core.prototype.mvMatrix.x(m);
+core.multMatrix = function(m) {
+    core.mvMatrix = core.mvMatrix.x(m);
 }
 
-_core.prototype.mvTranslate = function(v) {
+core.mvTranslate = function(v) {
     this.multMatrix(Matrix.Translation($V([ v[0], v[1], v[2] ])).ensure4x4());
 }
 
-_core.prototype.mvPushMatrix = function(m) {
+core.mvPushMatrix = function(m) {
     if (m) {
-        _core.prototype.mvMatrixStack.push(m.dup());
-        _core.prototype.mvMatrix = m.dup();
+        core.mvMatrixStack.push(m.dup());
+        core.mvMatrix = m.dup();
     } else {
-        _core.prototype.mvMatrixStack.push(_core.prototype.mvMatrix.dup());
+        core.mvMatrixStack.push(core.mvMatrix.dup());
     }
 }
 
-_core.prototype.mvPopMatrix = function() {
-    if (!_core.prototype.mvMatrixStack.length) {
+core.mvPopMatrix = function() {
+    if (!core.mvMatrixStack.length) {
         throw ("Can't pop from an empty matrix stack.");
     }
 
-    _core.prototype.mvMatrix = _core.prototype.mvMatrixStack.pop();
-    return _core.prototype.mvMatrix;
+    core.mvMatrix = core.mvMatrixStack.pop();
+    return core.mvMatrix;
 }
 
-_core.prototype.mvRotate = function(angle, v) {
+core.mvRotate = function(angle, v) {
     var inRadians = angle * Math.PI / 180.0;
 
     var m = Matrix.Rotation(inRadians, $V([ v[0], v[1], v[2] ])).ensure4x4();
@@ -151,9 +150,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
         vgui.initGui(data);
         var vviewport = new viewport();
         vviewport.initGui();
-        core = new _core();
-        _core.prototype.viewport = vviewport;
-        _core.prototype.gui = vgui;
+        core.viewport = vviewport;
+        core.gui = vgui;
         core.start();
     };
     getJSON(base_url + "api/?action=getDataSources&verbose=true&enable=[STEREO_A,STEREO_B,PROBA2]", success, success);

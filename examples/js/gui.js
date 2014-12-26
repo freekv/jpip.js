@@ -114,9 +114,9 @@ gui.prototype.buildUrl = function() {
 }
 
 gui.prototype.setBeginAndEndDate = function() {
-    beginDate = parseDate(this.datasetGUIObject["startTime"].value, 0);
-    endDate = parseDate(this.datasetGUIObject["endTime"].value, 0);
-    currentDate = beginDate;
+    core.beginDate = parseDate(this.datasetGUIObject["startTime"].value, 0);
+    core.endDate = parseDate(this.datasetGUIObject["endTime"].value, 0);
+    core.currentDate = core.beginDate;
 }
 
 gui.prototype.createServerPanel = function(data) {
@@ -229,9 +229,9 @@ gui.prototype.handleEvent = function(e) {
 gui.prototype.createVideoBar = function() {
     var videoButton = document.getElementById("videoPlayButton");
     videoButton.addEventListener("click", function() {
-        running = !running;
+        core.running = !core.running;
         var el = this.childNodes[0];
-        if (running) {
+        if (core.running) {
             el.src = "images/pause.png";
         } else {
             el.src = "images/play.png";

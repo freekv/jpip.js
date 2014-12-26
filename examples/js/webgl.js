@@ -21,6 +21,7 @@ var currentDate = 0;
 var cadence = 25 * 60 * 1000;
 var running = false;
 var loop = true;
+var viewport;
 
 function initWebGL() {
     gl = null;
@@ -54,50 +55,49 @@ function drawScene() {
     loadIdentity();
     mvTranslate([ -0.0, 0.0, -1.0 ]);
     mvPushMatrix();
-    for (var ll = 0; ll < 2; ll++) {
-        gl.viewport(ll * 512, 0, 512, 512);
+    var vcl = viewport.totalWidth / viewport.columns;
+    var vrl = viewport.totalHeight / viewport.rows;
 
-        if (running) {
-            currentDate += cadence;
-        }
-        if (currentDate > endDate && loop) {
-            currentDate = beginDate;
-        }
+    for (var ll = 0; ll < viewport.columns; ll++) {
+        for (var rr = 0; rr < viewport.rows; rr++) {
+            var index = viewport.columns * (viewport.rows - 1 - rr) + ll;
+            gl.viewport(ll * vcl, rr * vrl, vcl, vrl);
 
-        for (var i = 0; i < objectList.length; i++) {
-            object = objectList[i];
-            if (!object.initialized) {
-                object.init(gl);
+            if (running) {
+                currentDate += cadence;
             }
-        }
-
-        for (var i = 0; i < objectList.length; i++) {
-            object = objectList[i];
-            if (object.viewportIndex == ll) {
-                object.prerender(gl);
+            if (currentDate > endDate && loop) {
+                currentDate = beginDate;
             }
-        }
 
-        for (var i = 0; i < objectList.length; i++) {
-            object = objectList[i];
-            if (object.viewportIndex == ll) {
-                object.render(perspectiveMatrix, mvMatrix, currentDate);
+            for (var i = 0; i < objectList.length; i++) {
+                object = objectList[i];
+                if (!object.initialized) {
+                    object.init(gl);
+                }
             }
-        }
 
-        /*
-         * var currentTime = (new Date).getTime(); if (lastCubeUpdateTime) { var
-         * delta = currentTime - lastCubeUpdateTime; cubeRotation += (30 *
-         * delta) / 1000.0; }
-         * 
-         * lastCubeUpdateTime = currentTime;
-         */
-        for (var i = 0; i < objectList.length; i++) {
-            object = objectList[i];
-            object.updateGUI();
+            for (var i = 0; i < objectList.length; i++) {
+                object = objectList[i];
+                if (object.viewportIndices.indexOf(index) !== -1) {
+                    object.prerender(gl);
+                }
+            }
+
+            for (var i = 0; i < objectList.length; i++) {
+                object = objectList[i];
+                if (object.viewportIndices.indexOf(index) !== -1) {
+                    object.render(perspectiveMatrix, mvMatrix, currentDate);
+                }
+            }
+
+            for (var i = 0; i < objectList.length; i++) {
+                object = objectList[i];
+                object.updateGUI();
+            }
+            elapsed = Date.now() - bt;
+            bt = Date.now();
         }
-        elapsed = Date.now() - bt;
-        bt = Date.now();
     }
     mvPopMatrix();
 

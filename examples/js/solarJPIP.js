@@ -25,9 +25,10 @@ function solarJPIP(baseurl, imgname, numberOfFrames, size) {
     this.boostboxValue = 0.8;
     this.isDiff = 0;
     this.alphaValue = 1.;
-    this.viewportIndex = 0;
+    this.viewportIndices = [ 0 ];
     this.optionsPanel = document.createElement("div");
     this.metadataPanel;
+    vviewport.addListener(this);
 }
 
 solarJPIP.prototype.render = function(perspectiveMatrix, mvMatrix, time) {
@@ -396,14 +397,16 @@ solarJPIP.prototype.colormapSelected = function(e) {
 
 solarJPIP.prototype.viewportSelected = function(e) {
     var comboViewportmap = e.target || e.srcElement;
-    var selectedIndex = comboViewportmap.selectedIndex;
-    this.viewportIndex = comboViewportmap.children[selectedIndex].value;
+    this.viewportIndices = [];
+    for (j = 0; j < comboViewportmap.selectedOptions.length; j++) {
+        this.viewportIndices.push(parseInt(comboViewportmap.selectedOptions[j].value));
+    }
 }
 
 solarJPIP.prototype.loadColormapGui = function() {
     var colorTableNames = [ 'Blue/Green/Red/Yellow', 'Blue/Red', 'Blue/White Linear', 'Gray', 'Green/White Exponential', 'Green/White Linear', 'Rainbow 1', 'Rainbow 2', 'Red Temperature', 'SDO-AIA 131', 'SDO-AIA 1600', 'SDO-AIA 1700', 'SDO-AIA 171', 'SDO-AIA 193', 'SDO-AIA 211', 'SDO-AIA 304', 'SDO-AIA 335', 'SDO-AIA 4500', 'SDO-AIA 94', 'SOHO EIT 171', 'SOHO EIT 195', 'SOHO EIT 284', 'SOHO EIT 304', 'STEREO EUVI 171', 'STEREO EUVI 195', 'STEREO EUVI 284', 'STEREO EUVI 304' ];
     var comboColormap = document.createElement("select");
-    comboColormap.setAttribute("id", "comboColormap");
+    comboColormap.setAttribute("class", "comboColormap");
     for (var i = 0; i < colorTableNames.length; i++) {
         var comboColormapOption = document.createElement("option");
         comboColormapOption.setAttribute("value", (i + 0.5) / 256.);
@@ -462,9 +465,11 @@ solarJPIP.prototype.loadAlphaValue = function() {
     this.optionsPanel.appendChild(document.createElement("br"));
 }
 solarJPIP.prototype.loadViewport = function() {
-    var viewportNames = [ '0', '1' ];
+    var viewportNames = [ '0' ];
     var comboViewportmap = document.createElement("select");
-    comboViewportmap.setAttribute("id", "comboViewportmap");
+    comboViewportmap.setAttribute("class", "comboViewportmap");
+    comboViewportmap.setAttribute("multiple", "multiple");
+
     for (var i = 0; i < viewportNames.length; i++) {
         var comboViewportOption = document.createElement("option");
         comboViewportOption.setAttribute("value", i);
@@ -479,6 +484,7 @@ solarJPIP.prototype.loadViewport = function() {
     comboViewportmap.setAttribute("data-type", "comboViewportmap");
     comboViewportmap.addEventListener("change", this, false);
 }
+
 solarJPIP.prototype.loadMetadataPanel = function() {
     this.metadataPanel = document.createElement("div");
 
@@ -497,4 +503,24 @@ solarJPIP.prototype.loadMetadataPanel = function() {
     this.metadataPanel.style.display = 'none';
     this.optionsPanel.appendChild(this.metadataPanel);
 
+}
+
+solarJPIP.prototype.fireViewportChanged = function(vp) {
+    var viewportNames = [];
+    for (var j = 0; j < vp.rows * vp.columns; j++) {
+        viewportNames.push("" + j);
+    }
+    var comboViewportmaps = document.getElementsByClassName("comboViewportmap");
+    for (var k = 0; k < comboViewportmaps.length; k++) {
+        comboViewportmap = comboViewportmaps[k];
+        while (comboViewportmap.hasChildNodes()) {
+            comboViewportmap.removeChild(comboViewportmap.lastChild);
+        }
+        for (var i = 0; i < viewportNames.length; i++) {
+            var comboViewportOption = document.createElement("option");
+            comboViewportOption.setAttribute("value", i);
+            comboViewportOption.innerHTML = viewportNames[i];
+            comboViewportmap.appendChild(comboViewportOption);
+        }
+    }
 }

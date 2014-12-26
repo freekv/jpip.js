@@ -1,13 +1,12 @@
 //Uses globals: objectList from webgl.js
 
 gui = function() {
-    this.datasetGUIObject;
+    this.datasetGUIObject = {};
     this.controlpanel = document.getElementById("controlpanel");
     this.local_controlpanel = document.getElementById("local_controlpanel");
     this.datePanel = document.getElementById("datePanel");
 };
 
-gui.prototype.datasetGUIObject = {};
 gui.prototype.reinsertCombo = function(name, nextel) {
     this.datasetGUIObject[name] = undefined;
     var comboDataList = document.getElementById(name + "ComboDataList");
@@ -71,7 +70,8 @@ gui.prototype.createCombobox = function(name, data) {
         }
         index++;
     }
-    comboDataList.onchange = this.datasetSelected;
+
+    comboDataList.addEventListener("change", this, false);
     this.datasetGUIObject[name + "HtmlElement"] = comboDataList;
     comboDataList.selectIndex = foundindex;
     comboDataList.value = foundindex;
@@ -218,6 +218,12 @@ gui.prototype.handleEvent = function(e) {
                 });
                 this.setBeginAndEndDate();
             }
+        case "change":
+            var element = e.target || e.srcElement;
+            var elementType = element.attributes["data-type"].value;
+            if (element.id.indexOf("ComboDataList") > -1) {
+                this.datasetSelected(e);
+            }
     }
 }
 gui.prototype.createVideoBar = function() {
@@ -233,12 +239,14 @@ gui.prototype.createVideoBar = function() {
     });
 
 }
-
 document.addEventListener("DOMContentLoaded", function(event) {
     base_url = "http://swhv.oma.be/hv/";
     var success = function(data) {
         vgui = new gui();
         vgui.initGui(data);
+        vviewport = new viewport();
+        vviewport.initGui();
+        viewport = vviewport;
     };
     getJSON(base_url + "api/?action=getDataSources&verbose=true&enable=[STEREO_A,STEREO_B,PROBA2]", success, success);
 });

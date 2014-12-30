@@ -5,7 +5,8 @@ viewport = function() {
     this.rows = 1;
     this.columns = 1;
     this.listeners = [];
-    this.modes;
+    this.modeList = [ '2D', '3D', 'limb', 'limbexponential' ]
+    this.modes = {};
 };
 
 viewport.prototype.setRows = function(rows) {
@@ -104,8 +105,54 @@ viewport.prototype.viewportChanged = function() {
     for (var i = 0; i < this.listeners.length; i++) {
         this.listeners[i].fireViewportChanged(this);
     }
+    this.updateGui();
 }
 
-viewport.prototype.addGui = function() {
+viewport.prototype.updateGui = function() {
+    var viewportDiv = document.getElementById("viewportDiv");
+    for (var ll = 0; ll < core.viewport.columns; ll++) {
+        for (var rr = 0; rr < core.viewport.rows; rr++) {
+            var index = core.viewport.columns * (core.viewport.rows - 1 - rr) + ll;
+            if (this.modes[index] === undefined) {
+                this.loadViewportModesGui(viewportDiv, index);
+            }
+        }
+    }
+    for (var index = core.viewport.columns * core.viewport.rows; index < 16; index++) {
+        var el = document.getElementById("comboViewportModeDiv" + index);
 
+        if (el !== null) {
+            el.parentNode.removeChild(el);
+            this.modes[index] = undefined;
+        }
+    }
+}
+
+viewport.prototype.loadViewportModesGui = function(viewportDiv, number) {
+    var comboViewportModeDiv = document.createElement("div");
+    comboViewportModeDiv.setAttribute("id", "comboViewportModeDiv" + number);
+    viewportDiv.appendChild(comboViewportModeDiv);
+
+    var comboViewportModes = document.createElement("select");
+    comboViewportModes.setAttribute("class", "comboViewportModemap");
+    comboViewportModes.setAttribute("multiple", "multiple");
+
+    for (var i = 0; i < this.modeList.length; i++) {
+        var comboViewportOption = document.createElement("option");
+        comboViewportOption.setAttribute("value", i);
+        comboViewportOption.innerHTML = this.modeList[i];
+        comboViewportModes.appendChild(comboViewportOption);
+        if (i === 0) {
+            comboViewportOption.setAttribute("selected", true);
+        }
+    }
+    var comboViewportLabel = document.createElement("label");
+    comboViewportLabel.innerHTML = "Viewport:";
+    comboViewportModeDiv.appendChild(comboViewportLabel);
+    comboViewportModeDiv.appendChild(comboViewportModes);
+    comboViewportModeDiv.appendChild(document.createElement("br"));
+    comboViewportModes.setAttribute("data-type", "comboViewportModes");
+    comboViewportModes.setAttribute("data-viewport", "" + number);
+    comboViewportModes.addEventListener("change", this, false);
+    this.modes[number] = this.modeList[0];
 }

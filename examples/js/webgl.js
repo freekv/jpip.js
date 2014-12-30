@@ -10,7 +10,6 @@ _core = function() {
     this.cubeRotation = 0.0;
     this.lastCubeUpdateTime = 0;
     this.mvMatrix;
-    this.mouseMatrix = Matrix.I(4);
     this.shaderProgram;
     this.vertexPositionAttribute;
     this.textureCoordAttribute;
@@ -28,8 +27,10 @@ _core = function() {
     this.mvMatrixStack = [];
     this.gl = null;
     this.zoom = {};
+    this.mouseMatrix = {};
     for (var i = 0; i < 16; i++) {
-        this.zoom[i] = 1.
+        this.zoom[i] = 1.;
+        this.mouseMatrix[i] = Matrix.I(4);
     }
 }
 var core = new _core();
@@ -69,7 +70,7 @@ core.drawScene = function() {
             core.loadIdentity();
             core.multMatrix(core.perspectiveMatrix);
 
-            core.multMatrix(core.mouseMatrix);
+            core.multMatrix(core.mouseMatrix[index]);
 
             core.mvTranslate([ -0.0, 0.0, -1.0 ]);
             core.mvPushMatrix();

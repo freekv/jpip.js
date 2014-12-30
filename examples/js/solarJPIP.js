@@ -20,16 +20,14 @@ function solarJPIP(baseurl, imgname, numberOfFrames, size) {
     this.colormapTexture;
     this.colormapImage;
     this.colormapInitialized = false;
-    this.colorTableValue = {
-        "0" : 1.
-    };
-
-    this.boostboxValue = {
-        "0" : 0.8
-    };
-    this.isDiff = {
-        "0" : 0
-    };
+    this.colorTableValue = {};
+    this.boostboxValue = {};
+    this.isDiff = {};
+    for (var i = 0; i < 16; i++) {
+        this.colorTableValue[i] = 1.;
+        this.boostboxValue[i] = 0.8;
+        this.isDiff[i] = 0;
+    }
 
     this.alphaValue = 1.;
     this.viewportIndices = [ 0 ];
@@ -425,6 +423,9 @@ solarJPIP.prototype.loadColormapGui = function(number, viewportDetailDiv) {
         comboColormapOption.setAttribute("value", (i + 0.5) / 256.);
         comboColormapOption.innerHTML = colorTableNames[i];
         comboColormap.appendChild(comboColormapOption);
+        if (i === 3) {
+            comboColormapOption.setAttribute("selected", true);
+        }
     }
     var comboColormapLabel = document.createElement("label");
     comboColormapLabel.innerHTML = "Colormap:";
@@ -499,6 +500,9 @@ solarJPIP.prototype.loadViewport = function() {
         comboViewportOption.setAttribute("value", i);
         comboViewportOption.innerHTML = viewportNames[i];
         comboViewportmap.appendChild(comboViewportOption);
+        if (i === 0) {
+            comboViewportmap.setAttribute("selected", true);
+        }
     }
     var comboViewportLabel = document.createElement("label");
     comboViewportLabel.innerHTML = "Viewport:";

@@ -152,7 +152,7 @@ viewport.prototype.loadViewportModesGui = function(viewportDiv, number) {
         }
     }
     var comboViewportLabel = document.createElement("label");
-    comboViewportLabel.innerHTML = "Viewport:";
+    comboViewportLabel.innerHTML = "Viewport " + number + " mode:";
     comboViewportModeDiv.appendChild(comboViewportLabel);
     comboViewportModeDiv.appendChild(comboViewportModes);
     comboViewportModeDiv.appendChild(document.createElement("br"));

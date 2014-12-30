@@ -201,6 +201,7 @@ gui.prototype.initGui = function(data) {
     this.createServerPanel(data);
     this.createDatePanel();
     this.createVideoBar();
+    // this.createResizeCanvas();
 };
 
 gui.prototype.handleEvent = function(e) {
@@ -212,7 +213,7 @@ gui.prototype.handleEvent = function(e) {
                 var success = function(data) {
                     var jpxfile = data.uri;
                     var jpxparts = jpxfile.split("movies");
-                    core.objectList.push(new solarJPIP("http" + jpxparts[0].substring(4, jpxparts[0].length), "movies" + jpxparts[1], data.frames.length, 512));
+                    core.objectList.push(new solarJPIP("http" + jpxparts[0].substring(4, jpxparts[0].length), "movies" + jpxparts[1], data.frames.length, 128));
                 };
                 getJSON(this.buildUrl(), success, function(e) {
                 });
@@ -220,7 +221,6 @@ gui.prototype.handleEvent = function(e) {
             }
         case "change":
             var element = e.target || e.srcElement;
-            var elementType = element.attributes["data-type"].value;
             if (element.id.indexOf("ComboDataList") > -1) {
                 this.datasetSelected(e);
             }
@@ -237,5 +237,15 @@ gui.prototype.createVideoBar = function() {
             el.src = "images/play.png";
         }
     });
+}
 
+gui.prototype.createResizeCanvas = function() {
+    var canvaswrap = document.getElementById("glcanvaswrap");
+    callback = function() {
+        core.canvas.setAttribute("width", canvaswrap.clientWidth - 10);
+        core.canvas.setAttribute("height", canvaswrap.style.height);
+
+    };
+    canvaswrap.addEventListener("mouseup", callback);
+    canvaswrap.addEventListener("mouseup", callback);
 }

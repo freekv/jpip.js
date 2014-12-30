@@ -5,6 +5,7 @@ viewport = function() {
     this.rows = 1;
     this.columns = 1;
     this.listeners = [];
+    this.modes;
 };
 
 viewport.prototype.setRows = function(rows) {
@@ -103,4 +104,8 @@ viewport.prototype.viewportChanged = function() {
     for (var i = 0; i < this.listeners.length; i++) {
         this.listeners[i].fireViewportChanged(this);
     }
+}
+
+viewport.prototype.addGui = function() {
+
 }

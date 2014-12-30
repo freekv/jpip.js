@@ -10,6 +10,7 @@ _core = function() {
     this.cubeRotation = 0.0;
     this.lastCubeUpdateTime = 0;
     this.mvMatrix;
+    this.mouseMatrix = Matrix.I(4);
     this.shaderProgram;
     this.vertexPositionAttribute;
     this.textureCoordAttribute;
@@ -26,6 +27,10 @@ _core = function() {
     this.elapsed;
     this.mvMatrixStack = [];
     this.gl = null;
+    this.zoom = {};
+    for (var i = 0; i < 16; i++) {
+        this.zoom[i] = 1.
+    }
 }
 var core = new _core();
 
@@ -54,16 +59,21 @@ core.start = function() {
 
 core.drawScene = function() {
     core.gl.clear(core.gl.COLOR_BUFFER_BIT | core.gl.DEPTH_BUFFER_BIT);
-    core.perspectiveMatrix = makePerspective(90, 1024.0 / 1024.0, 0.1, 100.0);
-    core.loadIdentity();
-    core.mvTranslate([ -0.0, 0.0, -1.0 ]);
-    core.mvPushMatrix();
+
     var vcl = core.viewport.totalWidth / core.viewport.columns;
     var vrl = core.viewport.totalHeight / core.viewport.rows;
-
     for (var ll = 0; ll < core.viewport.columns; ll++) {
         for (var rr = 0; rr < core.viewport.rows; rr++) {
             var index = core.viewport.columns * (core.viewport.rows - 1 - rr) + ll;
+            core.perspectiveMatrix = makePerspective(90 * core.zoom[index], 1024.0 / 1024.0, 0.1, 100.0);
+            core.loadIdentity();
+            core.multMatrix(core.perspectiveMatrix);
+
+            core.multMatrix(core.mouseMatrix);
+
+            core.mvTranslate([ -0.0, 0.0, -1.0 ]);
+            core.mvPushMatrix();
+
             core.gl.viewport(ll * vcl, rr * vrl, vcl, vrl);
 
             if (core.running) {
@@ -90,7 +100,7 @@ core.drawScene = function() {
             for (var i = 0; i < core.objectList.length; i++) {
                 var object = core.objectList[i];
                 if (object.viewportIndices.indexOf(index) !== -1) {
-                    object.render(core.gl, core.perspectiveMatrix, core.mvMatrix, core.currentDate);
+                    object.render(core.gl, core.perspectiveMatrix, core.mvMatrix, core.currentDate, index);
                 }
             }
 
@@ -100,9 +110,10 @@ core.drawScene = function() {
             }
             core.elapsed = Date.now() - core.bt;
             core.bt = Date.now();
+            core.mvPopMatrix();
+
         }
     }
-    core.mvPopMatrix();
 
 }
 
@@ -153,6 +164,11 @@ document.addEventListener("DOMContentLoaded", function(event) {
         core.viewport = vviewport;
         core.gui = vgui;
         core.start();
+        core.canvas.onmousedown = handleMouseDown;
+        document.onmouseup = handleMouseUp;
+        document.onmousemove = handleMouseMove;
+        core.canvas.onmousewheel = handleMouseWheel;
+
     };
     getJSON(base_url + "api/?action=getDataSources&verbose=true&enable=[STEREO_A,STEREO_B,PROBA2]", success, success);
 });

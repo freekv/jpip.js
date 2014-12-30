@@ -8,7 +8,6 @@ function solarJPIP(baseurl, imgname, numberOfFrames, size) {
     this.parsedMetadata = [];
     this.plottingMetadata = [];
     this.textureData = [];
-
     this.verticesBuffer;
     this.verticesTextureCoordBuffer;
     this.verticesIndexBuffer;
@@ -21,9 +20,17 @@ function solarJPIP(baseurl, imgname, numberOfFrames, size) {
     this.colormapTexture;
     this.colormapImage;
     this.colormapInitialized = false;
-    this.colorTableValue = 1.;
-    this.boostboxValue = 0.8;
-    this.isDiff = 0;
+    this.colorTableValue = {
+        "0" : 1.
+    };
+
+    this.boostboxValue = {
+        "0" : 0.8
+    };
+    this.isDiff = {
+        "0" : 0
+    };
+
     this.alphaValue = 1.;
     this.viewportIndices = [ 0 ];
     this.optionsPanel = document.createElement("div");
@@ -31,7 +38,7 @@ function solarJPIP(baseurl, imgname, numberOfFrames, size) {
     core.viewport.addListener(this);
 }
 
-solarJPIP.prototype.render = function(gl, perspectiveMatrix, mvMatrix, time) {
+solarJPIP.prototype.render = function(gl, perspectiveMatrix, mvMatrix, time, viewportIndex) {
     if (this.parsedMetadata.length > 0) {
         this.currentIndex = this.binarySearch(time);
     }
@@ -50,13 +57,13 @@ solarJPIP.prototype.render = function(gl, perspectiveMatrix, mvMatrix, time) {
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.texturesAndMetadata[this.currentIndex].texture);
 
-        if (this.isDiff && this.texturesAndMetadata[this.currentIndex + 1] !== undefined) {
+        if (this.isDiff[viewportIndex] && this.texturesAndMetadata[this.currentIndex + 1] !== undefined) {
             gl.activeTexture(gl.TEXTURE1);
             gl.bindTexture(gl.TEXTURE_2D, this.texturesAndMetadata[this.currentIndex + 1].texture);
             gl.uniform2f(gl.getUniformLocation(this.shaderProgram, "centerDiff"), this.texturesAndMetadata[this.currentIndex + 1].plottingMetadata.x0, this.texturesAndMetadata[this.currentIndex + 1].plottingMetadata.y0);
             gl.uniform2f(gl.getUniformLocation(this.shaderProgram, "stretchDiff"), this.texturesAndMetadata[this.currentIndex + 1].plottingMetadata.solarRadiiX, this.texturesAndMetadata[this.currentIndex + 1].plottingMetadata.solarRadiiY);
         }
-        gl.uniform1i(gl.getUniformLocation(this.shaderProgram, "isDiff"), this.isDiff);
+        gl.uniform1i(gl.getUniformLocation(this.shaderProgram, "isDiff"), this.isDiff[viewportIndex]);
 
         gl.activeTexture(gl.TEXTURE2);
         gl.bindTexture(gl.TEXTURE_2D, this.colormapTexture);
@@ -65,8 +72,8 @@ solarJPIP.prototype.render = function(gl, perspectiveMatrix, mvMatrix, time) {
         gl.uniform1i(gl.getUniformLocation(this.shaderProgram, "uSamplerDiff"), 1);
 
         gl.uniform1i(gl.getUniformLocation(this.shaderProgram, "uColormap"), 2);
-        gl.uniform1f(gl.getUniformLocation(this.shaderProgram, "colorTableValue"), this.colorTableValue);
-        gl.uniform1f(gl.getUniformLocation(this.shaderProgram, "boostboxValue"), 1. - this.boostboxValue);
+        gl.uniform1f(gl.getUniformLocation(this.shaderProgram, "colorTableValue"), this.colorTableValue[viewportIndex]);
+        gl.uniform1f(gl.getUniformLocation(this.shaderProgram, "boostboxValue"), 1. - this.boostboxValue[viewportIndex]);
         gl.uniform1f(gl.getUniformLocation(this.shaderProgram, "alphaValue"), this.alphaValue);
 
         gl.uniform2f(gl.getUniformLocation(this.shaderProgram, "center"), this.texturesAndMetadata[this.currentIndex].plottingMetadata.x0, this.texturesAndMetadata[this.currentIndex].plottingMetadata.y0);
@@ -340,9 +347,9 @@ function printMetadata(keywords) {
     keys.sort();
     for (var i = 0; i < keys.length; i++) {
         if (this.keywords[keys[i]].length < 40) {
-            if (keys[i][0] == "D" || keys[i][0] == "C") {
-                metadataHtml += "<li>" + keys[i] + " : " + this.keywords[keys[i]] + "</li>";
-            }
+            // if (keys[i][0] == "D" || keys[i][0] == "C") {
+            metadataHtml += "<li>" + keys[i] + " : " + this.keywords[keys[i]] + "</li>";
+            // }
         }
     }
     metadataHtml += "<li>" + "test" + "</li>";
@@ -354,9 +361,9 @@ solarJPIP.prototype.loadGUIElements = function(e) {
     var imagePanel = document.getElementById("imagepanel");
     imagePanel.appendChild(this.optionsPanel);
     this.loadViewport();
-    this.loadDifferenceCheckbox();
-    this.loadAlphaValue();
     this.loadMetadataPanel();
+    this.fireViewportChanged(core.viewport);
+    this.loadAlphaValue();
 }
 solarJPIP.prototype.handleEvent = function(e) {
     switch (e.type) {
@@ -364,12 +371,14 @@ solarJPIP.prototype.handleEvent = function(e) {
             var elementType = e.srcElement.attributes["data-type"].value;
             var element = e.target || e.srcElement;
             if (elementType == "comboColormap") {
-                this.colormapSelected(e);
+                var elementViewport = parseInt(e.srcElement.attributes["data-viewport"].value);
+                this.colormapSelected(e, elementViewport);
             } else if (elementType == "checkboxDifference") {
+                var elementViewport = parseInt(e.srcElement.attributes["data-viewport"].value);
                 if (element.checked) {
-                    this.isDiff = 1;
+                    this.isDiff[elementViewport] = 1;
                 } else {
-                    this.isDiff = 0;
+                    this.isDiff[elementViewport] = 0;
                 }
             } else if (elementType == "checkboxMetadata") {
                 if (element.checked) {
@@ -380,7 +389,8 @@ solarJPIP.prototype.handleEvent = function(e) {
                     this.metadataPanel.style.display = 'none';
                 }
             } else if (elementType == "boostboxDifference") {
-                this.boostboxValue = element.value;
+                var elementViewport = parseInt(e.srcElement.attributes["data-viewport"].value);
+                this.boostboxValue[elementViewport] = element.value;
             } else if (elementType == "alphabox") {
                 this.alphaValue = element.value;
             } else if (elementType == "comboViewportmap") {
@@ -389,10 +399,10 @@ solarJPIP.prototype.handleEvent = function(e) {
     }
 }
 
-solarJPIP.prototype.colormapSelected = function(e) {
+solarJPIP.prototype.colormapSelected = function(e, elementViewport) {
     var comboColormap = e.target || e.srcElement;
     var selectedIndex = comboColormap.selectedIndex;
-    this.colorTableValue = comboColormap.children[selectedIndex].value;
+    this.colorTableValue[elementViewport] = comboColormap.children[selectedIndex].value;
 }
 
 solarJPIP.prototype.viewportSelected = function(e) {
@@ -403,7 +413,10 @@ solarJPIP.prototype.viewportSelected = function(e) {
     }
 }
 
-solarJPIP.prototype.loadColormapGui = function() {
+solarJPIP.prototype.loadColormapGui = function(number, viewportDetailDiv) {
+    var colormapDiv = document.createElement("div");
+    colormapDiv.setAttribute('id', "colormapDiv" + number);
+    viewportDetailDiv.appendChild(colormapDiv);
     var colorTableNames = [ 'Blue/Green/Red/Yellow', 'Blue/Red', 'Blue/White Linear', 'Gray', 'Green/White Exponential', 'Green/White Linear', 'Rainbow 1', 'Rainbow 2', 'Red Temperature', 'SDO-AIA 131', 'SDO-AIA 1600', 'SDO-AIA 1700', 'SDO-AIA 171', 'SDO-AIA 193', 'SDO-AIA 211', 'SDO-AIA 304', 'SDO-AIA 335', 'SDO-AIA 4500', 'SDO-AIA 94', 'SOHO EIT 171', 'SOHO EIT 195', 'SOHO EIT 284', 'SOHO EIT 304', 'STEREO EUVI 171', 'STEREO EUVI 195', 'STEREO EUVI 284', 'STEREO EUVI 304' ];
     var comboColormap = document.createElement("select");
     comboColormap.setAttribute("class", "comboColormap");
@@ -415,14 +428,18 @@ solarJPIP.prototype.loadColormapGui = function() {
     }
     var comboColormapLabel = document.createElement("label");
     comboColormapLabel.innerHTML = "Colormap:";
-    this.optionsPanel.appendChild(comboColormapLabel);
-    this.optionsPanel.appendChild(comboColormap);
-    this.optionsPanel.appendChild(document.createElement("br"));
+    colormapDiv.appendChild(comboColormapLabel);
+    colormapDiv.appendChild(comboColormap);
+    colormapDiv.appendChild(document.createElement("br"));
     comboColormap.setAttribute("data-type", "comboColormap");
+    comboColormap.setAttribute("data-viewport", "" + number);
     comboColormap.addEventListener("change", this, false);
 }
 
-solarJPIP.prototype.loadDifferenceCheckbox = function() {
+solarJPIP.prototype.loadDifferenceCheckbox = function(number, viewportDetailDiv) {
+    var differenceCheckboxDiv = document.createElement("div");
+    differenceCheckboxDiv.setAttribute('id', "differenceCheckboxDiv" + number);
+    viewportDetailDiv.appendChild(differenceCheckboxDiv);
     var differenceCheckboxLabel = document.createElement("label");
     differenceCheckboxLabel.innerHTML = "Difference Image:";
 
@@ -432,23 +449,27 @@ solarJPIP.prototype.loadDifferenceCheckbox = function() {
     var differenceCheckbox = document.createElement("input");
     differenceCheckbox.setAttribute("type", "checkbox");
     differenceCheckbox.setAttribute("data-type", "checkboxDifference");
+    differenceCheckbox.setAttribute("data-viewport", "" + number);
+
     differenceCheckbox.addEventListener("change", this, false);
-    this.optionsPanel.appendChild(differenceCheckboxLabel);
-    this.optionsPanel.appendChild(differenceCheckbox);
+    differenceCheckboxDiv.appendChild(differenceCheckboxLabel);
+    differenceCheckboxDiv.appendChild(differenceCheckbox);
 
     var differenceBoostbox = document.createElement("input");
     differenceBoostbox.setAttribute("type", "number");
     differenceBoostbox.setAttribute("data-type", "boostboxDifference");
+    differenceBoostbox.setAttribute("data-viewport", "" + number);
     differenceBoostbox.setAttribute("min", 0);
     differenceBoostbox.setAttribute("max", 1);
     differenceBoostbox.setAttribute("step", 0.01);
     differenceBoostbox.value = 0.8;
 
     differenceBoostbox.addEventListener("change", this, false);
-    this.optionsPanel.appendChild(differenceBoostboxLabel);
-    this.optionsPanel.appendChild(differenceBoostbox);
-    this.optionsPanel.appendChild(document.createElement("br"));
+    differenceCheckboxDiv.appendChild(differenceBoostboxLabel);
+    differenceCheckboxDiv.appendChild(differenceBoostbox);
+    differenceCheckboxDiv.appendChild(document.createElement("br"));
 }
+
 solarJPIP.prototype.loadAlphaValue = function() {
     var alphaLabel = document.createElement("label");
     alphaLabel.innerHTML = "Alpha value:";
@@ -507,13 +528,30 @@ solarJPIP.prototype.loadMetadataPanel = function() {
     this.optionsPanel.appendChild(this.metadataPanel);
 
 }
-
+solarJPIP.prototype.loadCombiViewportDetail = function(viewportIndex) {
+    if (document.getElementById("viewportDetailDiv" + viewportIndex) === null) {
+        this.isDiff[viewportIndex] = false;
+        this.boostboxValue[viewportIndex] = 0.8;
+        var viewportDetailDiv = document.createElement("div");
+        viewportDetailDiv.setAttribute('id', "viewportDetailDiv" + viewportIndex);
+        this.optionsPanel.appendChild(viewportDetailDiv);
+        this.loadDifferenceCheckbox(viewportIndex, viewportDetailDiv);
+        this.loadColormapGui(viewportIndex, viewportDetailDiv);
+    }
+}
 solarJPIP.prototype.fireViewportChanged = function(vp) {
     var viewportNames = [];
     for (var j = 0; j < vp.rows * vp.columns; j++) {
         viewportNames.push("" + j);
     }
+
     var comboViewportmaps = document.getElementsByClassName("comboViewportmap");
+    for (var k = viewportNames.length; k < 4 * 4; k++) {
+        var el = document.getElementById("viewportDetailDiv" + k);
+        if (el !== null) {
+            el.parentNode.removeChild(el);
+        }
+    }
     for (var k = 0; k < comboViewportmaps.length; k++) {
         comboViewportmap = comboViewportmaps[k];
         while (comboViewportmap.hasChildNodes()) {
@@ -524,6 +562,8 @@ solarJPIP.prototype.fireViewportChanged = function(vp) {
             comboViewportOption.setAttribute("value", i);
             comboViewportOption.innerHTML = viewportNames[i];
             comboViewportmap.appendChild(comboViewportOption);
+            this.loadCombiViewportDetail(i);
         }
     }
+
 }

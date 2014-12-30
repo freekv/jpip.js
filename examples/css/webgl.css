@@ -19,7 +19,11 @@ body {
     position: relative;
     *zoom: 1;
 }
-
+#glcanvaswrap {
+	resize: both;
+	background: #00FF00;
+	overflow:auto;
+}
 body:before, body:after {
     content: "";
 }

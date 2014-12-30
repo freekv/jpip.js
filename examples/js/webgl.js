@@ -86,21 +86,21 @@ core.drawScene = function() {
 
             for (var i = 0; i < core.objectList.length; i++) {
                 var object = core.objectList[i];
-                if (!object.initialized) {
+                if (!object.initialized && object.supportedModes.indexOf(core.viewport.modes[i]) !== -1) {
                     object.init(core.gl);
                 }
             }
 
             for (var i = 0; i < core.objectList.length; i++) {
                 var object = core.objectList[i];
-                if (object.viewportIndices.indexOf(index) !== -1) {
+                if (object.viewportIndices.indexOf(index) !== -1 && object.supportedModes.indexOf(core.viewport.modes[i]) !== -1) {
                     object.prerender(core.gl);
                 }
             }
 
             for (var i = 0; i < core.objectList.length; i++) {
                 var object = core.objectList[i];
-                if (object.viewportIndices.indexOf(index) !== -1) {
+                if (object.viewportIndices.indexOf(index) !== -1 && object.supportedModes.indexOf(core.viewport.modes[i]) !== -1) {
                     object.render(core.gl, core.perspectiveMatrix, core.mvMatrix, core.currentDate, index);
                 }
             }

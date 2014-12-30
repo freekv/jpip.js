@@ -7,6 +7,7 @@ viewport = function() {
     this.listeners = [];
     this.modeList = [ '2D', '3D', 'limb', 'limbexponential' ]
     this.modes = {};
+    this.updateGui();
 };
 
 viewport.prototype.setRows = function(rows) {
@@ -80,6 +81,10 @@ viewport.prototype.handleEvent = function(e) {
                 this.setWidth(element.value);
             } else if (elementType == "height") {
                 this.setHeight(element.value);
+            } else if (elementType == "comboViewportModes") {
+                var elementViewport = parseInt(e.srcElement.attributes["data-viewport"].value);
+                var selectedIndex = element.selectedIndex;
+                this.modes[elementViewport] = this.modeList[selectedIndex];
             }
     }
 }
@@ -110,15 +115,15 @@ viewport.prototype.viewportChanged = function() {
 
 viewport.prototype.updateGui = function() {
     var viewportDiv = document.getElementById("viewportDiv");
-    for (var ll = 0; ll < core.viewport.columns; ll++) {
-        for (var rr = 0; rr < core.viewport.rows; rr++) {
-            var index = core.viewport.columns * (core.viewport.rows - 1 - rr) + ll;
+    for (var ll = 0; ll < this.columns; ll++) {
+        for (var rr = 0; rr < this.rows; rr++) {
+            var index = this.columns * (this.rows - 1 - rr) + ll;
             if (this.modes[index] === undefined) {
                 this.loadViewportModesGui(viewportDiv, index);
             }
         }
     }
-    for (var index = core.viewport.columns * core.viewport.rows; index < 16; index++) {
+    for (var index = this.columns * this.rows; index < 16; index++) {
         var el = document.getElementById("comboViewportModeDiv" + index);
 
         if (el !== null) {

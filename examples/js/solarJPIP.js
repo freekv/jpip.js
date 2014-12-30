@@ -28,11 +28,12 @@ function solarJPIP(baseurl, imgname, numberOfFrames, size) {
         this.boostboxValue[i] = 0.8;
         this.isDiff[i] = 0;
     }
-
+    this.infoDiv;
     this.alphaValue = 1.;
     this.viewportIndices = [ 0 ];
     this.optionsPanel = document.createElement("div");
     this.metadataPanel;
+    this.supportedModes = [ '2D' ];
     core.viewport.addListener(this);
 }
 
@@ -189,7 +190,7 @@ solarJPIP.prototype.loadNewTextures = function(gl) {
         this.texturesAndMetadata.sort(function(a, b) {
             return (a.plottingMetadata.dateObs - b.plottingMetadata.dateObs);
         });
-        document.getElementById("info").innerHTML = "Loaded " + this.texturesAndMetadata.length + "/" + (this.parsedMetadata.length - 1);
+        this.infoDiv.innerHTML = "Loaded " + this.texturesAndMetadata.length + "/" + (this.parsedMetadata.length - 1);
     }
 }
 
@@ -358,10 +359,14 @@ function printMetadata(keywords) {
 solarJPIP.prototype.loadGUIElements = function(e) {
     var imagePanel = document.getElementById("imagepanel");
     imagePanel.appendChild(this.optionsPanel);
+    this.infoDiv = document.createElement("div");
+    this.infoDiv.setAttribute("class", "solarjpipinfodiv");
+    this.optionsPanel.appendChild(this.infoDiv);
     this.loadViewport();
     this.loadMetadataPanel();
     this.fireViewportChanged(core.viewport);
     this.loadAlphaValue();
+
 }
 solarJPIP.prototype.handleEvent = function(e) {
     switch (e.type) {
@@ -557,7 +562,7 @@ solarJPIP.prototype.fireViewportChanged = function(vp) {
         }
     }
     for (var k = 0; k < comboViewportmaps.length; k++) {
-        comboViewportmap = comboViewportmaps[k];
+        var comboViewportmap = comboViewportmaps[k];
         while (comboViewportmap.hasChildNodes()) {
             comboViewportmap.removeChild(comboViewportmap.lastChild);
         }

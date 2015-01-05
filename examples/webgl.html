@@ -60,7 +60,7 @@
       varying highp vec2 vTextureCoordDiff;
    
       void main(void) {
-        gl_Position =  vec4(aVertexPosition , 1.0);
+        gl_Position =  vec4(aVertexPosition.x*stretch.x, aVertexPosition.y*stretch.y, 0. , 1.0);
 		gl_Position = uMVMatrix * gl_Position;
         vTextureCoord = aTextureCoord;// + vec2(center.x, -center.y);
         vTextureCoordDiff = aTextureCoord + vec2(centerDiff.x, -centerDiff.y);
@@ -161,10 +161,13 @@
 
   
   <div style="float:left;">
-  	<div id ="videoPlayButton" class="video"><img src="images/play.png"/>
-  	</div><div id="videoBarWrap"><div class="video" id="videoBar" data-tips="This is a video bar"></div>
-  	</div><div class="video" id="videoEnd"><img src="images/pause.png"/>
-  	</div><div></div>
+  	<div id ="videoPlayButton" class="video" data-tips="Play/Pause video"><img src="images/play.png"/>
+  	</div><div id="videoBarWrap"><div class="video" id="videoBar"></div>
+  	</div><div></div><div class="video" id="videoStart" data-tips="Jump to start"><img src="images/first.png"/>
+  	</div><div class="video" id="videoPrevious" data-tips="Step backward in time"><img src="images/previous.png"/>
+  	</div><div class="video" id="videoNext" data-tips="Step forward in time"><img src="images/next.png"/>
+  	</div><div class="video" id="videoEnd" data-tips="Jump to end"><img src="images/last.png"/>
+  	</div>
   	<div id="gllcanvaswrap" style="width:550px; height:512px;">	
 	    <canvas id="glcanvas" width="512" height="512">
 	      Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.

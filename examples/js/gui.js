@@ -170,7 +170,7 @@ gui.prototype.createServerPanel = function(data) {
         var imageName = document.getElementById("imageExternal").value;
         var numberOfFrames = document.getElementById("imageExternal").value;
         var frameCount = parseInt(numberOfFramesInput.value);
-        objectList.push(new solarJPIP(serverName, imageName, frameCount, 512));
+        objectList.push(new solarJPIP(serverName, imageName, frameCount, 2048));
     }
 
     var loadButton = document.createElement("button");
@@ -193,6 +193,12 @@ gui.prototype.createServerPanel = function(data) {
 
 gui.prototype.createDatePanel = function() {
     var dateNumber = 1;
+    var extendBackwardsButton = document.createElement("button");
+    extendBackwardsButton.innerHTML = "Extend Backward";
+    extendBackwardsButton.setAttribute("data-type", "extendBackwardsButton");
+
+    this.datePanel.appendChild(extendBackwardsButton);
+    extendBackwardsButton.addEventListener("click", this, false);
     this.createDatebox("startTime", dateNumber);
     this.datePanel.appendChild(document.createElement("br"));
     dateNumber--;
@@ -216,11 +222,23 @@ gui.prototype.handleEvent = function(e) {
                 var success = function(data) {
                     var jpxfile = data.uri;
                     var jpxparts = jpxfile.split("movies");
-                    core.objectList.push(new solarJPIP("http" + jpxparts[0].substring(4, jpxparts[0].length), "movies" + jpxparts[1], data.frames.length, 128));
+                    var obs = core.gui.datasetGUIObject["observatoryHtmlElement"];
+                    var observatory = obs.children[obs.selectedIndex].childNodes[0].data;
+                    var ins = core.gui.datasetGUIObject["instrumentHtmlElement"];
+                    var instrument = ins.children[ins.selectedIndex].childNodes[0].data;
+                    var det = core.gui.datasetGUIObject["detectorHtmlElement"];
+                    var detector = det.children[det.selectedIndex].childNodes[0].data;
+                    var meas = core.gui.datasetGUIObject["measurementHtmlElement"];
+                    var measurement = meas.children[meas.selectedIndex].childNodes[0].data;
+                    core.objectList.push(new solarJPIP("http" + jpxparts[0].substring(4, jpxparts[0].length), "movies" + jpxparts[1], data.frames.length, 128, observatory, instrument, detector, measurement, core.beginDate, core.endDate));
                 };
                 getJSON(this.buildUrl(), success, function(e) {
                 });
                 this.setBeginAndEndDate();
+            } else if (elementType == "extendBackwardButton") {
+                for (var i = 0; i < core.objectList.length; i++) {
+                    core.objectList[i].extendBackwards();
+                }
             }
         case "change":
             var element = e.target || e.srcElement;
@@ -239,6 +257,22 @@ gui.prototype.createVideoBar = function() {
         } else {
             el.src = "images/play.png";
         }
+    });
+    var videoNextButton = document.getElementById("videoNext");
+    videoNextButton.addEventListener("click", function() {
+        core.stepForward = true;
+    });
+    var videoPreviousButton = document.getElementById("videoPrevious");
+    videoPreviousButton.addEventListener("click", function() {
+        core.stepBackward = true;
+    });
+    var videoStartButton = document.getElementById("videoStart");
+    videoStartButton.addEventListener("click", function() {
+        core.currentDate = core.beginDate
+    });
+    var videoEndButton = document.getElementById("videoEnd");
+    videoEndButton.addEventListener("click", function() {
+        core.currentDate = core.endDate;
     });
 }
 

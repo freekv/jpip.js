@@ -29,9 +29,12 @@ _core = function() {
     this.zoom = {};
     this.mouseMatrix = {};
     for (var i = 0; i < 16; i++) {
-        this.zoom[i] = 1.;
+        this.zoom[i] = 1.2;
         this.mouseMatrix[i] = Matrix.I(4);
     }
+    this.stepForward = false;
+    this.stepBackward = false;
+
 }
 var core = new _core();
 
@@ -77,8 +80,16 @@ core.drawScene = function() {
 
             core.gl.viewport(ll * vcl, rr * vrl, vcl, vrl);
 
-            if (core.running) {
+            if (core.running || core.stepForward) {
                 core.currentDate += core.cadence;
+                core.stepForward = false;
+            }
+            if (core.stepBackward) {
+                core.currentDate -= core.cadence;
+                core.stepBackward = false;
+            }
+            if (core.currentDate < core.beginDate) {
+                core.currentDate = core.beginDate;
             }
             if (core.currentDate > core.endDate && core.loop) {
                 core.currentDate = core.beginDate;
@@ -86,21 +97,19 @@ core.drawScene = function() {
 
             for (var i = 0; i < core.objectList.length; i++) {
                 var object = core.objectList[i];
-                if (!object.initialized && object.supportedModes.indexOf(core.viewport.modes[i]) !== -1) {
+                if (!object.initialized) {
                     object.init(core.gl);
                 }
             }
 
             for (var i = 0; i < core.objectList.length; i++) {
                 var object = core.objectList[i];
-                if (object.viewportIndices.indexOf(index) !== -1 && object.supportedModes.indexOf(core.viewport.modes[i]) !== -1) {
-                    object.prerender(core.gl);
-                }
+                object.prerender(core.gl);
             }
 
             for (var i = 0; i < core.objectList.length; i++) {
                 var object = core.objectList[i];
-                if (object.viewportIndices.indexOf(index) !== -1 && object.supportedModes.indexOf(core.viewport.modes[i]) !== -1) {
+                if (object.viewportIndices.indexOf(index) !== -1 && object.supportedModes.indexOf(core.viewport.modes[index]) !== -1) {
                     object.render(core.gl, core.perspectiveMatrix, core.mvMatrix, core.currentDate, index);
                 }
             }

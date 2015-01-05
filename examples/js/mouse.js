@@ -55,18 +55,14 @@ function handleMouseMove(event) {
 }
 
 handleMouseWheel = function(event) {
-    var newX;
-    var newY;
-    if (event.pageX || event.pageY) {
-        newX = event.pageX;
-        newY = event.pageY;
-    } else {
-        newX = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-        newY = event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-    }
-    newX -= core.canvas.offsetLeft;
-    newY -= core.canvas.offsetTop;
-    newY = core.viewport.totalHeight - newY;
+
+    var target = event.target || event.srcElement;
+    var rect = target.getBoundingClientRect();
+    var offsetX = event.clientX - rect.left;
+    offsetY = event.clientY - rect.top;
+
+    var newX = offsetX;
+    var newY = core.viewport.totalHeight - offsetY;
 
     var vcl = core.viewport.totalWidth / core.viewport.columns;
     var vrl = core.viewport.totalHeight / core.viewport.rows;

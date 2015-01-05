@@ -1,4 +1,10 @@
-function solarJPIP(baseurl, imgname, numberOfFrames, size) {
+function solarJPIP(baseurl, imgname, numberOfFrames, size, observatory, instrument, detector, measurement, beginDate, endDate) {
+    this.observatory = observatory;
+    this.instrument = instrument;
+    this.detector = detector;
+    this.measurement = measurement;
+    this.beginDate = beginDate;
+    this.endDate = endDate;
     this.metadataInitialized = false;
     this.initialized = false;
     this.visible = true;
@@ -23,20 +29,56 @@ function solarJPIP(baseurl, imgname, numberOfFrames, size) {
     this.colorTableValue = {};
     this.boostboxValue = {};
     this.isDiff = {};
+    this.alphaValue = {};
+
     for (var i = 0; i < 16; i++) {
         this.colorTableValue[i] = 1.;
         this.boostboxValue[i] = 0.8;
         this.isDiff[i] = 0;
+        this.alphaValue[i] = 1.;
     }
     this.infoDiv;
-    this.alphaValue = 1.;
     this.viewportIndices = [ 0 ];
     this.optionsPanel = document.createElement("div");
     this.metadataPanel;
     this.supportedModes = [ '2D' ];
     core.viewport.addListener(this);
     core.gui.addLayer("solarJPIP", imgname, this.optionsPanel);
+    this.viewportDetailDiv = {};
+    this.viewportDetails = document.createElement("div");
+    this.optionsPanel.appendChild(this.viewportDetails);
+    this.comboViewportmap = {};
+}
 
+solarJPIP.prototype.buildUrl = function(beginDateString, endDateString) {
+    var url = core.gui.datasetGUIObject.baseurl;
+    url += "&observatory=";
+    url += this.observatory;
+    url += "&instrument=";
+    url += this.instrument;
+    url += "&detector=";
+    url += this.detector;
+    url += "&measurement=";
+    url += this.measurement;
+    url += "&startTime=";
+    url += beginDateString + ".000Z";
+    url += "&endTime=";
+    url += endDateString + ".000Z";
+    url += "&cadence=1800&jpip=true&verbose=true&linked=true";
+    return url;
+}
+
+solarJPIP.prototype.extendBackwards = function() {
+    var ttt = this;
+    var success = function(data) {
+        var jpxfile = data.uri;
+        var jpxparts = jpxfile.split("movies");
+        ttt.baseurl = "http" + jpxparts[0].substring(4, jpxparts[0].length);
+        ttt.imgname = "movies" + jpxparts[1];
+        ttt.initTextures()
+    };
+    getJSON(this.buildUrl(formatDate(new Date(this.beginDate - (this.endDate - this.beginDate))), formatDate(new Date(this.beginDate))), success, function(e) {
+    });
 }
 
 solarJPIP.prototype.render = function(gl, perspectiveMatrix, mvMatrix, time, viewportIndex) {
@@ -75,7 +117,7 @@ solarJPIP.prototype.render = function(gl, perspectiveMatrix, mvMatrix, time, vie
         gl.uniform1i(gl.getUniformLocation(this.shaderProgram, "uColormap"), 2);
         gl.uniform1f(gl.getUniformLocation(this.shaderProgram, "colorTableValue"), this.colorTableValue[viewportIndex]);
         gl.uniform1f(gl.getUniformLocation(this.shaderProgram, "boostboxValue"), 1. - this.boostboxValue[viewportIndex]);
-        gl.uniform1f(gl.getUniformLocation(this.shaderProgram, "alphaValue"), this.alphaValue);
+        gl.uniform1f(gl.getUniformLocation(this.shaderProgram, "alphaValue"), this.alphaValue[viewportIndex]);
 
         gl.uniform2f(gl.getUniformLocation(this.shaderProgram, "center"), this.texturesAndMetadata[this.currentIndex].plottingMetadata.x0, this.texturesAndMetadata[this.currentIndex].plottingMetadata.y0);
         gl.uniform2f(gl.getUniformLocation(this.shaderProgram, "stretch"), this.texturesAndMetadata[this.currentIndex].plottingMetadata.solarRadiiX, this.texturesAndMetadata[this.currentIndex].plottingMetadata.solarRadiiY);
@@ -143,7 +185,7 @@ solarJPIP.prototype.initIndicesBuffers = function(gl) {
 }
 
 solarJPIP.prototype.initTextures = function() {
-    td = this;
+    var td = this;
     JPIP.prototype.onload = function(data) {
         if (data[0] == "meta") {
             var metadata = data[5];
@@ -192,6 +234,7 @@ solarJPIP.prototype.loadNewTextures = function(gl) {
         this.texturesAndMetadata.sort(function(a, b) {
             return (a.plottingMetadata.dateObs - b.plottingMetadata.dateObs);
         });
+
         this.infoDiv.innerHTML = "Loaded " + this.texturesAndMetadata.length + "/" + (this.parsedMetadata.length - 1);
     }
 }
@@ -367,8 +410,6 @@ solarJPIP.prototype.loadGUIElements = function(e) {
     this.loadViewport();
     this.loadMetadataPanel();
     this.fireViewportChanged(core.viewport);
-    this.loadAlphaValue();
-
 }
 solarJPIP.prototype.handleEvent = function(e) {
     switch (e.type) {
@@ -397,7 +438,8 @@ solarJPIP.prototype.handleEvent = function(e) {
                 var elementViewport = parseInt(e.srcElement.attributes["data-viewport"].value);
                 this.boostboxValue[elementViewport] = element.value;
             } else if (elementType == "alphabox") {
-                this.alphaValue = element.value;
+                var elementViewport = parseInt(e.srcElement.attributes["data-viewport"].value);
+                this.alphaValue[elementViewport] = element.value;
             } else if (elementType == "comboViewportmap") {
                 this.viewportSelected(e);
             }
@@ -446,7 +488,7 @@ solarJPIP.prototype.loadColormapGui = function(number, viewportDetailDiv) {
 
 solarJPIP.prototype.loadDifferenceCheckbox = function(number, viewportDetailDiv) {
     var differenceCheckboxDiv = document.createElement("div");
-    differenceCheckboxDiv.setAttribute('id', "differenceCheckboxDiv" + number);
+    differenceCheckboxDiv.setAttribute("class", "differenceCheckbox");
     viewportDetailDiv.appendChild(differenceCheckboxDiv);
     var differenceCheckboxLabel = document.createElement("label");
     differenceCheckboxLabel.innerHTML = "Difference Image:";
@@ -478,46 +520,50 @@ solarJPIP.prototype.loadDifferenceCheckbox = function(number, viewportDetailDiv)
     differenceCheckboxDiv.appendChild(document.createElement("br"));
 }
 
-solarJPIP.prototype.loadAlphaValue = function() {
+solarJPIP.prototype.loadAlphaValue = function(number, viewportDetailDiv) {
+    var alphaDiv = document.createElement("div");
+    alphaDiv.setAttribute('class', "alphaDiv");
+    viewportDetailDiv.appendChild(alphaDiv);
     var alphaLabel = document.createElement("label");
     alphaLabel.innerHTML = "Alpha value:";
     var alphaBox = document.createElement("input");
     alphaBox.setAttribute("type", "number");
     alphaBox.setAttribute("data-type", "alphabox");
+    alphaBox.setAttribute("data-viewport", "" + number);
     alphaBox.setAttribute("min", 0);
     alphaBox.setAttribute("max", 1);
     alphaBox.setAttribute("step", 0.01);
     alphaBox.value = 1.;
     alphaBox.addEventListener("change", this, false);
-    this.optionsPanel.appendChild(alphaLabel);
-    this.optionsPanel.appendChild(alphaBox);
-    this.optionsPanel.appendChild(document.createElement("br"));
+    alphaDiv.appendChild(alphaLabel);
+    alphaDiv.appendChild(alphaBox);
+    alphaDiv.appendChild(document.createElement("br"));
 }
 solarJPIP.prototype.loadViewport = function() {
     var viewportNames = [];
     for (var j = 0; j < core.viewport.rows * core.viewport.columns; j++) {
         viewportNames.push("" + j);
     }
-    var comboViewportmap = document.createElement("select");
-    comboViewportmap.setAttribute("class", "comboViewportmap");
-    comboViewportmap.setAttribute("multiple", "multiple");
+    this.comboViewportmap = document.createElement("select");
+    this.comboViewportmap.setAttribute("class", "comboViewportmap");
+    this.comboViewportmap.setAttribute("multiple", "multiple");
 
     for (var i = 0; i < viewportNames.length; i++) {
         var comboViewportOption = document.createElement("option");
         comboViewportOption.setAttribute("value", i);
         comboViewportOption.innerHTML = viewportNames[i];
-        comboViewportmap.appendChild(comboViewportOption);
+        this.comboViewportmap.appendChild(comboViewportOption);
         if (i === 0) {
-            comboViewportmap.setAttribute("selected", true);
+            comboViewportOption.setAttribute("selected", true);
         }
     }
     var comboViewportLabel = document.createElement("label");
     comboViewportLabel.innerHTML = "Viewport:";
     this.optionsPanel.appendChild(comboViewportLabel);
-    this.optionsPanel.appendChild(comboViewportmap);
+    this.optionsPanel.appendChild(this.comboViewportmap);
     this.optionsPanel.appendChild(document.createElement("br"));
-    comboViewportmap.setAttribute("data-type", "comboViewportmap");
-    comboViewportmap.addEventListener("change", this, false);
+    this.comboViewportmap.setAttribute("data-type", "comboViewportmap");
+    this.comboViewportmap.addEventListener("change", this, false);
 }
 
 solarJPIP.prototype.loadMetadataPanel = function() {
@@ -540,14 +586,16 @@ solarJPIP.prototype.loadMetadataPanel = function() {
 
 }
 solarJPIP.prototype.loadCombiViewportDetail = function(viewportIndex) {
-    if (document.getElementById("viewportDetailDiv" + viewportIndex) === null) {
+    if (this.viewportDetailDiv[viewportIndex] === undefined) {
+        this.viewportDetailDiv[viewportIndex] = document.createElement("div");
+        var viewportDetailDiv = this.viewportDetailDiv[viewportIndex];
+        this.viewportDetails.appendChild(viewportDetailDiv);
         this.isDiff[viewportIndex] = false;
         this.boostboxValue[viewportIndex] = 0.8;
-        var viewportDetailDiv = document.createElement("div");
-        viewportDetailDiv.setAttribute('id', "viewportDetailDiv" + viewportIndex);
         this.optionsPanel.appendChild(viewportDetailDiv);
         this.loadDifferenceCheckbox(viewportIndex, viewportDetailDiv);
         this.loadColormapGui(viewportIndex, viewportDetailDiv);
+        this.loadAlphaValue(viewportIndex, viewportDetailDiv);
     }
 }
 solarJPIP.prototype.fireViewportChanged = function(vp) {
@@ -556,24 +604,25 @@ solarJPIP.prototype.fireViewportChanged = function(vp) {
         viewportNames.push("" + j);
     }
 
-    var comboViewportmaps = document.getElementsByClassName("comboViewportmap");
     for (var k = viewportNames.length; k < 4 * 4; k++) {
-        var el = document.getElementById("viewportDetailDiv" + k);
-        if (el !== null) {
+        var el = this.viewportDetailDiv[k];
+        if (el !== undefined && el !== null) {
             el.parentNode.removeChild(el);
         }
+        this.viewportDetailDiv[k] = undefined;
     }
-    for (var k = 0; k < comboViewportmaps.length; k++) {
-        var comboViewportmap = comboViewportmaps[k];
-        while (comboViewportmap.hasChildNodes()) {
-            comboViewportmap.removeChild(comboViewportmap.lastChild);
-        }
-        for (var i = 0; i < viewportNames.length; i++) {
-            var comboViewportOption = document.createElement("option");
-            comboViewportOption.setAttribute("value", i);
-            comboViewportOption.innerHTML = viewportNames[i];
-            comboViewportmap.appendChild(comboViewportOption);
-            this.loadCombiViewportDetail(i);
+
+    while (this.comboViewportmap.hasChildNodes()) {
+        this.comboViewportmap.removeChild(this.comboViewportmap.lastChild);
+    }
+    for (var i = 0; i < viewportNames.length; i++) {
+        var comboViewportOption = document.createElement("option");
+        comboViewportOption.setAttribute("value", i);
+        comboViewportOption.innerHTML = viewportNames[i];
+        this.comboViewportmap.appendChild(comboViewportOption);
+        this.loadCombiViewportDetail(i);
+        if (this.viewportIndices.indexOf(i) !== -1) {
+            comboViewportOption.setAttribute("selected", true);
         }
     }
 

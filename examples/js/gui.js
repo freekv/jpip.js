@@ -2,9 +2,12 @@
 
 gui = function() {
     this.datasetGUIObject = {};
+    this.types = {};
     this.controlpanel = document.getElementById("controlpanel");
     this.local_controlpanel = document.getElementById("local_controlpanel");
     this.datePanel = document.getElementById("datePanel");
+    this.layersPanel = document.getElementById("layers");
+    this.addTypePanel("solarJPIP");
 };
 
 gui.prototype.reinsertCombo = function(name, nextel) {
@@ -247,5 +250,27 @@ gui.prototype.createResizeCanvas = function() {
 
     };
     canvaswrap.addEventListener("mouseup", callback);
-    canvaswrap.addEventListener("mouseup", callback);
+}
+
+gui.prototype.addTypePanel = function(typeName) {
+    var li = document.createElement("li")
+    li.innerHTML = typeName;
+    var ul = document.createElement("ul")
+    li.appendChild(ul);
+    this.layersPanel.appendChild(li);
+    this.types[typeName] = ul;
+}
+
+gui.prototype.addLayer = function(typeName, layerName, optionsPanel) {
+    var li = document.createElement("li")
+    li.innerHTML = layerName;
+    this.types[typeName].appendChild(li);
+    li.onclick = function() {
+        var clss = document.getElementsByClassName("activeOptionsPanel");
+        for (var i = 0; i < clss.length; i++) {
+            var cl = clss[i];
+            cl.setAttribute("class", "inactiveOptionsPanel");
+        }
+        optionsPanel.setAttribute("class", "activeOptionsPanel");
+    };
 }

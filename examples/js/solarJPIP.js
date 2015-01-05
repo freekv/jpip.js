@@ -35,6 +35,8 @@ function solarJPIP(baseurl, imgname, numberOfFrames, size) {
     this.metadataPanel;
     this.supportedModes = [ '2D' ];
     core.viewport.addListener(this);
+    core.gui.addLayer("solarJPIP", imgname, this.optionsPanel);
+
 }
 
 solarJPIP.prototype.render = function(gl, perspectiveMatrix, mvMatrix, time, viewportIndex) {

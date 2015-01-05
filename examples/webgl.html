@@ -3,6 +3,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Communication over jpip demo</title>
     <link rel="stylesheet" href="./css/webgl.css" type="text/css"> 
+    <link rel="stylesheet" href="./css/aaccordion.css" type="text/css"> 
+    
     <script src="./js/globals.js" type="text/javascript"></script>
     <script src="./js/sylvester.js" type="text/javascript"></script>
     <script src="./js/glUtils.js" type="text/javascript"></script>
@@ -65,28 +67,97 @@
 
       }
     </script>
+    <script id="shader-fs-limb" type="x-shader/x-fragment">
+      varying highp vec2 vTextureCoord;
+      varying highp vec2 vTextureCoordDiff;
+
+      uniform sampler2D uSampler;
+      uniform sampler2D uSamplerDiff;
+
+      uniform sampler2D uColormap;
+      uniform highp float colorTableValue;
+      uniform highp float boostboxValue;
+      uniform highp float alphaValue;
+      uniform int isDiff;
+      
+      void main(void) {
+	    if(isDiff==1){
+          gl_FragColor = texture2D(uSampler, vTextureCoord) - texture2D(uSamplerDiff, vTextureCoordDiff);
+		  highp float val = clamp((clamp(gl_FragColor.x, -boostboxValue, boostboxValue)/boostboxValue + 1.)/2., 0. , 1.);
+		  gl_FragColor.xyz = vec3(val,val,val);
+		}
+        else{
+		  gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+		}
+
+        gl_FragColor = texture2D(uColormap, vec2(gl_FragColor.r, colorTableValue));
+
+        gl_FragColor.a = alphaValue;
+      }
+    </script>
+     
+    <script id="shader-vs-limb" type="x-shader/x-vertex">
+      attribute vec3 aVertexPosition;
+      attribute vec2 aTextureCoord;
+
+    
+      uniform mat4 uMVMatrix;
+      uniform mat4 uPMatrix;
+      uniform vec2 center;
+      uniform vec2 centerDiff;
+      uniform vec2 stretch;
+      uniform vec2 stretchDiff;
+      
+      varying highp vec2 vTextureCoord;
+      varying highp vec2 vTextureCoordDiff;
+   
+      void main(void) {
+        gl_Position =  vec4(aVertexPosition , 1.0);
+		gl_Position = uMVMatrix * gl_Position;
+        vTextureCoord = aTextureCoord;// + vec2(center.x, -center.y);
+        vTextureCoordDiff = aTextureCoord + vec2(centerDiff.x, -centerDiff.y);
+
+      }
+    </script>
   </head>
   
   <body>
-  <div id="top">
-      <input type="checkbox" id="read_more" role="button">
-      <label class="togglelabel" for="read_more" onclick="">
-          <span>
-	      		Click to choose your own server
-	      </span>
-	      <span>
-	      		Click to load from classical server
-	      </span>
-      </label>
-      <br style="clear:both;" />
-      <div id ="viewport"></div>  
-      <div id ="viewportDiv"></div>       
-           
-      <div id ="datePanel"></div> 
-      
-	  <div id ="controlpanel"></div> 
-	  <div id ="local_controlpanel"></div>
-  </div>
+  <article class="accordion">
+
+	<section id="acc1">
+  	      <h2><a href="#acc1">Date range</a></h2>
+  	      <p>   	  
+	      	  <input type="checkbox" id="read_more" role="button"></input>
+	      	  <label class="togglelabel" for="read_more" onclick="">
+		          <span>
+			      		Click to choose your own server
+			      </span>
+			      <span>
+			      		Click to load from classical server
+			      </span>
+	      	  </label>
+		      <br style="clear:both;" />     
+
+	      <p>     
+	      <div id ="datePanel"></div> 
+
+          <p>     	      
+		  <div id ="controlpanel"></div> 
+		  <div id ="local_controlpanel"></div>
+		  <p class="accnav"><a href="#acc2">next &#10151;</a></p>
+	</section>
+	
+	<section id="acc2">
+		<h2><a href="#acc2">Viewport</a></h2>
+		      <div id ="viewport"></div>  
+		      <div id ="viewportDiv"></div>
+		<p class="accnav"><a href="#acc2">next &#10151;</a></p>
+		 
+	</section>
+	
+
+ 
+</article>
 
   
   <div style="float:left;">
@@ -101,6 +172,7 @@
     </div>
   </div>
   <div id="wrap" style="float:left;">
+  	  <div><ul id="layers"></ul></div>
       <div id="info">
       </div>
       <div id ="imagepanel">
@@ -110,5 +182,7 @@
       <div id="fps">
       </div>
   </div>
+  
+  
 </body>
 </html>

@@ -74,7 +74,7 @@ var getJSON = function(url, successHandler, errorHandler) {
 // Parsing dates
 function parseDate(input, offset) {
     var year = parseInt(input.substr(0 + offset, 4), 10);
-    var month = parseInt(input.substr(5 + offset, 2), 10);
+    var month = parseInt(input.substr(5 + offset, 2), 10) - 1;
     var day = parseInt(input.substr(8 + offset, 2), 10);
     var hours = parseInt(input.substr(11 + offset, 2), 10);
     var minutes = parseInt(input.substr(14 + offset, 2), 10);

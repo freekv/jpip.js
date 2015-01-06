@@ -1,4 +1,4 @@
-function solarJPIP(baseurl, imgname, numberOfFrames, size, observatory, instrument, detector, measurement, beginDate, endDate) {
+function solarJPIP(baseurl, imgname, newNumberOfFrames, size, observatory, instrument, detector, measurement, beginDate, endDate) {
     this.observatory = observatory;
     this.instrument = instrument;
     this.detector = detector;
@@ -21,7 +21,8 @@ function solarJPIP(baseurl, imgname, numberOfFrames, size, observatory, instrume
     this.vertexPositionAttribute;
     this.textureCoordAttribute;
     this.currentIndex = 0;
-    this.numberOfFrames = numberOfFrames;
+    this.newNumberOfFrames = newNumberOfFrames;
+    this.numberOfFrames = 0;
     this.size = size;
     this.colormapTexture;
     this.colormapImage;
@@ -75,7 +76,9 @@ solarJPIP.prototype.extendBackwards = function() {
         var jpxparts = jpxfile.split("movies");
         ttt.baseurl = "http" + jpxparts[0].substring(4, jpxparts[0].length);
         ttt.imgname = "movies" + jpxparts[1];
-        ttt.initTextures()
+        core.beginDate = ttt.beginDate - (ttt.endDate - ttt.beginDate);
+        this.beginDate = ttt.beginDate - (ttt.endDate - ttt.beginDate);
+        ttt.initTextures(data.frames.length)
     };
     getJSON(this.buildUrl(formatDate(new Date(this.beginDate - (this.endDate - this.beginDate))), formatDate(new Date(this.beginDate))), success, function(e) {
     });
@@ -156,7 +159,7 @@ solarJPIP.prototype.init = function(gl) {
         this.loadGUIElements();
         this.initShaders(gl);
         this.initBuffers(gl);
-        this.initTextures(gl);
+        this.initTextures(this.newNumberOfFrames);
         this.initialized = true;
     }
 }
@@ -184,7 +187,9 @@ solarJPIP.prototype.initIndicesBuffers = function(gl) {
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.vertexIndices), gl.STATIC_DRAW);
 }
 
-solarJPIP.prototype.initTextures = function() {
+solarJPIP.prototype.initTextures = function(nof) {
+    var toAdd = this.numberOfFrames;
+    this.numberOfFrames += nof;
     var td = this;
     JPIP.prototype.onload = function(data) {
         if (data[0] == "meta") {
@@ -197,11 +202,11 @@ solarJPIP.prototype.initTextures = function() {
         dataObj.data = new Uint8Array(data[1]);
         dataObj.width = data[2];
         dataObj.height = data[3];
-        dataObj.index = curr;
+        dataObj.index = curr + toAdd;
         td.textureData.push(dataObj);
     }
     var jpip = new JPIP();
-    var jpipConn = jpip.open(this.baseurl, this.imgname, this.size, this.numberOfFrames);
+    var jpipConn = jpip.open(this.baseurl, this.imgname, this.size, nof);
 }
 
 solarJPIP.prototype.loadColormapTexture = function(gl) {
@@ -234,6 +239,11 @@ solarJPIP.prototype.loadNewTextures = function(gl) {
         this.texturesAndMetadata.sort(function(a, b) {
             return (a.plottingMetadata.dateObs - b.plottingMetadata.dateObs);
         });
+        console.log("START");
+        for (var l = 0; l < this.texturesAndMetadata.length; l++) {
+            console.log(formatDate(new Date(this.texturesAndMetadata[l].plottingMetadata.dateObs)));
+        }
+        console.log("END");
 
         this.infoDiv.innerHTML = "Loaded " + this.texturesAndMetadata.length + "/" + (this.parsedMetadata.length - 1);
     }

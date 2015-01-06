@@ -235,7 +235,7 @@ gui.prototype.handleEvent = function(e) {
                 getJSON(this.buildUrl(), success, function(e) {
                 });
                 this.setBeginAndEndDate();
-            } else if (elementType == "extendBackwardButton") {
+            } else if (elementType == "extendBackwardsButton") {
                 for (var i = 0; i < core.objectList.length; i++) {
                     core.objectList[i].extendBackwards();
                 }

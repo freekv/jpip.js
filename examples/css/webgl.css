@@ -117,17 +117,33 @@ input[type=checkbox]:checked ~ #local_controlpanel {
 }
 #videoBarWrap{
 	float:left;
-	width: 402px;
+	width: 424px;
 	height: 16px;	
-	padding: 4px 0px 4px 0px;
+	padding: 0px 0px 0px 0px;
 }
 #videoBar{
 	background:#c2c2c2; 
-	width: 402px;
+	width: 424px;
 	border: 10 px;
 	height: 8px;		
 	border-radius: 10px;
+	position:absolute;
+	margin: 4px 0px 4px 0px;
 }
+#videoIndicator{
+	background:#0000FF; 
+	width: 2px;
+	//border: 1px solid black;
+	margin: 2px 0px 2px 0px;
+	height: 12px;	
+	left: 100px;	
+	border-radius: 1px;
+	position:absolute;
+	display:inline-block;
+    padding:0;
+    border:0; 
+}
+
 
 #videoPlayButton, #videoStart, #videoEnd, #videoNext, #videoPrevious{
 	float:left;

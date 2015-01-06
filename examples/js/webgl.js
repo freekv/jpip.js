@@ -124,7 +124,7 @@ core.drawScene = function() {
 
         }
     }
-
+    document.getElementById("videoIndicator").style.left = 2;
 }
 
 core.loadIdentity = function() {

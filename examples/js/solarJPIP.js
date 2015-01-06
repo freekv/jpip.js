@@ -239,11 +239,6 @@ solarJPIP.prototype.loadNewTextures = function(gl) {
         this.texturesAndMetadata.sort(function(a, b) {
             return (a.plottingMetadata.dateObs - b.plottingMetadata.dateObs);
         });
-        console.log("START");
-        for (var l = 0; l < this.texturesAndMetadata.length; l++) {
-            console.log(formatDate(new Date(this.texturesAndMetadata[l].plottingMetadata.dateObs)));
-        }
-        console.log("END");
 
         this.infoDiv.innerHTML = "Loaded " + this.texturesAndMetadata.length + "/" + (this.parsedMetadata.length - 1);
     }

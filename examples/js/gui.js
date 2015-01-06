@@ -230,7 +230,7 @@ gui.prototype.handleEvent = function(e) {
                     var detector = det.children[det.selectedIndex].childNodes[0].data;
                     var meas = core.gui.datasetGUIObject["measurementHtmlElement"];
                     var measurement = meas.children[meas.selectedIndex].childNodes[0].data;
-                    core.objectList.push(new solarJPIP("http" + jpxparts[0].substring(4, jpxparts[0].length), "movies" + jpxparts[1], data.frames.length, 128, observatory, instrument, detector, measurement, core.beginDate, core.endDate));
+                    core.objectList.push(new solarJPIP("http" + jpxparts[0].substring(4, jpxparts[0].length), "movies" + jpxparts[1], data.frames.length, 4096, observatory, instrument, detector, measurement, core.beginDate, core.endDate));
                 };
                 getJSON(this.buildUrl(), success, function(e) {
                 });
@@ -239,6 +239,7 @@ gui.prototype.handleEvent = function(e) {
                 for (var i = 0; i < core.objectList.length; i++) {
                     core.objectList[i].extendBackwards();
                 }
+                this.datasetGUIObject["startTime"].value = formatDate(new Date(core.beginDate - (core.endDate - core.beginDate)));
             }
         case "change":
             var element = e.target || e.srcElement;

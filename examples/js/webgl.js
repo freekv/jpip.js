@@ -29,7 +29,7 @@ _core = function() {
     this.zoom = {};
     this.mouseMatrix = {};
     for (var i = 0; i < 16; i++) {
-        this.zoom[i] = 1.2;
+        this.zoom[i] = 1.0;
         this.mouseMatrix[i] = Matrix.I(4);
     }
     this.stepForward = false;

@@ -81,6 +81,14 @@ gui.prototype.createCombobox = function(name, data) {
     this.controlpanel.appendChild(comboDataList);
 }
 gui.prototype.createDatebox = function(id, number) {
+    var dateElLabel = document.createElement("label");
+    dateElLabel.setAttribute("for", id);
+    if (number == 0) {
+        dateElLabel.innerHTML = "End date: ";
+    } else {
+        dateElLabel.innerHTML = "Start date: ";
+    }
+
     var dateEl = document.createElement("input");
     dateEl.id = id;
     dateEl.setAttribute("type", "textarea");
@@ -91,6 +99,10 @@ gui.prototype.createDatebox = function(id, number) {
         console.log("EVENT" + e);
     });
     this.datasetGUIObject[id] = dateEl;
+    dateElLabel.setAttribute("class", "alignlabel");
+    dateEl.setAttribute("class", "aligninput");
+
+    this.datePanel.appendChild(dateElLabel);
     this.datePanel.appendChild(dateEl);
 }
 
@@ -199,6 +211,8 @@ gui.prototype.createDatePanel = function() {
 
     this.datePanel.appendChild(extendBackwardsButton);
     extendBackwardsButton.addEventListener("click", this, false);
+    this.datePanel.appendChild(document.createElement("br"));
+
     this.createDatebox("startTime", dateNumber);
     this.datePanel.appendChild(document.createElement("br"));
     dateNumber--;

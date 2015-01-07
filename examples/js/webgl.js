@@ -51,7 +51,7 @@ core.start = function() {
     core.canvas = document.getElementById("glcanvas");
     core.initWebGL(core.canvas);
     if (core.gl) {
-        core.gl.clearColor(1.0, 0.0, 0.0, 1.0);
+        core.gl.clearColor(0.0, 0.0, 0.0, 1.0);
         core.gl.clearDepth(1.0);
         core.gl.enable(core.gl.DEPTH_TEST);
         core.gl.depthFunc(core.gl.LEQUAL);

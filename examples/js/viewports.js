@@ -26,11 +26,12 @@ viewport.prototype.initGui = function() {
 
 viewport.prototype.addRowElements = function() {
     var toAdd = [ 'rowNumber', 'columnNumber' ];
-    var labels = [ 'Number of rows:', 'Number of columns:' ]
+    var labels = [ 'Rows:', 'Columns:' ]
 
     for (var i = 0; i < 2; i++) {
         var elLabel = document.createElement("label");
         elLabel.innerHTML = labels[i];
+
         var el = document.createElement("input");
         el.setAttribute("type", "number");
         el.setAttribute("data-type", toAdd[i]);
@@ -39,6 +40,8 @@ viewport.prototype.addRowElements = function() {
         el.setAttribute("step", 1);
         el.value = 1;
         el.addEventListener("change", this, false);
+        elLabel.setAttribute("class", "alignlabel");
+        el.setAttribute("class", "aligninput");
         this.viewportElement.appendChild(elLabel);
         this.viewportElement.appendChild(el);
         this.viewportElement.appendChild(document.createElement("br"));
@@ -60,6 +63,8 @@ viewport.prototype.addWidthHeightControl = function() {
         el.setAttribute("step", 1);
         el.value = 512;
         el.addEventListener("change", this, false);
+        elLabel.setAttribute("class", "alignlabel");
+        el.setAttribute("class", "aligninput");
         this.viewportElement.appendChild(elLabel);
         this.viewportElement.appendChild(el);
         this.viewportElement.appendChild(document.createElement("br"));

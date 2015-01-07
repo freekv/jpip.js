@@ -21,9 +21,18 @@ html { background: white }
 	display: none;
     visibility: hidden;
 }
+
+.aligninput, .alignlabel {
+  display:inline-block;
+}
+
+.alignlabel {
+  width:75px; /* or whatever size you want them */
+}
+
 body {
     width: 90%;
-    margin: 3em auto;
+    margin: 1em auto;
     font-size: 75%;
     line-height: 1.3rem;
     font-family: sans-serif;

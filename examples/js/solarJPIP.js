@@ -18,8 +18,6 @@ function solarJPIP(baseurl, imgname, newNumberOfFrames, size, observatory, instr
     this.verticesTextureCoordBuffer;
     this.verticesIndexBuffer;
     this.shaderProgram;
-    this.vertexPositionAttribute;
-    this.textureCoordAttribute;
     this.currentIndex = 0;
     this.newNumberOfFrames = newNumberOfFrames;
     this.numberOfFrames = 0;
@@ -42,7 +40,7 @@ function solarJPIP(baseurl, imgname, newNumberOfFrames, size, observatory, instr
     this.viewportIndices = [ 0 ];
     this.optionsPanel = document.createElement("div");
     this.metadataPanel;
-    this.supportedModes = [ '2D' ];
+    this.supportedModes = [ '2D', 'limb', 'limb-conformal' ];
     core.viewport.addListener(this);
     core.gui.addLayer("solarJPIP", imgname, this.optionsPanel);
     this.viewportDetailDiv = {};
@@ -85,7 +83,9 @@ solarJPIP.prototype.extendBackwards = function() {
 }
 
 solarJPIP.prototype.render = function(gl, perspectiveMatrix, mvMatrix, time, viewportIndex) {
-    var key = '2D';
+    var key = core.viewport.modes[viewportIndex];
+    gl.useProgram(solarJPIP.prototype.shaderProgram[key]);
+
     if (this.parsedMetadata.length > 0) {
         this.currentIndex = this.binarySearch(time);
     }
@@ -96,10 +96,10 @@ solarJPIP.prototype.render = function(gl, perspectiveMatrix, mvMatrix, time, vie
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
-        gl.vertexAttribPointer(this.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+        gl.vertexAttribPointer(this.vertexPositionAttribute[key], 3, gl.FLOAT, false, 0, 0);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesTextureCoordBuffer);
-        gl.vertexAttribPointer(this.textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
+        gl.vertexAttribPointer(this.textureCoordAttribute[key], 2, gl.FLOAT, false, 0, 0);
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.texturesAndMetadata[this.currentIndex].texture);
@@ -248,14 +248,18 @@ solarJPIP.prototype.loadNewTextures = function(gl) {
 }
 
 solarJPIP.prototype.initShaders = function(gl, key) {
+
     if (solarJPIP.prototype.shaderProgram === undefined) {
         solarJPIP.prototype.shaderProgram = {};
+        solarJPIP.prototype.vertexPositionAttribute = {};
+        solarJPIP.prototype.textureCoordAttribute = {};
     }
     if (solarJPIP.prototype.shaderProgram[key] !== undefined) {
         return;
     }
-    var fragmentShader = getShader(gl, "shader-fs");
-    var vertexShader = getShader(gl, "shader-vs");
+    console.log("shader-fs-" + key);
+    var fragmentShader = getShader(gl, "shader-fs-" + key);
+    var vertexShader = getShader(gl, "shader-vs-" + key);
 
     solarJPIP.prototype.shaderProgram[key] = gl.createProgram();
     gl.attachShader(solarJPIP.prototype.shaderProgram[key], vertexShader);
@@ -268,11 +272,11 @@ solarJPIP.prototype.initShaders = function(gl, key) {
 
     gl.useProgram(solarJPIP.prototype.shaderProgram[key]);
 
-    solarJPIP.prototype.vertexPositionAttribute = gl.getAttribLocation(solarJPIP.prototype.shaderProgram[key], "aVertexPosition");
-    gl.enableVertexAttribArray(solarJPIP.prototype.vertexPositionAttribute);
+    solarJPIP.prototype.vertexPositionAttribute[key] = gl.getAttribLocation(solarJPIP.prototype.shaderProgram[key], "aVertexPosition");
+    gl.enableVertexAttribArray(solarJPIP.prototype.vertexPositionAttribute[key]);
 
-    solarJPIP.prototype.textureCoordAttribute = gl.getAttribLocation(solarJPIP.prototype.shaderProgram[key], "aTextureCoord");
-    gl.enableVertexAttribArray(solarJPIP.prototype.textureCoordAttribute);
+    solarJPIP.prototype.textureCoordAttribute[key] = gl.getAttribLocation(solarJPIP.prototype.shaderProgram[key], "aTextureCoord");
+    gl.enableVertexAttribArray(solarJPIP.prototype.textureCoordAttribute[key]);
 }
 
 getShader = function(gl, id) {

@@ -5,7 +5,7 @@ viewport = function() {
     this.rows = 1;
     this.columns = 1;
     this.listeners = [];
-    this.modeList = [ '2D', '3D', 'limb', 'limbexponential' ]
+    this.modeList = [ '2D', '3D', 'limb', 'limb-conformal' ]
     this.modes = {};
     this.updateGui();
 };

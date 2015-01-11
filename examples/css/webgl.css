@@ -142,12 +142,10 @@ input[type=checkbox]:checked ~ #local_controlpanel {
 #videoIndicator{
 	background:#0000FF; 
 	width: 2px;
-	//border: 1px solid black;
 	margin: 2px 0px 2px 0px;
 	height: 12px;	
-	left: 100px;	
 	border-radius: 1px;
-	position:absolute;
+	position:relative;
 	display:inline-block;
     padding:0;
     border:0; 
@@ -166,17 +164,6 @@ input[type=checkbox]:checked ~ #local_controlpanel {
 
 
 
-
-/**
- * CSS3 Tips v1.0.1
- *
- * A stylesheet for creating tooltips without using anything other than CSS3.
- *
- * created by c.bavota
- * released under GPL v2
- *
- * March 21st, 2014
- */
 [data-tips] {
 	position: relative;
 	text-decoration: none;
@@ -272,6 +259,7 @@ input[type=checkbox]:checked ~ #local_controlpanel {
 
 [data-tips].bottom-tip:hover:before {
 	left: 15px;
+	font-size:small;
 }
 
 /* Right tip */
@@ -333,8 +321,8 @@ ul {
 }
 
 li { 
-    padding-left: 1em; 
-    text-indent: -.7em;
+    padding-left: .2em; 
+    text-indent: -.1em;
 }
 
 li:before {

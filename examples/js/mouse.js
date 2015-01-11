@@ -1,24 +1,26 @@
 var mouseDown = false;
-var lastMouseX = null;
-var lastMouseY = null;
-var activeIndex = 0;
+var lastMouse = null;
 
+var activeIndex = 0;
+getCanvasCoordinates = function(event) {
+    var coordinates = {};
+    var rect = core.canvas.getBoundingClientRect();
+    coordinates.x = event.clientX - rect.left;
+    coordinates.y = event.clientY - rect.top;
+    return coordinates;
+}
 function handleMouseDown(event) {
     mouseDown = true;
-    lastMouseX = event.clientX;
-    lastMouseY = event.clientY;
-    var newX;
-    var newY;
-    if (event.pageX || event.pageY) {
-        newX = event.pageX;
-        newY = event.pageY;
-    } else {
-        newX = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-        newY = event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-    }
-    newX -= core.canvas.offsetLeft;
-    newY -= core.canvas.offsetTop;
-    newY = core.viewport.totalHeight - newY;
+    var canvasCoordinates = getCanvasCoordinates(event);
+
+    var perspectiveMatrix = makePerspective(90 * core.zoom[0], 1024.0 / 1024.0, 0.1, 100.0);
+    perspectiveMatrix = perspectiveMatrix.multiply(Matrix.Translation($V([ 0., 0., -1. ])));
+    perspectiveMatrix = perspectiveMatrix.inverse();
+    var solarCoordinates = perspectiveMatrix.multiply($V([ 2. * (canvasCoordinates.x / core.viewport.totalWidth - 0.5), 2. * (canvasCoordinates.y / core.viewport.totalWidth - 0.5), 0., 0. ]));
+    document.getElementById("canvasCoordinates").innerHTML = "" + canvasCoordinates.x + " " + canvasCoordinates.x;
+    document.getElementById("solarCoordinates").innerHTML = "" + solarCoordinates.elements[0] + " " + solarCoordinates.elements[1] + " " + solarCoordinates.elements[2];
+
+    lastMouse = solarCoordinates;
 
     var vcl = core.viewport.totalWidth / core.viewport.columns;
     var vrl = core.viewport.totalHeight / core.viewport.rows;
@@ -26,7 +28,7 @@ function handleMouseDown(event) {
 
     for (var ll = 0; !quit && ll < core.viewport.columns; ll++) {
         for (var rr = 0; !quit && rr < core.viewport.rows; rr++) {
-            if (newX >= ll * vcl && newX <= ll * vcl + vcl && newY >= rr * vrl && newY <= rr * vrl + vrl) {
+            if (canvasCoordinates.x >= ll * vcl && canvasCoordinates.x <= ll * vcl + vcl && canvasCoordinates.y >= rr * vrl && canvasCoordinates.y <= rr * vrl + vrl) {
                 quit = true;
                 activeIndex = core.viewport.columns * (core.viewport.rows - 1 - rr) + ll;
             }
@@ -42,16 +44,23 @@ function handleMouseMove(event) {
     if (!mouseDown) {
         return;
     }
-    var newX = event.clientX;
-    var newY = event.clientY;
+    var canvasCoordinates = getCanvasCoordinates(event);
+    var perspectiveMatrix = makePerspective(90 * core.zoom[0], 1024.0 / 1024.0, 0.1, 100.0);
+    perspectiveMatrix = perspectiveMatrix.multiply(Matrix.Translation($V([ 0., 0., -1. ])));
+    perspectiveMatrix = perspectiveMatrix.inverse();
+    var solarCoordinates = perspectiveMatrix.multiply($V([ 2. * (canvasCoordinates.x / core.viewport.totalWidth - 0.5), 2. * (canvasCoordinates.y / core.viewport.totalWidth - 0.5), 0., 0. ]));
 
-    var deltaX = (newX - lastMouseX) / 500.;
-    var deltaY = -(newY - lastMouseY) / 500.;
-
+    var deltaX = solarCoordinates.elements[0] - lastMouse.elements[0];// /
+    // core.viewport.totalWidth;
+    var deltaY = -(solarCoordinates.elements[1] - lastMouse.elements[1]);// /
+    // core.viewport.totalWidth;
+    // var matr = makePerspective(90 * core.zoom[index], 1024.0 / 1024.0, 0.1,
+    // 100.0);
+    // var matrinv = inverse(matr);
+    // matrinv.multiply()
     core.mouseMatrix[activeIndex] = core.mouseMatrix[activeIndex].multiply(Matrix.Translation($V([ deltaX, deltaY, 0 ])).ensure4x4());
 
-    lastMouseX = newX
-    lastMouseY = newY;
+    lastMouse = solarCoordinates;
 }
 
 handleMouseWheel = function(event) {

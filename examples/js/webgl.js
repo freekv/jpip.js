@@ -57,10 +57,10 @@ core.start = function() {
         core.gl.depthFunc(core.gl.LEQUAL);
         setInterval(function() {
             requestAnimationFrame(core.drawScene)
-        }, 30);
+        }, 100);
     }
 }
-
+var fff = 0;
 core.drawScene = function() {
     core.gl.clear(core.gl.COLOR_BUFFER_BIT | core.gl.DEPTH_BUFFER_BIT);
 
@@ -70,12 +70,23 @@ core.drawScene = function() {
         for (var rr = 0; rr < core.viewport.rows; rr++) {
             var index = core.viewport.columns * (core.viewport.rows - 1 - rr) + ll;
             core.perspectiveMatrix = makePerspective(90 * core.zoom[index], 1024.0 / 1024.0, 0.1, 100.0);
+
             core.loadIdentity();
-            core.multMatrix(core.perspectiveMatrix);
+            r = 1.;
+            t = 1.;
+            f = 100.;
+            n = 0.1;
+            core.mvMatrix.elements[0][0] = 1. / r;
+            core.mvMatrix.elements[1][1] = 1. / t;
+            core.mvMatrix.elements[2][2] = -2. / (f - n);
+            core.mvMatrix.elements[2][3] = -(f + n) / (f - n);
+            // core.multMatrix(core.perspectiveMatrix);
 
             core.multMatrix(core.mouseMatrix[index]);
-
             core.mvTranslate([ -0.0, 0.0, -1.0 ]);
+
+            // core.mvRotate(fff, [ 1.0, 0.0, 0.0 ]);
+            // fff++;
             core.mvPushMatrix();
 
             core.gl.viewport(ll * vcl, rr * vrl, vcl, vrl);
@@ -124,7 +135,9 @@ core.drawScene = function() {
 
         }
     }
-    document.getElementById("videoIndicator").style.left = 2;
+    var indicatorElement = document.getElementById("videoIndicator");
+    indicatorElement.style.left = indicatorElement.parentNode.clientWidth * (core.currentDate - core.beginDate) / (core.endDate - core.beginDate);
+    indicatorElement.setAttribute("data-tips", formatDate(new Date(core.currentDate)));
 }
 
 core.loadIdentity = function() {
@@ -161,7 +174,7 @@ core.mvRotate = function(angle, v) {
     var inRadians = angle * Math.PI / 180.0;
 
     var m = Matrix.Rotation(inRadians, $V([ v[0], v[1], v[2] ])).ensure4x4();
-    multMatrix(m);
+    this.multMatrix(m);
 }
 
 document.addEventListener("DOMContentLoaded", function(event) {

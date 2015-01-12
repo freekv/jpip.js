@@ -57,7 +57,7 @@ core.start = function() {
         core.gl.depthFunc(core.gl.LEQUAL);
         setInterval(function() {
             requestAnimationFrame(core.drawScene)
-        }, 100);
+        }, 30);
     }
 }
 var fff = 0;
@@ -72,18 +72,16 @@ core.drawScene = function() {
             core.perspectiveMatrix = makePerspective(90 * core.zoom[index], 1024.0 / 1024.0, 0.1, 100.0);
 
             core.loadIdentity();
-            r = 1.;
-            t = 1.;
-            f = 100.;
-            n = 0.1;
-            core.mvMatrix.elements[0][0] = 1. / r;
-            core.mvMatrix.elements[1][1] = 1. / t;
-            core.mvMatrix.elements[2][2] = -2. / (f - n);
-            core.mvMatrix.elements[2][3] = -(f + n) / (f - n);
-            // core.multMatrix(core.perspectiveMatrix);
+            /*
+             * r = 1.; t = 1.; f = 100.; n = 0.1; core.mvMatrix.elements[0][0] =
+             * 1. / r; core.mvMatrix.elements[1][1] = 1. / t;
+             * core.mvMatrix.elements[2][2] = -2. / (f - n);
+             * core.mvMatrix.elements[2][3] = -(f + n) / (f - n);
+             */
+            core.multMatrix(core.perspectiveMatrix);
 
             core.multMatrix(core.mouseMatrix[index]);
-            core.mvTranslate([ -0.0, 0.0, -1.0 ]);
+            core.mvTranslate([ -0.0, 0.0, -10.0 ]);
 
             // core.mvRotate(fff, [ 1.0, 0.0, 0.0 ]);
             // fff++;

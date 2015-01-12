@@ -40,7 +40,7 @@ function solarJPIP(baseurl, imgname, newNumberOfFrames, size, observatory, instr
     this.viewportIndices = [ 0 ];
     this.optionsPanel = document.createElement("div");
     this.metadataPanel;
-    this.supportedModes = [ '2D', 'limb', 'limb-conformal' ];
+    this.supportedModes = [ '2D', '3D', 'limb', 'limb-conformal' ];
     core.viewport.addListener(this);
     core.gui.addLayer("solarJPIP", imgname, this.optionsPanel);
     this.viewportDetailDiv = {};
@@ -95,11 +95,12 @@ solarJPIP.prototype.render = function(gl, perspectiveMatrix, mvMatrix, time, vie
     if (this.initialized && this.visible && this.texturesAndMetadata[this.currentIndex] !== undefined) {
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer[key]);
         gl.vertexAttribPointer(this.vertexPositionAttribute[key], 3, gl.FLOAT, false, 0, 0);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesTextureCoordBuffer);
-        gl.vertexAttribPointer(this.textureCoordAttribute[key], 2, gl.FLOAT, false, 0, 0);
+        // gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesTextureCoordBuffer);
+        // gl.vertexAttribPointer(this.textureCoordAttribute[key], 2, gl.FLOAT,
+        // false, 0, 0);
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.texturesAndMetadata[this.currentIndex].texture);
@@ -126,14 +127,17 @@ solarJPIP.prototype.render = function(gl, perspectiveMatrix, mvMatrix, time, vie
         gl.uniform2f(gl.getUniformLocation(this.shaderProgram[key], "center"), this.texturesAndMetadata[this.currentIndex].plottingMetadata.x0, this.texturesAndMetadata[this.currentIndex].plottingMetadata.y0);
         gl.uniform2f(gl.getUniformLocation(this.shaderProgram[key], "stretch"), this.texturesAndMetadata[this.currentIndex].plottingMetadata.solarRadiiX, this.texturesAndMetadata[this.currentIndex].plottingMetadata.solarRadiiY);
 
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.verticesIndexBuffer);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.verticesIndexBuffer[key]);
         var pUniform = gl.getUniformLocation(this.shaderProgram[key], "uPMatrix");
         gl.uniformMatrix4fv(pUniform, false, new Float32Array(perspectiveMatrix.flatten()));
 
         var mvUniform = gl.getUniformLocation(this.shaderProgram[key], "uMVMatrix");
         gl.uniformMatrix4fv(mvUniform, false, new Float32Array(mvMatrix.flatten()));
-
-        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+        if (key === '3D') {
+            gl.drawElements(gl.TRIANGLES, this.vertexIndices[key].length, gl.UNSIGNED_SHORT, 0);
+        } else {
+            gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+        }
         gl.disable(gl.BLEND);
     }
 }
@@ -161,21 +165,88 @@ solarJPIP.prototype.init = function(gl) {
         for (var i = 0; i < this.supportedModes.length; i++) {
             this.initShaders(gl, this.supportedModes[i]);
         }
-        this.initBuffers(gl);
+        for (var i = 0; i < this.supportedModes.length; i++) {
+            this.initBuffers(gl, this.supportedModes[i]);
+        }
         this.initTextures(this.newNumberOfFrames);
         this.initialized = true;
     }
 }
-solarJPIP.prototype.initBuffers = function(gl) {
-    this.initVerticesBuffers(gl);
-    this.initTextureCoordBuffers(gl);
-    this.initIndicesBuffers(gl);
+solarJPIP.prototype.initBuffers = function(gl, key) {
+    this.initVerticesBuffers(gl, key);
+    // this.initTextureCoordBuffers(gl);
 }
-solarJPIP.prototype.initVerticesBuffers = function(gl) {
-    this.verticesBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
-    var vertices = [ -1.0, -1.0, 0.0, -1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, -1.0, 0.0, ];
+solarJPIP.prototype.initVerticesBuffers = function(gl, key) {
+    if (this.verticesBuffer === undefined) {
+        this.verticesBuffer = {};
+        this.verticesIndexBuffer = {};
+        this.vertexIndices = {};
+    }
+    this.verticesBuffer[key] = gl.createBuffer();
+    this.vertexIndices[key] = [];// [ 0, 1, 2, 0, 2, 3, ]
+    var vertices = [];
+    if (key !== '3D') {
+        vertices = [ -1.0, -1.0, 0.0, -1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, -1.0, 0.0, ];
+        this.vertexIndices[key] = [ 0, 1, 2, 0, 2, 3, ];
+    } else {
+        var res = 20;
+        var count = 0;
+        for (var i = 0; i < res - 1; i++) {
+            for (var j = 0; j < res - 1; j++) {
+                for (var face = 0; face <= 2; face++) {
+                    for (var sign = -1; sign <= 1; sign = sign + 2) {
+                        p1 = this.sphericalPoint(i, j, res, face, sign);
+                        p2 = this.sphericalPoint(i, j + 1, res, face, sign);
+                        p3 = this.sphericalPoint(i + 1, j, res, face, sign);
+                        p4 = this.sphericalPoint(i + 1, j + 1, res, face, sign);
+                        var cp1 = count;
+                        vertices.push(p1.x);
+                        vertices.push(p1.y);
+                        vertices.push(p1.z);
+                        count++;
+                        var cp2 = count;
+                        vertices.push(p2.x);
+                        vertices.push(p2.y);
+                        vertices.push(p2.z);
+                        count++;
+                        var cp3 = count;
+                        vertices.push(p3.x);
+                        vertices.push(p3.y);
+                        vertices.push(p3.z);
+                        count++;
+                        var cp4 = count;
+                        vertices.push(p4.x);
+                        vertices.push(p4.y);
+                        vertices.push(p4.z);
+                        count++;
+                        if (sign == -1) {
+                            this.vertexIndices[key].push(cp1);
+                            this.vertexIndices[key].push(cp2);
+                            this.vertexIndices[key].push(cp3);
+
+                            this.vertexIndices[key].push(cp2);
+                            this.vertexIndices[key].push(cp4);
+                            this.vertexIndices[key].push(cp3);
+                        } else {
+                            this.vertexIndices[key].push(cp1);
+                            this.vertexIndices[key].push(cp3);
+                            this.vertexIndices[key].push(cp2);
+
+                            this.vertexIndices[key].push(cp2);
+                            this.vertexIndices[key].push(cp4);
+                            this.vertexIndices[key].push(cp3);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer[key]);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    this.verticesIndexBuffer[key] = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.verticesIndexBuffer[key]);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.vertexIndices[key]), gl.STATIC_DRAW);
 }
 solarJPIP.prototype.initTextureCoordBuffers = function(gl) {
     this.verticesTextureCoordBuffer = gl.createBuffer();
@@ -184,10 +255,6 @@ solarJPIP.prototype.initTextureCoordBuffers = function(gl) {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates), gl.STATIC_DRAW);
 }
 solarJPIP.prototype.initIndicesBuffers = function(gl) {
-    this.verticesIndexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.verticesIndexBuffer);
-    this.vertexIndices = [ 0, 1, 2, 0, 2, 3, ]
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.vertexIndices), gl.STATIC_DRAW);
 }
 
 solarJPIP.prototype.initTextures = function(nof) {
@@ -275,8 +342,10 @@ solarJPIP.prototype.initShaders = function(gl, key) {
     solarJPIP.prototype.vertexPositionAttribute[key] = gl.getAttribLocation(solarJPIP.prototype.shaderProgram[key], "aVertexPosition");
     gl.enableVertexAttribArray(solarJPIP.prototype.vertexPositionAttribute[key]);
 
-    solarJPIP.prototype.textureCoordAttribute[key] = gl.getAttribLocation(solarJPIP.prototype.shaderProgram[key], "aTextureCoord");
-    gl.enableVertexAttribArray(solarJPIP.prototype.textureCoordAttribute[key]);
+    // solarJPIP.prototype.textureCoordAttribute[key] =
+    // gl.getAttribLocation(solarJPIP.prototype.shaderProgram[key],
+    // "aTextureCoord");
+    // gl.enableVertexAttribArray(solarJPIP.prototype.textureCoordAttribute[key]);
 }
 
 getShader = function(gl, id) {
@@ -426,6 +495,7 @@ solarJPIP.prototype.loadGUIElements = function(e) {
     this.loadMetadataPanel();
     this.fireViewportChanged(core.viewport);
 }
+
 solarJPIP.prototype.handleEvent = function(e) {
     switch (e.type) {
         case "change":
@@ -554,6 +624,7 @@ solarJPIP.prototype.loadAlphaValue = function(number, viewportDetailDiv) {
     alphaDiv.appendChild(alphaBox);
     alphaDiv.appendChild(document.createElement("br"));
 }
+
 solarJPIP.prototype.loadViewport = function() {
     var viewportNames = [];
     for (var j = 0; j < core.viewport.rows * core.viewport.columns; j++) {
@@ -600,6 +671,7 @@ solarJPIP.prototype.loadMetadataPanel = function() {
     this.optionsPanel.appendChild(this.metadataPanel);
 
 }
+
 solarJPIP.prototype.loadCombiViewportDetail = function(viewportIndex) {
     if (this.viewportDetailDiv[viewportIndex] === undefined) {
         this.viewportDetailDiv[viewportIndex] = document.createElement("div");
@@ -613,6 +685,7 @@ solarJPIP.prototype.loadCombiViewportDetail = function(viewportIndex) {
         this.loadAlphaValue(viewportIndex, viewportDetailDiv);
     }
 }
+
 solarJPIP.prototype.fireViewportChanged = function(vp) {
     var viewportNames = [];
     for (var j = 0; j < vp.rows * vp.columns; j++) {
@@ -641,4 +714,29 @@ solarJPIP.prototype.fireViewportChanged = function(vp) {
         }
     }
 
+}
+
+solarJPIP.prototype.sphericalPoint = function(i, j, res, face, sign) {
+    point = {}
+    if (face === 0) {
+        point.x = -1 + 2. * i / (res - 1);
+        point.y = -(-1 + 2. * j / (res - 1));
+        point.z = sign * Math.sqrt(2. - point.x * point.x - point.y * point.y);
+    }
+    if (face === 1) {
+        point.x = -1. + 2. * i / (res - 1);
+        point.z = -(-1. + 2. * j / (res - 1));
+        point.y = sign * Math.sqrt(2. - point.x * point.x - point.z * point.z);
+    }
+    if (face === 2) {
+        point.z = -1 + 2. * i / (res - 1);
+        point.y = -(-1 + 2. * j / (res - 1));
+        point.x = sign * Math.sqrt(2 - point.z * point.z - point.y * point.y);
+    }
+    var r = Math.sqrt(point.x * point.x + point.y * point.y + point.z * point.z)
+    point.x = point.x / r;
+    point.y = point.y / r;
+    point.z = point.z / r;
+
+    return point;
 }

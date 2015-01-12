@@ -14,7 +14,64 @@
     <script src="./js/gui.js" type="text/javascript"></script>
     <script src="./js/viewports.js" type="text/javascript"></script>
     <script src="./js/mouse.js" type="text/javascript"></script>
+    <script id="shader-fs-3D" type="x-shader/x-fragment">
+      varying highp vec2 vTextureCoord;
+      varying highp vec2 vTextureCoordDiff;
+      varying highp vec3 position;
 
+      uniform sampler2D uSampler;
+      uniform sampler2D uSamplerDiff;
+
+      uniform sampler2D uColormap;
+      uniform highp float colorTableValue;
+      uniform highp float boostboxValue;
+      uniform highp float alphaValue;
+      uniform int isDiff;
+      
+      void main(void) {
+		if(position.z<0.){
+			discard;
+		}
+	    if(isDiff==1){
+          gl_FragColor = texture2D(uSampler, vTextureCoord) - texture2D(uSamplerDiff, vTextureCoordDiff);
+		  highp float val = clamp((clamp(gl_FragColor.x, -boostboxValue, boostboxValue)/boostboxValue + 1.)/2., 0. , 1.);
+		  gl_FragColor.xyz = vec3(val,val,val);
+		}
+        else{
+		  gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+		}
+
+        gl_FragColor = texture2D(uColormap, vec2(gl_FragColor.r, colorTableValue));
+
+        gl_FragColor.a = alphaValue;
+      }
+    </script>
+ 
+    <script id="shader-vs-3D" type="x-shader/x-vertex">
+      attribute vec3 aVertexPosition;
+      attribute vec2 aTextureCoord;
+
+    
+      uniform mat4 uMVMatrix;
+      uniform mat4 uPMatrix;
+      uniform vec2 center;
+      uniform vec2 centerDiff;
+      uniform vec2 stretch;
+      uniform vec2 stretchDiff;
+      
+      varying highp vec2 vTextureCoord;
+      varying highp vec2 vTextureCoordDiff;
+      varying highp vec3 position;
+ 
+      void main(void) {
+        gl_Position =  vec4(aVertexPosition.x, aVertexPosition.y, aVertexPosition.z , 1.0);
+		gl_Position = uMVMatrix * gl_Position;
+        vTextureCoord = (aVertexPosition.xy/stretch.x+1.)/2.;// + vec2(center.x, -center.y);
+		vTextureCoord.y = 1.-vTextureCoord.y;
+		position = aVertexPosition;
+        vTextureCoordDiff = vTextureCoord;
+      }
+    </script>
     <script id="shader-fs-2D" type="x-shader/x-fragment">
       varying highp vec2 vTextureCoord;
       varying highp vec2 vTextureCoordDiff;
@@ -62,8 +119,9 @@
       void main(void) {
         gl_Position =  vec4(aVertexPosition.x*stretch.x, aVertexPosition.y*stretch.y, 0. , 1.0);
 		gl_Position = uMVMatrix * gl_Position;
-        vTextureCoord = aTextureCoord;// + vec2(center.x, -center.y);
-        vTextureCoordDiff = aTextureCoord + vec2(centerDiff.x, -centerDiff.y);
+        vTextureCoord = (aVertexPosition.xy+1.)/2.;// + vec2(center.x, -center.y);
+		vTextureCoord.y = 1.-vTextureCoord.y;
+        vTextureCoordDiff = vTextureCoord;
       }
     </script>
     <script id="shader-fs-limb" type="x-shader/x-fragment">
@@ -121,10 +179,9 @@
       void main(void) {
         gl_Position =  vec4(aVertexPosition , 1.0);
 		gl_Position.y = -gl_Position.y;
-		//gl_Position = uMVMatrix * gl_Position;
-        vTextureCoord = aTextureCoord;
-        vTextureCoordDiff = aTextureCoord;
-
+        vTextureCoord = (aVertexPosition.xy+1.)/2.;// + vec2(center.x, -center.y);
+		vTextureCoord.y = 1.-vTextureCoord.y;
+        vTextureCoordDiff = vTextureCoord;
       }
     </script>
     
@@ -181,10 +238,10 @@
       void main(void) {
         gl_Position =  vec4(aVertexPosition , 1.0);
 		gl_Position.y = -gl_Position.y;
-		//gl_Position = uMVMatrix * gl_Position;
-        vTextureCoord = aTextureCoord;
-        vTextureCoordDiff = aTextureCoord;
+        vTextureCoord = (aVertexPosition.xy+1.)/2.;// + vec2(center.x, -center.y);
+		vTextureCoord.y = 1.-vTextureCoord.y;
 
+        vTextureCoordDiff = vTextureCoord;
       }
     </script>
   </head>

@@ -82,7 +82,7 @@ solarJPIP.prototype.extendBackwards = function() {
     });
 }
 
-solarJPIP.prototype.render = function(gl, perspectiveMatrix, mvMatrix, time, viewportIndex) {
+solarJPIP.prototype.render = function(gl, mvMatrix, time, viewportIndex) {
     var key = core.viewport.modes[viewportIndex];
     gl.useProgram(solarJPIP.prototype.shaderProgram[key]);
 
@@ -124,8 +124,10 @@ solarJPIP.prototype.render = function(gl, perspectiveMatrix, mvMatrix, time, vie
         gl.uniform2f(gl.getUniformLocation(this.shaderProgram[key], "stretch"), this.texturesAndMetadata[this.currentIndex].plottingMetadata.solarRadiiX, this.texturesAndMetadata[this.currentIndex].plottingMetadata.solarRadiiY);
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.verticesIndexBuffer[key]);
-        var pUniform = gl.getUniformLocation(this.shaderProgram[key], "uPMatrix");
-        gl.uniformMatrix4fv(pUniform, false, new Float32Array(perspectiveMatrix.flatten()));
+        // var pUniform = gl.getUniformLocation(this.shaderProgram[key],
+        // "uPMatrix");
+        // gl.uniformMatrix4fv(pUniform, false, new
+        // Float32Array(perspectiveMatrix.flatten()));
 
         var mvUniform = gl.getUniformLocation(this.shaderProgram[key], "uMVMatrix");
         gl.uniformMatrix4fv(mvUniform, false, new Float32Array(mvMatrix.flatten()));

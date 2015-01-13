@@ -31,6 +31,9 @@ _core = function() {
     this.projectionMatrix = {};
     this.mouseMatrix = {};
     this.viewMatrix = {};
+    this.viewProjectionMatrix = {};
+    this.phi = 0.;
+    this.theta = 0.;
     for (var i = 0; i < 16; i++) {
         this.zoom[i] = 1.0;
         this.viewMatrix[i] = Matrix.I(4);
@@ -81,10 +84,13 @@ core.start = function() {
     }
 }
 core.getViewMatrix = function(mode, date) {
+    var M, M1, M2, V;
+    V = $V([ 0, 0, -10. ]);
+
     if (mode === '3D') {
 
-        var phi = getL0Radians(date);
-        var theta = getB0Radians(date);
+        var phi = getL0Radians(date) + core.phi;
+        var theta = getB0Radians(date) + core.theta;
 
         M1 = Matrix.Rotation(-theta, $V([ 1, 0, 0 ]));
         M2 = Matrix.Rotation(phi, $V([ 0, 1, 0 ]));
@@ -97,6 +103,7 @@ core.getViewMatrix = function(mode, date) {
         M = Matrix.I(4);
         M = M.x(Matrix.Translation($V([ V.elements[0], V.elements[1], V.elements[2] ])).ensure4x4());
     }
+    return M;
 }
 core.drawScene = function() {
     core.gl.clear(core.gl.COLOR_BUFFER_BIT | core.gl.DEPTH_BUFFER_BIT);
@@ -106,9 +113,9 @@ core.drawScene = function() {
     for (var ll = 0; ll < core.viewport.columns; ll++) {
         for (var rr = 0; rr < core.viewport.rows; rr++) {
             var index = core.viewport.columns * (core.viewport.rows - 1 - rr) + ll;
-            core.perspectiveMatrix = makePerspective(90 * core.zoom[index], 1024.0 / 1024.0, 0.1, 100.0);
+            // core.perspectiveMatrix = makePerspective(90 * core.zoom[index],
+            // 1024.0 / 1024.0, 0.1, 100.0);
 
-            core.loadIdentity();
             /*
              * r = 1. * core.zoom[index]; t = 1. * core.zoom[index]; f = 100.; n =
              * 0.1; core.mvMatrix.elements[0][0] = 1. / r;
@@ -116,20 +123,18 @@ core.drawScene = function() {
              * core.mvMatrix.elements[2][2] = -2. / (f - n);
              * core.mvMatrix.elements[2][3] = -(f + n) / (f - n);
              */
-            core.multMatrix(core.projectionMatrix[index]);
 
             // core.multMatrix(core.viewMatrix[index]);
             // core.mvRotate(fff, [ 1.0, 0.0, 0.0 ]);
-            V = $V([ 0, 0, -10. ]);
             var mode = core.viewport.modes[index];
             var curdate = new Date(core.currentDate);
-            core.getViewMatrix(mode, curdate);
-            core.multMatrix(M);
-            // core.mvTranslate(V.flatten());
+            core.viewMatrix[index] = core.getViewMatrix(mode, curdate);
+
+            core.viewProjectionMatrix[index] = core.projectionMatrix[index].x(core.viewMatrix[index]);
+            core.viewProjectionMatrix[index] = core.viewProjectionMatrix[index].x(core.mouseMatrix[index]);
 
             // core.mvRotate(fff, [ 1.0, 0.0, 0.0 ]);
             // fff++;
-            core.mvPushMatrix();
 
             core.gl.viewport(ll * vcl, rr * vrl, vcl, vrl);
 
@@ -163,7 +168,7 @@ core.drawScene = function() {
             for (var i = 0; i < core.objectList.length; i++) {
                 var object = core.objectList[i];
                 if (object.viewportIndices.indexOf(index) !== -1 && object.supportedModes.indexOf(core.viewport.modes[index]) !== -1) {
-                    object.render(core.gl, core.perspectiveMatrix, core.mvMatrix, core.currentDate, index);
+                    object.render(core.gl, core.viewProjectionMatrix[index], core.currentDate, index);
                 }
             }
 
@@ -173,7 +178,6 @@ core.drawScene = function() {
             }
             core.elapsed = Date.now() - core.bt;
             core.bt = Date.now();
-            core.mvPopMatrix();
 
         }
     }

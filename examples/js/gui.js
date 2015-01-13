@@ -92,7 +92,7 @@ gui.prototype.createDatebox = function(id, number) {
     var dateEl = document.createElement("input");
     dateEl.id = id;
     dateEl.setAttribute("type", "textarea");
-    var setDate = new Date;
+    var setDate = new Date();
     setDate.setDate(setDate.getDate() - number);
     dateEl.value = formatDate(setDate);
     dateEl.addEventListener("scroll", function(e) {

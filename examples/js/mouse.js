@@ -1,6 +1,7 @@
 var mouseDown = false;
 var lastMouse = null;
-
+var lastPhi = 0.;
+var lastTheta = 0.;
 var activeIndex = 0;
 getCanvasCoordinates = function(event) {
     var coordinates = {};
@@ -13,12 +14,26 @@ function handleMouseDown(event) {
     mouseDown = true;
     var canvasCoordinates = getCanvasCoordinates(event);
 
-    var perspectiveMatrix = makePerspective(90 * core.zoom[0], 1024.0 / 1024.0, 0.1, 100.0);
-    perspectiveMatrix = perspectiveMatrix.multiply(Matrix.Translation($V([ 0., 0., -1. ])));
-    perspectiveMatrix = perspectiveMatrix.inverse();
-    var solarCoordinates = perspectiveMatrix.multiply($V([ 2. * (canvasCoordinates.x / core.viewport.totalWidth - 0.5), 2. * (canvasCoordinates.y / core.viewport.totalWidth - 0.5), 0., 0. ]));
+    var vpm = core.projectionMatrix[0].inverse();
+    // var vm = core.viewProjectionMatrix[0].inverse();
+
+    var solarCoordinates = vpm.multiply($V([ 2. * (canvasCoordinates.x / core.viewport.totalWidth - 0.5), 2. * (canvasCoordinates.y / core.viewport.totalWidth - 0.5), 0., 0. ]));
+    var solarCoordinates3Dz = Math.sqrt(1 - solarCoordinates.dot(solarCoordinates));
+    var solarCoordinates3D = solarCoordinates.dup();
+    solarCoordinates3D.elements[2] = solarCoordinates3Dz;
+    // var solarCoordinates3D = vm.multiply($V([ 2. * (canvasCoordinates.x /
+    // core.viewport.totalWidth - 0.5), 2. * (canvasCoordinates.y /
+    // core.viewport.totalWidth - 0.5), 0., 0. ]));
+    // solarCoordinates3D = $V([ solarCoordinates3D.elements[0],
+    // solarCoordinates3D.elements[1], solarCoordinates3D.elements[2] ]);
     document.getElementById("canvasCoordinates").innerHTML = "" + canvasCoordinates.x + " " + canvasCoordinates.x;
-    document.getElementById("solarCoordinates").innerHTML = "" + solarCoordinates.elements[0] + " " + solarCoordinates.elements[1] + " " + solarCoordinates.elements[2];
+    document.getElementById("solarCoordinates").innerHTML = "" + solarCoordinates.elements[0] + " " + solarCoordinates.elements[1] + " " + solarCoordinates.elements[2] + " " + solarCoordinates.elements[3];
+    document.getElementById("solarCoordinates3D").innerHTML = "" + solarCoordinates3D.elements[0] + " " + solarCoordinates3D.elements[1] + " " + solarCoordinates3D.elements[2];
+    varsign = 1.;
+
+    lastPhi = Math.atan(solarCoordinates3D.elements[0] / solarCoordinates3D.elements[2]);
+    lastTheta = Math.acos(solarCoordinates3D.elements[1]) - Math.PI / 2.;
+    document.getElementById("thetaPhi").innerHTML = "phi:" + lastPhi * 180. / Math.PI + " theta:" + lastTheta * 180. / Math.PI;
 
     lastMouse = solarCoordinates;
 
@@ -45,22 +60,33 @@ function handleMouseMove(event) {
         return;
     }
     var canvasCoordinates = getCanvasCoordinates(event);
-    var perspectiveMatrix = makePerspective(90 * core.zoom[activeIndex], 1024.0 / 1024.0, 0.1, 100.0);
-    perspectiveMatrix = perspectiveMatrix.multiply(Matrix.Translation($V([ 0., 0., -1. ])));
-    perspectiveMatrix = perspectiveMatrix.inverse();
-    var solarCoordinates = perspectiveMatrix.multiply($V([ 2. * (canvasCoordinates.x / core.viewport.totalWidth - 0.5), 2. * (canvasCoordinates.y / core.viewport.totalWidth - 0.5), 0., 0. ]));
+    var vpm = core.projectionMatrix[0].inverse();
 
-    var deltaX = solarCoordinates.elements[0] - lastMouse.elements[0];// /
-    // core.viewport.totalWidth;
-    var deltaY = -(solarCoordinates.elements[1] - lastMouse.elements[1]);// /
-    // core.viewport.totalWidth;
-    // var matr = makePerspective(90 * core.zoom[index], 1024.0 / 1024.0, 0.1,
-    // 100.0);
-    // var matrinv = inverse(matr);
-    // matrinv.multiply()
-    core.mouseMatrix[activeIndex] = core.mouseMatrix[activeIndex].multiply(Matrix.Translation($V([ deltaX, deltaY, 0 ])).ensure4x4());
+    var solarCoordinates = vpm.multiply($V([ 2. * (canvasCoordinates.x / core.viewport.totalWidth - 0.5), 2. * (canvasCoordinates.y / core.viewport.totalWidth - 0.5), 0., 0. ]));
+    var solarCoordinates3Dz = Math.sqrt(1 - solarCoordinates.dot(solarCoordinates));
 
-    lastMouse = solarCoordinates;
+    var solarCoordinates3D = solarCoordinates.dup();
+    solarCoordinates3D.elements[2] = solarCoordinates3Dz;
+
+    var deltaX = solarCoordinates.elements[0] - lastMouse.elements[0];
+    var deltaY = -(solarCoordinates.elements[1] - lastMouse.elements[1]);
+    phi = Math.atan(solarCoordinates3D.elements[0] / solarCoordinates3D.elements[2]);
+    theta = Math.acos(solarCoordinates3D.elements[1]) - Math.PI / 2.;
+    M1 = Matrix.Rotation((lastTheta - theta), $V([ 1, 0, 0 ]));
+    M2 = Matrix.Rotation(-(lastPhi - phi), $V([ 0, 1, 0 ]));
+    M = M2.x(M1);
+    if (!(isNaN(phi) || isNaN(lastPhi) || isNaN(theta) || isNaN(lastTheta))) {
+        core.theta += (lastTheta - theta);
+        core.phi += (lastPhi - phi);
+
+        // core.mouseMatrix[activeIndex] =
+        // core.mouseMatrix[activeIndex].multiply(M.ensure4x4());
+    }
+    // core.mouseMatrix[activeIndex].multiply(Matrix.Translation($V([ deltaX,
+    // deltaY, 0 ])).ensure4x4());
+
+    lastPhi = phi;
+    lastTheta = theta;
 }
 
 handleMouseWheel = function(event) {

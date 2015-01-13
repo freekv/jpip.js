@@ -45,7 +45,7 @@ function handleMouseMove(event) {
         return;
     }
     var canvasCoordinates = getCanvasCoordinates(event);
-    var perspectiveMatrix = makePerspective(90 * core.zoom[0], 1024.0 / 1024.0, 0.1, 100.0);
+    var perspectiveMatrix = makePerspective(90 * core.zoom[activeIndex], 1024.0 / 1024.0, 0.1, 100.0);
     perspectiveMatrix = perspectiveMatrix.multiply(Matrix.Translation($V([ 0., 0., -1. ])));
     perspectiveMatrix = perspectiveMatrix.inverse();
     var solarCoordinates = perspectiveMatrix.multiply($V([ 2. * (canvasCoordinates.x / core.viewport.totalWidth - 0.5), 2. * (canvasCoordinates.y / core.viewport.totalWidth - 0.5), 0., 0. ]));
@@ -97,6 +97,6 @@ handleMouseWheel = function(event) {
     if (core.zoom[index] > 1.8) {
         core.zoom[index] = 1.8;
     }
+    core.computeProjectionMatrix(index);
     event.preventDefault();
-
 }

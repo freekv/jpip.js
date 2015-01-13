@@ -98,10 +98,6 @@ solarJPIP.prototype.render = function(gl, perspectiveMatrix, mvMatrix, time, vie
         gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer[key]);
         gl.vertexAttribPointer(this.vertexPositionAttribute[key], 3, gl.FLOAT, false, 0, 0);
 
-        // gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesTextureCoordBuffer);
-        // gl.vertexAttribPointer(this.textureCoordAttribute[key], 2, gl.FLOAT,
-        // false, 0, 0);
-
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.texturesAndMetadata[this.currentIndex].texture);
 
@@ -134,6 +130,16 @@ solarJPIP.prototype.render = function(gl, perspectiveMatrix, mvMatrix, time, vie
         var mvUniform = gl.getUniformLocation(this.shaderProgram[key], "uMVMatrix");
         gl.uniformMatrix4fv(mvUniform, false, new Float32Array(mvMatrix.flatten()));
         if (key === '3D') {
+            var theta = this.texturesAndMetadata[this.currentIndex].plottingMetadata.hgltobs * 3.141592654 / 180.;
+            var phi = this.texturesAndMetadata[this.currentIndex].plottingMetadata.hglnobs * 3.141592654 / 180.;
+            var rotmat = $M([ [ Math.cos(phi), 0, -Math.sin(phi) ], [ -Math.sin(theta) * Math.sin(phi), Math.cos(theta), -Math.sin(theta) * Math.cos(phi) ], [ Math.cos(theta) * Math.sin(phi), Math.sin(theta), Math.cos(theta) * Math.cos(phi) ] ]);
+            var rotmatinv = rotmat.inverse();
+            var rotmatUniform = gl.getUniformLocation(this.shaderProgram[key], "rotmat");
+            var rotmatUniformInv = gl.getUniformLocation(this.shaderProgram[key], "rotmatinv");
+
+            gl.uniformMatrix3fv(rotmatUniform, false, new Float32Array(rotmat.flatten()));
+            gl.uniformMatrix3fv(rotmatUniformInv, false, new Float32Array(rotmatinv.flatten()));
+
             gl.drawElements(gl.TRIANGLES, this.vertexIndices[key].length, gl.UNSIGNED_SHORT, 0);
         } else {
             gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
@@ -183,8 +189,8 @@ solarJPIP.prototype.initVerticesBuffers = function(gl, key) {
         this.vertexIndices = {};
     }
     this.verticesBuffer[key] = gl.createBuffer();
-    this.vertexIndices[key] = [];// [ 0, 1, 2, 0, 2, 3, ]
-    var vertices = [];
+    this.vertexIndices[key] = [ 0, 1, 2, 0, 2, 3, ];
+    var vertices = [ -5.0, -5.0, 0.0, -5.0, 5.0, 0.0, 5.0, 5.0, 0.0, 5.0, -5.0, 0.0, ];
     if (key !== '3D') {
         vertices = [ -1.0, -1.0, 0.0, -1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, -1.0, 0.0, ];
         this.vertexIndices[key] = [ 0, 1, 2, 0, 2, 3, ];
@@ -445,6 +451,24 @@ solarJPIP.prototype.parseXML = function(metadata) {
                 console.log("DATE-OBS not defined");
             }
             console.log("ERROR parsing metadata:" + err);
+        }
+        try {
+            plotMetadata.hgltobs = parseFloat(keywords["CRLT_OBS"]);
+        } catch (err) {
+            try {
+                plotMetadata.hgltobs = parseFloat(keywords["HGLT-OBS"]);
+            } catch (err) {
+                plotMetadata.hgltobs = 0;
+            }
+        }
+        try {
+            plotMetadata.hglnobs = parseFloat(keywords["CRLN_OBS"]);
+        } catch (err) {
+            try {
+                plotMetadata.hglnobs = parseFloat(keywords["HGLN-OBS"]);
+            } catch (err) {
+                plotMetadata.hglnobs = 0;
+            }
         }
         this.plottingMetadata.push(plotMetadata);
     }

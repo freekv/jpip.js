@@ -4,8 +4,12 @@
     <title>Communication over jpip demo</title>
     <link rel="stylesheet" href="./css/webgl.css" type="text/css"> 
     <!-- <link rel="stylesheet" href="./css/aaccordion.css" type="text/css"> -->
-    <link rel="stylesheet" href="./css/tabs.css" type="text/css">   
+    <link rel="stylesheet" href="./css/tabs.css" type="text/css"> 
+
+    <script src="./WebGL-Inspector/core/embed.js" type="text/javascript"></script>
+      
     <script src="./js/globals.js" type="text/javascript"></script>
+    <script src="./js/astronomy.js" type="text/javascript"></script>
     <script src="./js/sylvester.js" type="text/javascript"></script>
     <script src="./js/glUtils.js" type="text/javascript"></script>
     <script src="../src/js/jpip.js" type="text/javascript"></script>
@@ -21,6 +25,8 @@
 
       uniform sampler2D uSampler;
       uniform sampler2D uSamplerDiff;
+	  uniform highp mat3 rotmatinv;
+	  uniform highp mat3 rotmat;
 
       uniform sampler2D uColormap;
       uniform highp float colorTableValue;
@@ -29,7 +35,11 @@
       uniform int isDiff;
       
       void main(void) {
-		if(position.z<0.){
+		highp vec3 rotposition = rotmat*position;
+		if((position.z!=0. &&rotposition.z<0.)||vTextureCoord.y<0.||vTextureCoord.y>1.||vTextureCoord.x<0.||vTextureCoord.x>1.){
+		  	discard;
+		}
+		if(position.z==0. && dot(position, position)<0.99){
 			discard;
 		}
 	    if(isDiff==1){
@@ -54,6 +64,9 @@
     
       uniform mat4 uMVMatrix;
       uniform mat4 uPMatrix;
+	  uniform mat3 rotmat;
+	  uniform mat3 rotmatinv;
+
       uniform vec2 center;
       uniform vec2 centerDiff;
       uniform vec2 stretch;
@@ -64,9 +77,24 @@
       varying highp vec3 position;
  
       void main(void) {
+        vec3 rot, rott;
+
         gl_Position =  vec4(aVertexPosition.x, aVertexPosition.y, aVertexPosition.z , 1.0);
 		gl_Position = uMVMatrix * gl_Position;
-        vTextureCoord = (aVertexPosition.xy/stretch.x+1.)/2.;// + vec2(center.x, -center.y);
+		if(abs(aVertexPosition.x)<4.){
+	    	rot = rotmat*aVertexPosition;
+        	gl_Position =  vec4(aVertexPosition.x, aVertexPosition.y, aVertexPosition.z , 1.0);
+			gl_Position = uMVMatrix * gl_Position;
+		}
+		else{
+			rot = aVertexPosition;
+	    	rott = rotmatinv*aVertexPosition;
+
+        	gl_Position =  vec4(rott.x, rott.y, rott.z , 1.0);
+			gl_Position = uMVMatrix * gl_Position;
+		}
+
+        vTextureCoord = (rot.xy/stretch.x+1.)/2.;// + vec2(center.x, -center.y);
 		vTextureCoord.y = 1.-vTextureCoord.y;
 		position = aVertexPosition;
         vTextureCoordDiff = vTextureCoord;
@@ -247,6 +275,7 @@
   </head>
   
   <body>
+    <div id="videourl"></div>
   	<div style = "float:left;">
 	    <section class="tab-area tabs-checked">
 			<input class="tabinput" checked="" type="radio" name="tab" id="tab-A">
@@ -283,12 +312,12 @@
 	  	</section>
  	</div>    
 	<div style="margin-left:1em;float:left;">
-	    <div id ="videoPlayButton" class="video" data-tips="Play/Pause video"><img src="images/play.png"/>
-	 	</div><div id="videoBarWrap"><div class="video" id="videoBar"></div><div id="videoIndicator"></div>
-	 	</div><div></div><div class="video" id="videoStart" data-tips="Jump to start"><img src="images/first.png"/>
-	 	</div><div class="video" id="videoPrevious" data-tips="Step backward in time"><img src="images/previous.png"/>
-	 	</div><div class="video" id="videoNext" data-tips="Step forward in time"><img src="images/next.png"/>
-	 	</div><div class="video" id="videoEnd" data-tips="Jump to end"><img src="images/last.png"/>
+	    <div id ="videoPlayButton" data-tips="Play/Pause video" class="video bottom-tip"><img src="images/play.png"/>
+	 	</div><div id="videoBarWrap"><div id="videoBar"></div><div id="videoIndicator" class="video bottom-tip"></div>
+	 	</div><div></div><div id="videoStart" data-tips="Jump to start" class="video bottom-tip"><img src="images/first.png"/>
+	 	</div><div id="videoPrevious" data-tips="Step backward in time" class="video bottom-tip"><img src="images/previous.png"/>
+	 	</div><div id="videoNext" data-tips="Step forward in time" class="video bottom-tip"><img src="images/next.png"/>
+	 	</div><div id="videoEnd" data-tips="Jump to end" class="video bottom-tip"><img src="images/last.png"/>
 	 	</div>
 	 	<div id="gllcanvaswrap" style="width:550px; height:512px;">	
 	    <canvas id="glcanvas" width="512" height="512">
@@ -301,4 +330,5 @@
 		<div id = solarCoordinates></div>		
 	</div>
 </body>
+
 </html>

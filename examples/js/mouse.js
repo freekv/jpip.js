@@ -61,8 +61,13 @@ function handleMouseMove(event) {
     if (!mouseDown) {
         return;
     }
-    if (core.mode)
-        var canvasCoordinates = getCanvasCoordinates(event);
+    if (core.viewport.modes[activeIndex] === '3D') {
+        handelMouseMove3D(event);
+    }
+}
+
+function handelMouseMove3D(event) {
+    var canvasCoordinates = getCanvasCoordinates(event);
     var vpm = core.projectionMatrix[activeIndex].inverse();
 
     var solarCoordinates = vpm.multiply($V([ 2. * (canvasCoordinates.x / core.viewport.totalWidth - 0.5), 2. * (canvasCoordinates.y / core.viewport.totalWidth - 0.5), 0., 0. ]));

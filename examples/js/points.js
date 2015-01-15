@@ -1,6 +1,12 @@
+solarEvent = function(angles, imageTextureIndex) {
+    this.L0 = angles[0];
+    this.B0 = angles[1];
+    this.imageTextureIndex = imageTextureIndex;
+}
+
 sunPoints = function() {
     this.initialized = false;
-    this.textures = [ "./images/gradient_jhv.png" ];
+    this.textures = [ "./images/EventIcons/ar_icon.png" ];
     this.images = {};
     this.imageTextures = {};
     this.amountOfTexturesLoaded = 0;
@@ -8,12 +14,18 @@ sunPoints = function() {
     this.textureLoadStarted = false;
     this.supportedModes = [ '2D', '3D' ];// , '3D', 'limb', 'limb-conformal'
     this.optionsPanel = document.createElement("div");
-    this.optionsPanel.innerHTML = "TBD";
+    this.optionsPanel.innerHTML = "<div>TBD</div>";
     core.gui.addTypePanel("sunPoints");
     core.gui.addLayer("sunPoints", "SUNP", this.optionsPanel);
     this.viewportIndices = [ 0 ];
     this.verticesBuffer = {};
     this.textureCoordsBuffer = {};
+    this.solarEvents = [];
+    var angs = [ [ 0., 0. ], [ Math.PI / 2., 0. ], [ Math.PI, 0. ], [ 3 * Math.PI / 2., 0. ], [ 0., Math.PI / 4. ] ];
+    for (var i = 0; i < angs.length; i++) {
+        var event = new solarEvent(angs[i], this.textures.indexOf("./images/EventIcons/ar_icon.png"));
+        this.solarEvents.push(event);
+    }
 
     this.init();
 }
@@ -70,14 +82,14 @@ sunPoints.prototype.loadGUIElements = function() {
 }
 sunPoints.prototype.initBuffers = function(gl, key) {
     this.verticesBuffer[key] = gl.createBuffer();
-    var f = 0.1;
+    var f = 0.05;
     this.vertices = new Float32Array([ f, f, f, -f, -f, -f, -f, -f, -f, f, f, f ]);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer[key]);
     gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.DYNAMIC_DRAW);
 
     this.textureCoordsBuffer[key] = gl.createBuffer();
     var h = 1.;
-    this.textureCoords = new Float32Array([ h, h, h, 0, 0, 0, 0, 0, 0, h, h, h ]);
+    this.textureCoords = new Float32Array([ h, 0, h, h, 0, h, 0, h, 0, 0, h, 0 ]);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.textureCoordsBuffer[key]);
     gl.bufferData(gl.ARRAY_BUFFER, this.textureCoords, gl.DYNAMIC_DRAW);
 }
@@ -117,50 +129,51 @@ sunPoints.prototype.initShaders = function(gl, key) {
 sunPoints.prototype.prerender = function(gl) {
 
 }
+
+sunPoints.prototype.computeMatrix = function(L0, B0, mvMatrix) {
+    var M1 = Matrix.Rotation(B0, $V([ 1, 0, 0 ]));
+    var M2 = Matrix.Rotation(L0, $V([ 0, 1, 0 ]));
+    var V = $V([ 0., 0., 1., 1. ]);
+    var M = M2.x(M1).ensure4x4();
+    var V = M.x(V);
+
+    var MM = mvMatrix.x(Matrix.Translation($V([ V.elements[0], V.elements[1], V.elements[2] ])));
+
+    MM = MM.x(M);
+    return MM;
+}
 sunPoints.prototype.render = function(gl, mvMatrix, time, viewportIndex) {
     var key = core.viewport.modes[viewportIndex];
     gl.useProgram(sunPoints.prototype.shaderProgram[key]);
 
     if (this.initialized) {
-        var M1 = Matrix.Rotation(0. / 100., $V([ 1, 0, 0 ]));
-        var M2 = Matrix.Rotation(0. / 100., $V([ 0, 1, 0 ]));
-        var V = $V([ 0., 0., 1.1, 1. ]);
-        var M = M2.x(M1).ensure4x4();
-        V = M.x(V);
-
-        MM = mvMatrix.x(Matrix.Translation($V([ V.elements[0], V.elements[1], V.elements[2] ])));
-
-        var MM = MM.x(M);
-
-        var mvUniform = gl.getUniformLocation(sunPoints.prototype.shaderProgram[key], "uMVMatrix");
-        gl.uniformMatrix4fv(mvUniform, false, new Float32Array(MM.flatten()));
-
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
         gl.enableVertexAttribArray(this.textureCoordsAttribute[key]);
         gl.enableVertexAttribArray(this.vertexPositionAttribute[key]);
         {
-            for (var i = 0; i < 2; i++) {
+            for (var i = 0; i < this.solarEvents.length; i++) {
+                var event = this.solarEvents[i];
+                var MM = this.computeMatrix(event.L0, event.B0, mvMatrix)
+                var mvUniform = gl.getUniformLocation(sunPoints.prototype.shaderProgram[key], "uMVMatrix");
+                gl.uniformMatrix4fv(mvUniform, false, new Float32Array(MM.flatten()));
                 gl.activeTexture(gl.TEXTURE0);
-                gl.bindTexture(gl.TEXTURE_2D, this.imageTextures[0]);
+                gl.bindTexture(gl.TEXTURE_2D, this.imageTextures[event.imageTextureIndex]);
                 gl.uniform1i(gl.getUniformLocation(this.shaderProgram[key], "uSampler"), 0);
 
                 gl.bindBuffer(gl.ARRAY_BUFFER, this.textureCoordsBuffer[key]);
-                gl.vertexAttribPointer(this.textureCoordsAttribute[key], 2, gl.FLOAT, false, 0, 4 * 2 * 3 * i);
-                // float
-                // size=4
-                // bytes->6
-                // floats
-
+                gl.vertexAttribPointer(this.textureCoordsAttribute[key], 2, gl.FLOAT, false, 0, 0);
                 gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer[key]);
                 // gl.bufferData(gl.ARRAY_BUFFER, this.vertices,
                 // gl.DYNAMIC_DRAW);
-                gl.vertexAttribPointer(this.vertexPositionAttribute[key], 2, gl.FLOAT, false, 0, 4 * 2 * 3 * i);
+                gl.vertexAttribPointer(this.vertexPositionAttribute[key], 2, gl.FLOAT, false, 0, 0);
 
-                gl.drawArrays(gl.TRIANGLES, 0, 3);
+                gl.drawArrays(gl.TRIANGLES, 0, 6);
             }
         }
         gl.disableVertexAttribArray(this.vertexPositionAttribute[key]);
         gl.disableVertexAttribArray(this.textureCoordsAttribute[key]);
-
+        gl.disable(gl.BLEND);
     }
 }
 sunPoints.prototype.updateGUI = function() {

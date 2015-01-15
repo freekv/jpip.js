@@ -42,7 +42,7 @@ function solarJPIP(baseurl, imgname, newNumberOfFrames, size, observatory, instr
     this.metadataPanel;
     this.supportedModes = [ '2D', '3D', 'limb', 'limb-conformal' ];
     core.viewport.addListener(this);
-    core.gui.addLayer("solarJPIP", imgname, this.optionsPanel);
+    core.gui.addLayer("solarJPIP", observatory + " " + instrument + " " + detector + " " + measurement, this.optionsPanel);
     this.viewportDetailDiv = {};
     this.viewportDetails = document.createElement("div");
     this.optionsPanel.appendChild(this.viewportDetails);
@@ -479,8 +479,6 @@ function printMetadata(keywords) {
 }
 // GUI section
 solarJPIP.prototype.loadGUIElements = function(e) {
-    var imagePanel = document.getElementById("imagepanel");
-    imagePanel.appendChild(this.optionsPanel);
     this.infoDiv = document.createElement("div");
     this.infoDiv.setAttribute("class", "solarjpipinfodiv");
     this.optionsPanel.appendChild(this.infoDiv);

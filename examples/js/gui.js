@@ -314,6 +314,8 @@ gui.prototype.addLayer = function(typeName, layerName, optionsPanel) {
     var li = document.createElement("li")
     li.innerHTML = layerName;
     this.types[typeName].appendChild(li);
+    var imagePanel = document.getElementById("imagepanel");
+    imagePanel.appendChild(optionsPanel);
     li.onclick = function() {
         var clss = document.getElementsByClassName("activeOptionsPanel");
         for (var i = 0; i < clss.length; i++) {
@@ -321,5 +323,13 @@ gui.prototype.addLayer = function(typeName, layerName, optionsPanel) {
             cl.setAttribute("class", "inactiveOptionsPanel");
         }
         optionsPanel.setAttribute("class", "activeOptionsPanel");
+
+        var clss = document.getElementsByClassName("activeLayer");
+        for (var i = 0; i < clss.length; i++) {
+            var cl = clss[i];
+            cl.setAttribute("class", "inactiveLayer");
+        }
+        this.setAttribute("class", "activeLayer");
     };
+    li.onclick();
 }

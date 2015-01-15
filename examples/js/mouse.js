@@ -61,7 +61,8 @@ function handleMouseMove(event) {
     if (!mouseDown) {
         return;
     }
-    var canvasCoordinates = getCanvasCoordinates(event);
+    if (core.mode)
+        var canvasCoordinates = getCanvasCoordinates(event);
     var vpm = core.projectionMatrix[activeIndex].inverse();
 
     var solarCoordinates = vpm.multiply($V([ 2. * (canvasCoordinates.x / core.viewport.totalWidth - 0.5), 2. * (canvasCoordinates.y / core.viewport.totalWidth - 0.5), 0., 0. ]));
@@ -80,12 +81,7 @@ function handleMouseMove(event) {
     if (!(isNaN(phi) || isNaN(lastPhi) || isNaN(theta) || isNaN(lastTheta))) {
         core.theta += (lastTheta - theta);
         core.phi += (lastPhi - phi);
-
-        // core.mouseMatrix[activeIndex] =
-        // core.mouseMatrix[activeIndex].multiply(M.ensure4x4());
     }
-    // core.mouseMatrix[activeIndex].multiply(Matrix.Translation($V([ deltaX,
-    // deltaY, 0 ])).ensure4x4());
 
     lastPhi = phi;
     lastTheta = theta;

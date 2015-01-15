@@ -25,7 +25,6 @@
       varying highp vec2 vTextureCoord;
       void main(void) {
 		gl_FragColor = texture2D(uSampler, vTextureCoord);
-
       }
     </script>
  
@@ -79,12 +78,7 @@
       
       void main(void) {
 		highp vec3 rotposition = rotmat*position;
-		if((position.z!=0. &&rotposition.z<0.)||vTextureCoord.y<0.||vTextureCoord.y>1.||vTextureCoord.x<0.||vTextureCoord.x>1.){
-		  	discard;
-		}
-		if(position.z==0. && dot(position, position)<0.99){
-			discard;
-		}
+
 	    if(isDiff==1){
           gl_FragColor = texture2D(uSampler, vTextureCoord) - texture2D(uSamplerDiff, vTextureCoordDiff);
 		  highp float val = clamp((clamp(gl_FragColor.x, -boostboxValue, boostboxValue)/boostboxValue + 1.)/2., 0. , 1.);
@@ -95,7 +89,12 @@
 		}
 
         gl_FragColor = texture2D(uColormap, vec2(gl_FragColor.r, colorTableValue));
-
+		if(vTextureCoord.y<0.||vTextureCoord.y>1.||vTextureCoord.x<0.||vTextureCoord.x>1.){
+discard;
+		}
+		if((position.z!=0. &&rotposition.z<0.)||(position.z==0. && dot(position, position)<0.99)){
+		  	gl_FragColor = vec4(0.,0.,0.,1.);
+		}
         gl_FragColor.a = alphaValue;
       }
     </script>

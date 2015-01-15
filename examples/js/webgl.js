@@ -1,9 +1,3 @@
-var solarConstants = {};
-
-solarConstants.radiusMeter = 6.955e8;
-solarConstants.radiusKiloMeter = solarConstants.radiusMeter / 1000.;
-solarConstants.radiusOpenGL = 1.;
-
 _core = function() {
     this.canvas;
     this.objectList = [];
@@ -153,7 +147,7 @@ core.drawScene = function() {
                 object.prerender(core.gl);
             }
 
-            for (var i = 0; i < core.objectList.length; i++) {
+            for (var i = core.objectList.length - 1; i >= 0; i--) {
                 var object = core.objectList[i];
                 if (object.viewportIndices.indexOf(index) !== -1 && object.supportedModes.indexOf(core.viewport.modes[index]) !== -1) {
                     object.render(core.gl, core.viewProjectionMatrix[index], core.currentDate, index);

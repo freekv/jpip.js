@@ -1,3 +1,9 @@
+var solarConstants = {};
+
+solarConstants.radiusMeter = 6.955e8;
+solarConstants.radiusKiloMeter = solarConstants.radiusMeter / 1000.;
+solarConstants.radiusOpenGL = 1.;
+
 function ymd2jd(y, m, d) {
     jd = 367 * y + ~~(-7 * (y + ~~((m + 9) / 12)) / 4) - 3 * ~~((~~(~~((y + (m - 9) / 7)) / 100) + 1) / 4) + ~~((275 * m) / 9) + d + 1721029. - 0.5;
     return jd;

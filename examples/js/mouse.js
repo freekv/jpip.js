@@ -33,7 +33,8 @@ function handleMouseDown(event) {
 
     lastPhi = Math.atan(solarCoordinates3D.elements[0] / solarCoordinates3D.elements[2]);
     lastTheta = Math.acos(solarCoordinates3D.elements[1]) - Math.PI / 2.;
-    document.getElementById("thetaPhi").innerHTML = "phi:" + lastPhi * 180. / Math.PI + " theta:" + lastTheta * 180. / Math.PI;
+    document.getElementById("thetaPhi").innerHTML = "phi:" + (lastPhi + core.phi) * 180. / Math.PI + " theta:" + (lastTheta + core.theta) * 180. / Math.PI;
+    document.getElementById("L0B0").innerHTML = "L0:" + (lastPhi + core.phi + core.L0) * 180. / Math.PI + " B0:" + (lastTheta + core.theta + core.B0) * 180. / Math.PI;
 
     lastMouse = solarCoordinates;
 
@@ -46,6 +47,7 @@ function handleMouseDown(event) {
             if (canvasCoordinates.x >= ll * vcl && canvasCoordinates.x <= ll * vcl + vcl && canvasCoordinates.y >= rr * vrl && canvasCoordinates.y <= rr * vrl + vrl) {
                 quit = true;
                 activeIndex = core.viewport.columns * (core.viewport.rows - 1 - rr) + ll;
+                console.log(activeIndex);
             }
         }
     }
@@ -60,7 +62,7 @@ function handleMouseMove(event) {
         return;
     }
     var canvasCoordinates = getCanvasCoordinates(event);
-    var vpm = core.projectionMatrix[0].inverse();
+    var vpm = core.projectionMatrix[activeIndex].inverse();
 
     var solarCoordinates = vpm.multiply($V([ 2. * (canvasCoordinates.x / core.viewport.totalWidth - 0.5), 2. * (canvasCoordinates.y / core.viewport.totalWidth - 0.5), 0., 0. ]));
     var solarCoordinates3Dz = Math.sqrt(1 - solarCoordinates.dot(solarCoordinates));
@@ -120,8 +122,8 @@ handleMouseWheel = function(event) {
     if (core.zoom[index] < 0.1) {
         core.zoom[index] = 0.1;
     }
-    if (core.zoom[index] > 1.8) {
-        core.zoom[index] = 1.8;
+    if (core.zoom[index] > 5.0) {
+        core.zoom[index] = 5.0;
     }
     core.computeProjectionMatrix(index);
     event.preventDefault();

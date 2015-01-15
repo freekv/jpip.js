@@ -85,69 +85,72 @@ solarJPIP.prototype.extendBackwards = function() {
 solarJPIP.prototype.render = function(gl, mvMatrix, time, viewportIndex) {
     var key = core.viewport.modes[viewportIndex];
     gl.useProgram(solarJPIP.prototype.shaderProgram[key]);
-
-    if (this.parsedMetadata.length > 0) {
-        this.currentIndex = this.binarySearch(time);
-    }
-    if (this.texturesAndMetadata[this.currentIndex] === undefined) {
-        this.currentIndex = 0;
-    }
-    if (this.initialized && this.visible && this.texturesAndMetadata[this.currentIndex] !== undefined) {
-        gl.enable(gl.BLEND);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer[key]);
-        gl.vertexAttribPointer(this.vertexPositionAttribute[key], 3, gl.FLOAT, false, 0, 0);
-
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, this.texturesAndMetadata[this.currentIndex].texture);
-
-        if (this.isDiff[viewportIndex] && this.texturesAndMetadata[this.currentIndex + 1] !== undefined) {
-            gl.activeTexture(gl.TEXTURE1);
-            gl.bindTexture(gl.TEXTURE_2D, this.texturesAndMetadata[this.currentIndex + 1].texture);
-            gl.uniform2f(gl.getUniformLocation(this.shaderProgram[key], "centerDiff"), this.texturesAndMetadata[this.currentIndex + 1].plottingMetadata.x0, this.texturesAndMetadata[this.currentIndex + 1].plottingMetadata.y0);
-            gl.uniform2f(gl.getUniformLocation(this.shaderProgram[key], "stretchDiff"), this.texturesAndMetadata[this.currentIndex + 1].plottingMetadata.solarRadiiX, this.texturesAndMetadata[this.currentIndex + 1].plottingMetadata.solarRadiiY);
+    gl.enableVertexAttribArray(solarJPIP.prototype.vertexPositionAttribute[key]);
+    {
+        if (this.parsedMetadata.length > 0) {
+            this.currentIndex = this.binarySearch(time);
         }
-        gl.uniform1i(gl.getUniformLocation(this.shaderProgram[key], "isDiff"), this.isDiff[viewportIndex]);
-
-        gl.activeTexture(gl.TEXTURE2);
-        gl.bindTexture(gl.TEXTURE_2D, this.colormapTexture);
-
-        gl.uniform1i(gl.getUniformLocation(this.shaderProgram[key], "uSampler"), 0);
-        gl.uniform1i(gl.getUniformLocation(this.shaderProgram[key], "uSamplerDiff"), 1);
-
-        gl.uniform1i(gl.getUniformLocation(this.shaderProgram[key], "uColormap"), 2);
-        gl.uniform1f(gl.getUniformLocation(this.shaderProgram[key], "colorTableValue"), this.colorTableValue[viewportIndex]);
-        gl.uniform1f(gl.getUniformLocation(this.shaderProgram[key], "boostboxValue"), 1. - this.boostboxValue[viewportIndex]);
-        gl.uniform1f(gl.getUniformLocation(this.shaderProgram[key], "alphaValue"), this.alphaValue[viewportIndex]);
-
-        gl.uniform2f(gl.getUniformLocation(this.shaderProgram[key], "center"), this.texturesAndMetadata[this.currentIndex].plottingMetadata.x0, this.texturesAndMetadata[this.currentIndex].plottingMetadata.y0);
-        gl.uniform2f(gl.getUniformLocation(this.shaderProgram[key], "stretch"), this.texturesAndMetadata[this.currentIndex].plottingMetadata.solarRadiiX, this.texturesAndMetadata[this.currentIndex].plottingMetadata.solarRadiiY);
-
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.verticesIndexBuffer[key]);
-        // var pUniform = gl.getUniformLocation(this.shaderProgram[key],
-        // "uPMatrix");
-        // gl.uniformMatrix4fv(pUniform, false, new
-        // Float32Array(perspectiveMatrix.flatten()));
-
-        var mvUniform = gl.getUniformLocation(this.shaderProgram[key], "uMVMatrix");
-        gl.uniformMatrix4fv(mvUniform, false, new Float32Array(mvMatrix.flatten()));
-        if (key === '3D') {
-            var theta = this.texturesAndMetadata[this.currentIndex].plottingMetadata.hgltobs * 3.141592654 / 180.;
-            var phi = this.texturesAndMetadata[this.currentIndex].plottingMetadata.hglnobs * 3.141592654 / 180.;
-            var rotmat = $M([ [ Math.cos(phi), 0, -Math.sin(phi) ], [ -Math.sin(theta) * Math.sin(phi), Math.cos(theta), -Math.sin(theta) * Math.cos(phi) ], [ Math.cos(theta) * Math.sin(phi), Math.sin(theta), Math.cos(theta) * Math.cos(phi) ] ]);
-            var rotmatinv = rotmat.inverse();
-            var rotmatUniform = gl.getUniformLocation(this.shaderProgram[key], "rotmat");
-            var rotmatUniformInv = gl.getUniformLocation(this.shaderProgram[key], "rotmatinv");
-
-            gl.uniformMatrix3fv(rotmatUniform, false, new Float32Array(rotmat.flatten()));
-            gl.uniformMatrix3fv(rotmatUniformInv, false, new Float32Array(rotmatinv.flatten()));
-
-            gl.drawElements(gl.TRIANGLES, this.vertexIndices[key].length, gl.UNSIGNED_SHORT, 0);
-        } else {
-            gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+        if (this.texturesAndMetadata[this.currentIndex] === undefined) {
+            this.currentIndex = 0;
         }
-        gl.disable(gl.BLEND);
+        if (this.initialized && this.visible && this.texturesAndMetadata[this.currentIndex] !== undefined) {
+            gl.enable(gl.BLEND);
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer[key]);
+            gl.vertexAttribPointer(this.vertexPositionAttribute[key], 3, gl.FLOAT, false, 0, 0);
+
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, this.texturesAndMetadata[this.currentIndex].texture);
+
+            if (this.isDiff[viewportIndex] && this.texturesAndMetadata[this.currentIndex + 1] !== undefined) {
+                gl.activeTexture(gl.TEXTURE1);
+                gl.bindTexture(gl.TEXTURE_2D, this.texturesAndMetadata[this.currentIndex + 1].texture);
+                gl.uniform2f(gl.getUniformLocation(this.shaderProgram[key], "centerDiff"), this.texturesAndMetadata[this.currentIndex + 1].plottingMetadata.x0, this.texturesAndMetadata[this.currentIndex + 1].plottingMetadata.y0);
+                gl.uniform2f(gl.getUniformLocation(this.shaderProgram[key], "stretchDiff"), this.texturesAndMetadata[this.currentIndex + 1].plottingMetadata.solarRadiiX, this.texturesAndMetadata[this.currentIndex + 1].plottingMetadata.solarRadiiY);
+            }
+            gl.uniform1i(gl.getUniformLocation(this.shaderProgram[key], "isDiff"), this.isDiff[viewportIndex]);
+
+            gl.activeTexture(gl.TEXTURE2);
+            gl.bindTexture(gl.TEXTURE_2D, this.colormapTexture);
+
+            gl.uniform1i(gl.getUniformLocation(this.shaderProgram[key], "uSampler"), 0);
+            gl.uniform1i(gl.getUniformLocation(this.shaderProgram[key], "uSamplerDiff"), 1);
+
+            gl.uniform1i(gl.getUniformLocation(this.shaderProgram[key], "uColormap"), 2);
+            gl.uniform1f(gl.getUniformLocation(this.shaderProgram[key], "colorTableValue"), this.colorTableValue[viewportIndex]);
+            gl.uniform1f(gl.getUniformLocation(this.shaderProgram[key], "boostboxValue"), 1. - this.boostboxValue[viewportIndex]);
+            gl.uniform1f(gl.getUniformLocation(this.shaderProgram[key], "alphaValue"), this.alphaValue[viewportIndex]);
+
+            gl.uniform2f(gl.getUniformLocation(this.shaderProgram[key], "center"), this.texturesAndMetadata[this.currentIndex].plottingMetadata.x0, this.texturesAndMetadata[this.currentIndex].plottingMetadata.y0);
+            gl.uniform2f(gl.getUniformLocation(this.shaderProgram[key], "stretch"), this.texturesAndMetadata[this.currentIndex].plottingMetadata.solarRadiiX, this.texturesAndMetadata[this.currentIndex].plottingMetadata.solarRadiiY);
+
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.verticesIndexBuffer[key]);
+            // var pUniform = gl.getUniformLocation(this.shaderProgram[key],
+            // "uPMatrix");
+            // gl.uniformMatrix4fv(pUniform, false, new
+            // Float32Array(perspectiveMatrix.flatten()));
+
+            var mvUniform = gl.getUniformLocation(this.shaderProgram[key], "uMVMatrix");
+            gl.uniformMatrix4fv(mvUniform, false, new Float32Array(mvMatrix.flatten()));
+            if (key === '3D') {
+                var theta = this.texturesAndMetadata[this.currentIndex].plottingMetadata.hgltobs * 3.141592654 / 180.;
+                var phi = this.texturesAndMetadata[this.currentIndex].plottingMetadata.hglnobs * 3.141592654 / 180.;
+                var rotmat = $M([ [ Math.cos(phi), 0, -Math.sin(phi) ], [ -Math.sin(theta) * Math.sin(phi), Math.cos(theta), -Math.sin(theta) * Math.cos(phi) ], [ Math.cos(theta) * Math.sin(phi), Math.sin(theta), Math.cos(theta) * Math.cos(phi) ] ]);
+                var rotmatinv = rotmat.inverse();
+                var rotmatUniform = gl.getUniformLocation(this.shaderProgram[key], "rotmat");
+                var rotmatUniformInv = gl.getUniformLocation(this.shaderProgram[key], "rotmatinv");
+
+                gl.uniformMatrix3fv(rotmatUniform, false, new Float32Array(rotmat.flatten()));
+                gl.uniformMatrix3fv(rotmatUniformInv, false, new Float32Array(rotmatinv.flatten()));
+
+                gl.drawElements(gl.TRIANGLES, this.vertexIndices[key].length, gl.UNSIGNED_SHORT, 0);
+            } else {
+                gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+            }
+            gl.disable(gl.BLEND);
+        }
     }
+    gl.disableVertexAttribArray(solarJPIP.prototype.vertexPositionAttribute[key]);
 }
 solarJPIP.prototype.prerender = function(gl) {
     this.loadNewTextures(gl);
@@ -348,48 +351,12 @@ solarJPIP.prototype.initShaders = function(gl, key) {
     gl.useProgram(solarJPIP.prototype.shaderProgram[key]);
 
     solarJPIP.prototype.vertexPositionAttribute[key] = gl.getAttribLocation(solarJPIP.prototype.shaderProgram[key], "aVertexPosition");
-    gl.enableVertexAttribArray(solarJPIP.prototype.vertexPositionAttribute[key]);
+    // gl.enableVertexAttribArray(solarJPIP.prototype.vertexPositionAttribute[key]);
 
     // solarJPIP.prototype.textureCoordAttribute[key] =
     // gl.getAttribLocation(solarJPIP.prototype.shaderProgram[key],
     // "aTextureCoord");
     // gl.enableVertexAttribArray(solarJPIP.prototype.textureCoordAttribute[key]);
-}
-
-getShader = function(gl, id) {
-    var shaderScript = document.getElementById(id);
-    if (!shaderScript) {
-        return null;
-    }
-    var theSource = "";
-    var currentChild = shaderScript.firstChild;
-
-    while (currentChild) {
-        if (currentChild.nodeType == 3) {
-            theSource += currentChild.textContent;
-        }
-
-        currentChild = currentChild.nextSibling;
-    }
-    var newShader;
-
-    if (shaderScript.type == "x-shader/x-fragment") {
-        newShader = gl.createShader(gl.FRAGMENT_SHADER);
-    } else if (shaderScript.type == "x-shader/x-vertex") {
-        newShader = gl.createShader(gl.VERTEX_SHADER);
-    } else {
-        return null;
-    }
-
-    gl.shaderSource(newShader, theSource);
-    gl.compileShader(newShader);
-
-    if (!gl.getShaderParameter(newShader, gl.COMPILE_STATUS)) {
-        alert("An error occurred compiling the shaders: " + gl.getShaderInfoLog(newShader));
-        return null;
-    }
-
-    return newShader;
 }
 
 solarJPIP.prototype.parseXML = function(metadata) {

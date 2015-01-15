@@ -112,3 +112,39 @@ function radiansToArcseconds(radians) {
     arcsec = radians / Math.PI * 648000;
     return arcsec;
 }
+
+getShader = function(gl, id) {
+    var shaderScript = document.getElementById(id);
+    if (!shaderScript) {
+        return null;
+    }
+    var theSource = "";
+    var currentChild = shaderScript.firstChild;
+
+    while (currentChild) {
+        if (currentChild.nodeType == 3) {
+            theSource += currentChild.textContent;
+        }
+
+        currentChild = currentChild.nextSibling;
+    }
+    var newShader;
+
+    if (shaderScript.type == "x-shader/x-fragment") {
+        newShader = gl.createShader(gl.FRAGMENT_SHADER);
+    } else if (shaderScript.type == "x-shader/x-vertex") {
+        newShader = gl.createShader(gl.VERTEX_SHADER);
+    } else {
+        return null;
+    }
+
+    gl.shaderSource(newShader, theSource);
+    gl.compileShader(newShader);
+
+    if (!gl.getShaderParameter(newShader, gl.COMPILE_STATUS)) {
+        alert("An error occurred compiling the shaders: " + gl.getShaderInfoLog(newShader));
+        return null;
+    }
+
+    return newShader;
+}

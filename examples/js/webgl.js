@@ -34,6 +34,8 @@ _core = function() {
     this.viewProjectionMatrix = {};
     this.phi = 0.;
     this.theta = 0.;
+    this.L0 = 0.;
+    this.B0 = 0.;
     for (var i = 0; i < 16; i++) {
         this.zoom[i] = 1.0;
         this.viewMatrix[i] = Matrix.I(4);
@@ -88,9 +90,10 @@ core.getViewMatrix = function(mode, date) {
     V = $V([ 0, 0, -10. ]);
 
     if (mode === '3D') {
-
-        var phi = getL0Radians(date) + core.phi;
-        var theta = getB0Radians(date) + core.theta;
+        core.L0 = getL0Radians(date);
+        core.B0 = getB0Radians(date);
+        var phi = core.L0 + core.phi;
+        var theta = core.B0 + core.theta;
 
         M1 = Matrix.Rotation(-theta, $V([ 1, 0, 0 ]));
         M2 = Matrix.Rotation(phi, $V([ 0, 1, 0 ]));
@@ -138,21 +141,6 @@ core.drawScene = function() {
 
             core.gl.viewport(ll * vcl, rr * vrl, vcl, vrl);
 
-            if (core.running || core.stepForward) {
-                core.currentDate += core.cadence;
-                core.stepForward = false;
-            }
-            if (core.stepBackward) {
-                core.currentDate -= core.cadence;
-                core.stepBackward = false;
-            }
-            if (core.currentDate < core.beginDate) {
-                core.currentDate = core.beginDate;
-            }
-            if (core.currentDate > core.endDate && core.loop) {
-                core.currentDate = core.beginDate;
-            }
-
             for (var i = 0; i < core.objectList.length; i++) {
                 var object = core.objectList[i];
                 if (!object.initialized) {
@@ -180,6 +168,20 @@ core.drawScene = function() {
             core.bt = Date.now();
 
         }
+    }
+    if (core.running || core.stepForward) {
+        core.currentDate += core.cadence;
+        core.stepForward = false;
+    }
+    if (core.stepBackward) {
+        core.currentDate -= core.cadence;
+        core.stepBackward = false;
+    }
+    if (core.currentDate < core.beginDate) {
+        core.currentDate = core.beginDate;
+    }
+    if (core.currentDate > core.endDate && core.loop) {
+        core.currentDate = core.beginDate;
     }
     var indicatorElement = document.getElementById("videoIndicator");
     indicatorElement.style.left = indicatorElement.parentNode.clientWidth * (core.currentDate - core.beginDate) / (core.endDate - core.beginDate);
@@ -237,6 +239,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
         document.onmouseup = handleMouseUp;
         document.onmousemove = handleMouseMove;
         core.canvas.onmousewheel = handleMouseWheel;
+        core.objectList.push(new sunPoints());
 
     };
     getJSON(base_url + "api/?action=getDataSources&verbose=true&enable=[STEREO_A,STEREO_B,PROBA2]", success, success);

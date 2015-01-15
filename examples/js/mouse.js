@@ -62,11 +62,11 @@ function handleMouseMove(event) {
         return;
     }
     if (core.viewport.modes[activeIndex] === '3D') {
-        handelMouseMove3D(event);
+        handleMouseMove3D(event);
     }
 }
 
-function handelMouseMove3D(event) {
+function handleMouseMove3D(event) {
     var canvasCoordinates = getCanvasCoordinates(event);
     var vpm = core.projectionMatrix[activeIndex].inverse();
 

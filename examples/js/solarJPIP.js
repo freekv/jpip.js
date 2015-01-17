@@ -83,7 +83,7 @@ solarJPIP.prototype.extendBackwards = function() {
 }
 
 solarJPIP.prototype.render = function(gl, mvMatrix, time, viewportIndex) {
-    var key = core.viewport.modes[viewportIndex];
+    var key = core.viewport.viewportDetails[viewportIndex].mode;
     gl.useProgram(solarJPIP.prototype.shaderProgram[key]);
     gl.enableVertexAttribArray(solarJPIP.prototype.vertexPositionAttribute[key]);
     {

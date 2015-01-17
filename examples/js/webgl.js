@@ -95,7 +95,7 @@ core.drawScene = function() {
             // 1024.0 / 1024.0, 0.1, 100.0);
             // core.multMatrix(core.viewMatrix[index]);
             // core.mvRotate(fff, [ 1.0, 0.0, 0.0 ]);
-            var mode = core.viewport.modes[index];
+            var mode = core.viewport.viewportDetails[index].mode;
             var curdate = new Date(core.currentDate);
             var viewDetail = core.viewport.viewportDetails[index]
             viewDetail.viewMatrix = core.getViewMatrix(mode, curdate, index);
@@ -117,7 +117,7 @@ core.drawScene = function() {
 
             for (var i = core.objectList.length - 1; i >= 0; i--) {
                 var object = core.objectList[i];
-                if (object.viewportIndices.indexOf(index) !== -1 && object.supportedModes.indexOf(core.viewport.modes[index]) !== -1) {
+                if (object.viewportIndices.indexOf(index) !== -1 && object.supportedModes.indexOf(mode) !== -1) {
                     object.render(core.gl, viewDetail.viewProjectionMatrix, core.currentDate, index);
                 }
             }

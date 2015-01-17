@@ -143,7 +143,7 @@ sunPoints.prototype.computeMatrix = function(L0, B0, mvMatrix) {
     return MM;
 }
 sunPoints.prototype.render = function(gl, mvMatrix, time, viewportIndex) {
-    var key = core.viewport.modes[viewportIndex];
+    var key = core.viewport.viewportDetails[viewportIndex].mode;
     gl.useProgram(sunPoints.prototype.shaderProgram[key]);
 
     if (this.initialized) {

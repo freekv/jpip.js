@@ -1,9 +1,11 @@
-viewportDetail = function(top, left, width, height) {
+viewportDetail = function(top, left, width, height, mode, index) {
     this.top = top;
     this.left = left;
     this.width = width;
     this.height = height;
     this.zoom = 1.;
+    this.mode;
+    this.index = index;
     this.projectionMatrix = Matrix.I(4);
     this.viewProjectionMatrix = Matrix.I(4);
     this.viewMatrix = Matrix.I(4);
@@ -37,10 +39,9 @@ viewport = function() {
     this.maxNumberOfViewPorts = this.maxRows * this.maxColumns;
     this.listeners = [];
     this.modeList = [ '2D', '3D', 'limb', 'limb-conformal' ]
-    this.modes = {};
-    this.viewportDetails = {};
+    this.viewportDetails = [];
     for (var i = 0; i < this.maxNumberOfViewPorts; i++) {
-        this.viewportDetails[i] = new viewportDetail(0, 0, this.totalWidth, this.totalHeight);
+        this.viewportDetails.push(new viewportDetail(0, 0, this.totalWidth, this.totalHeight, '2D', i));
     }
     this.updateGui();
 };
@@ -145,7 +146,7 @@ viewport.prototype.handleEvent = function(e) {
             } else if (elementType == "comboViewportModes") {
                 var elementViewport = parseInt(e.srcElement.attributes["data-viewport"].value);
                 var selectedIndex = element.selectedIndex;
-                this.modes[elementViewport] = this.modeList[selectedIndex];
+                this.viewportDetails[elementViewport].mode = this.modeList[selectedIndex];
             }
     }
 }
@@ -182,8 +183,9 @@ viewport.prototype.updateGui = function() {
     for (var ll = 0; ll < this.columns; ll++) {
         for (var rr = 0; rr < this.rows; rr++) {
             var index = this.rows * (ll) + rr;
-            if (this.modes[index] === undefined) {
+            if (this.viewportDetails[index].mode === undefined) {
                 this.loadViewportModesGui(viewportDiv, index);
+                this.viewportDetails[ll].index = index;
             }
             this.viewportDetails[index].left = ll * w;
             this.viewportDetails[index].top = rr * h;
@@ -195,7 +197,7 @@ viewport.prototype.updateGui = function() {
         var el = document.getElementById("comboViewportModeDiv" + index);
         if (el !== null) {
             el.parentNode.removeChild(el);
-            this.modes[index] = undefined;
+            this.viewportDetails[index].mode = undefined;
         }
     }
 }
@@ -226,5 +228,5 @@ viewport.prototype.loadViewportModesGui = function(viewportDiv, number) {
     comboViewportModes.setAttribute("data-type", "comboViewportModes");
     comboViewportModes.setAttribute("data-viewport", "" + number);
     comboViewportModes.addEventListener("change", this, false);
-    this.modes[number] = this.modeList[0];
+    this.viewportDetails[number].mode = this.modeList[0];
 }

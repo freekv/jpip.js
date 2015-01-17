@@ -56,7 +56,7 @@ function handleMouseMove(event) {
     if (!mouseDown) {
         return;
     }
-    if (core.viewport.modes[activeIndex] === '3D') {
+    if (core.viewport.viewportDetails[activeIndex].mode === '3D') {
         handleMouseMove3D(event);
     }
 }

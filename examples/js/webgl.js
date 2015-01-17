@@ -26,16 +26,20 @@ _core = function() {
     this.mouseMatrix = {};
     this.viewMatrix = {};
     this.viewProjectionMatrix = {};
-    this.phi = 0.;
-    this.theta = 0.;
+    this.phi = {};
+    this.theta = {};
     this.L0 = 0.;
     this.B0 = 0.;
+    this.L0click = 0.;
+    this.B0click = 0.;
     for (var i = 0; i < 16; i++) {
         this.zoom[i] = 1.0;
         this.viewMatrix[i] = Matrix.I(4);
         this.mouseMatrix[i] = Matrix.I(4);
         this.projectionMatrix[i] = Matrix.I(4);
         this.computeProjectionMatrix(i);
+        this.phi[i] = 0.;
+        this.theta[i] = 0.;
     }
     this.stepForward = false;
     this.stepBackward = false;
@@ -79,17 +83,17 @@ core.start = function() {
         }, 30);
     }
 }
-core.getViewMatrix = function(mode, date) {
+core.getViewMatrix = function(mode, date, index) {
     var M, M1, M2, V;
     V = $V([ 0, 0, -10. ]);
 
     if (mode === '3D') {
         core.L0 = getL0Radians(date);
         core.B0 = getB0Radians(date);
-        var phi = core.L0 + core.phi;
-        var theta = core.B0 + core.theta;
+        var phi = core.L0 + core.phi[index];
+        var theta = core.B0 + core.theta[index];
 
-        M1 = Matrix.Rotation(-theta, $V([ 1, 0, 0 ]));
+        M1 = Matrix.Rotation(theta, $V([ 1, 0, 0 ]));
         M2 = Matrix.Rotation(phi, $V([ 0, 1, 0 ]));
         M = M2.x(M1);
         V = M.x(V);
@@ -125,7 +129,7 @@ core.drawScene = function() {
             // core.mvRotate(fff, [ 1.0, 0.0, 0.0 ]);
             var mode = core.viewport.modes[index];
             var curdate = new Date(core.currentDate);
-            core.viewMatrix[index] = core.getViewMatrix(mode, curdate);
+            core.viewMatrix[index] = core.getViewMatrix(mode, curdate, index);
 
             core.viewProjectionMatrix[index] = core.projectionMatrix[index].x(core.viewMatrix[index]);
             core.viewProjectionMatrix[index] = core.viewProjectionMatrix[index].x(core.mouseMatrix[index]);

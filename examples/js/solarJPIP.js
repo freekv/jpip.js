@@ -708,7 +708,7 @@ solarJPIP.prototype.fireViewportChanged = function(vp) {
 }
 
 solarJPIP.prototype.sphericalPoint = function(i, j, res, face, sign) {
-    point = {}
+    point = {};
     if (face === 0) {
         point.x = -1 + 2. * i / (res - 1);
         point.y = -(-1 + 2. * j / (res - 1));

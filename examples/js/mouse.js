@@ -10,31 +10,35 @@ getCanvasCoordinates = function(event) {
     coordinates.y = event.clientY - rect.top;
     return coordinates;
 }
+getMatrix = function() {
+    var M1 = Matrix.Rotation(-core.B0, $V([ 1, 0, 0 ]));
+    var M2 = Matrix.Rotation(core.L0, $V([ 0, 1, 0 ]));
+    var M = M2.x(M1);
+    return M.ensure4x4();
+}
 function handleMouseDown(event) {
     mouseDown = true;
     var canvasCoordinates = getCanvasCoordinates(event);
-
     var vpm = core.projectionMatrix[0].inverse();
-    // var vm = core.viewProjectionMatrix[0].inverse();
 
     var solarCoordinates = vpm.multiply($V([ 2. * (canvasCoordinates.x / core.viewport.totalWidth - 0.5), 2. * (canvasCoordinates.y / core.viewport.totalWidth - 0.5), 0., 0. ]));
     var solarCoordinates3Dz = Math.sqrt(1 - solarCoordinates.dot(solarCoordinates));
     var solarCoordinates3D = solarCoordinates.dup();
     solarCoordinates3D.elements[2] = solarCoordinates3Dz;
-    // var solarCoordinates3D = vm.multiply($V([ 2. * (canvasCoordinates.x /
-    // core.viewport.totalWidth - 0.5), 2. * (canvasCoordinates.y /
-    // core.viewport.totalWidth - 0.5), 0., 0. ]));
-    // solarCoordinates3D = $V([ solarCoordinates3D.elements[0],
-    // solarCoordinates3D.elements[1], solarCoordinates3D.elements[2] ]);
+    solarCoordinates3D = getMatrix().x(solarCoordinates3D);
+
     document.getElementById("canvasCoordinates").innerHTML = "" + canvasCoordinates.x + " " + canvasCoordinates.x;
     document.getElementById("solarCoordinates").innerHTML = "" + solarCoordinates.elements[0] + " " + solarCoordinates.elements[1] + " " + solarCoordinates.elements[2] + " " + solarCoordinates.elements[3];
     document.getElementById("solarCoordinates3D").innerHTML = "" + solarCoordinates3D.elements[0] + " " + solarCoordinates3D.elements[1] + " " + solarCoordinates3D.elements[2];
     varsign = 1.;
 
-    lastPhi = Math.atan(solarCoordinates3D.elements[0] / solarCoordinates3D.elements[2]);
-    lastTheta = Math.acos(solarCoordinates3D.elements[1]) - Math.PI / 2.;
-    document.getElementById("thetaPhi").innerHTML = "phi:" + (lastPhi + core.phi) * 180. / Math.PI + " theta:" + (lastTheta + core.theta) * 180. / Math.PI;
-    document.getElementById("L0B0").innerHTML = "L0:" + (lastPhi + core.phi + core.L0) * 180. / Math.PI + " B0:" + (lastTheta + core.theta + core.B0) * 180. / Math.PI;
+    lastPhi = Math.atan2(solarCoordinates3D.elements[0], solarCoordinates3D.elements[2]);
+    lastTheta = Math.PI / 2. - Math.acos(solarCoordinates3D.elements[1]);
+    core.L0click = (lastPhi);// + core.L0);
+    core.B0click = (lastTheta);// + core.B0);
+
+    document.getElementById("thetaPhi").innerHTML = "phi:" + (lastPhi + core.phi[activeIndex]) * 180. / Math.PI + " theta:" + (lastTheta + core.theta[activeIndex]) * 180. / Math.PI;
+    document.getElementById("L0B0").innerHTML = "L0:" + (core.L0click) * 180. / Math.PI + " B0:" + (core.B0click) * 180. / Math.PI;
 
     lastMouse = solarCoordinates;
 
@@ -84,8 +88,8 @@ function handleMouseMove3D(event) {
     M2 = Matrix.Rotation(-(lastPhi - phi), $V([ 0, 1, 0 ]));
     M = M2.x(M1);
     if (!(isNaN(phi) || isNaN(lastPhi) || isNaN(theta) || isNaN(lastTheta))) {
-        core.theta += (lastTheta - theta);
-        core.phi += (lastPhi - phi);
+        core.theta[activeIndex] += (lastTheta - theta);
+        core.phi[activeIndex] += (lastPhi - phi);
     }
 
     lastPhi = phi;

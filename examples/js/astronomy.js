@@ -87,7 +87,7 @@ getB0Radians__ = function(year, month, day, et) {
 
     he_lat = Math.asin(Math.sin(diff) * Math.sin(i / radeg));
 
-    return he_lat;
+    return -he_lat;
 }
 
 function getB0Radians(date) {

@@ -152,6 +152,9 @@ sunPoints.prototype.render = function(gl, mvMatrix, time, viewportIndex) {
         gl.enableVertexAttribArray(this.textureCoordsAttribute[key]);
         gl.enableVertexAttribArray(this.vertexPositionAttribute[key]);
         {
+            this.solarEvents[this.solarEvents.length - 1].L0 = core.L0click;
+            this.solarEvents[this.solarEvents.length - 1].B0 = core.B0click;
+
             for (var i = 0; i < this.solarEvents.length; i++) {
                 var event = this.solarEvents[i];
                 var MM = this.computeMatrix(event.L0, event.B0, mvMatrix)
@@ -164,8 +167,8 @@ sunPoints.prototype.render = function(gl, mvMatrix, time, viewportIndex) {
                 gl.bindBuffer(gl.ARRAY_BUFFER, this.textureCoordsBuffer[key]);
                 gl.vertexAttribPointer(this.textureCoordsAttribute[key], 2, gl.FLOAT, false, 0, 0);
                 gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer[key]);
-                // gl.bufferData(gl.ARRAY_BUFFER, this.vertices,
-                // gl.DYNAMIC_DRAW);
+                gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.DYNAMIC_DRAW);
+
                 gl.vertexAttribPointer(this.vertexPositionAttribute[key], 2, gl.FLOAT, false, 0, 0);
 
                 gl.drawArrays(gl.TRIANGLES, 0, 6);

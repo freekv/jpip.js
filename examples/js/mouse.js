@@ -4,10 +4,8 @@ var lastPhi = 0.;
 var lastTheta = 0.;
 var activeIndex = 0;
 getCanvasCoordinates = function(event) {
-    var coordinates = {};
     var rect = core.canvas.getBoundingClientRect();
-    coordinates.x = event.clientX - rect.left;
-    coordinates.y = event.clientY - rect.top;
+    var coordinates = $V([ event.clientX - rect.left, event.clientY - rect.top ]);
     return coordinates;
 }
 getMatrix = function() {
@@ -19,15 +17,21 @@ getMatrix = function() {
 function handleMouseDown(event) {
     mouseDown = true;
     var canvasCoordinates = getCanvasCoordinates(event);
-    var vpm = core.viewport.viewportDetails[activeIndex].projectionMatrix.inverse();
+    activeIndex = core.viewport.getIndex(canvasCoordinates);
+    console.log(activeIndex);
+    var vpDetail = core.viewport.viewportDetails[activeIndex];
+    viewportCoordinates = vpDetail.convertCanvasToViewport(canvasCoordinates);
+    var vpm = vpDetail.projectionMatrix.inverse();
 
-    var solarCoordinates = vpm.multiply($V([ 2. * (canvasCoordinates.x / core.viewport.totalWidth - 0.5), 2. * (canvasCoordinates.y / core.viewport.totalWidth - 0.5), 0., 0. ]));
+    var solarCoordinates = vpm.multiply($V([ 2. * (viewportCoordinates.elements[0] / vpDetail.width - 0.5), 2. * (viewportCoordinates.elements[1] / vpDetail.height - 0.5), 0., 0. ]));
     var solarCoordinates3Dz = Math.sqrt(1 - solarCoordinates.dot(solarCoordinates));
     var solarCoordinates3D = solarCoordinates.dup();
     solarCoordinates3D.elements[2] = solarCoordinates3Dz;
     solarCoordinates3D = getMatrix().x(solarCoordinates3D);
 
-    document.getElementById("canvasCoordinates").innerHTML = "" + canvasCoordinates.x + " " + canvasCoordinates.x;
+    document.getElementById("canvasCoordinates").innerHTML = "" + canvasCoordinates.elements[0] + " " + canvasCoordinates.elements[1];
+    document.getElementById("viewportCoordinates").innerHTML = "" + viewportCoordinates.elements[0] + " " + viewportCoordinates.elements[1];
+
     document.getElementById("solarCoordinates").innerHTML = "" + solarCoordinates.elements[0] + " " + solarCoordinates.elements[1] + " " + solarCoordinates.elements[2] + " " + solarCoordinates.elements[3];
     document.getElementById("solarCoordinates3D").innerHTML = "" + solarCoordinates3D.elements[0] + " " + solarCoordinates3D.elements[1] + " " + solarCoordinates3D.elements[2];
     varsign = 1.;
@@ -42,19 +46,6 @@ function handleMouseDown(event) {
 
     lastMouse = solarCoordinates;
 
-    var vcl = core.viewport.totalWidth / core.viewport.columns;
-    var vrl = core.viewport.totalHeight / core.viewport.rows;
-    var quit = false;
-
-    for (var ll = 0; !quit && ll < core.viewport.columns; ll++) {
-        for (var rr = 0; !quit && rr < core.viewport.rows; rr++) {
-            if (canvasCoordinates.x >= ll * vcl && canvasCoordinates.x <= ll * vcl + vcl && canvasCoordinates.y >= rr * vrl && canvasCoordinates.y <= rr * vrl + vrl) {
-                quit = true;
-                activeIndex = core.viewport.columns * (core.viewport.rows - 1 - rr) + ll;
-                console.log(activeIndex);
-            }
-        }
-    }
 }
 
 function handleMouseUp(event) {
@@ -98,7 +89,7 @@ function handleMouseMove3D(event) {
 
 handleMouseWheel = function(event) {
     var canvasCoord = getCanvasCoordinates(event);
-    var index = core.viewport.getIndex(canvasCoord.x, canvasCoord.y);
+    var index = core.viewport.getIndex(canvasCoord);
 
     var wheel = event.wheelDelta / 120;// n or -n
 

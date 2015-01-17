@@ -17,7 +17,7 @@ sunPoints = function() {
     this.optionsPanel.innerHTML = "<div>TBD</div>";
     core.gui.addTypePanel("sunPoints");
     core.gui.addLayer("sunPoints", "SUNP", this.optionsPanel);
-    this.viewportIndices = [ 0 ];
+    this.viewportIndices = [ 0, 1, 2, 3 ];
     this.verticesBuffer = {};
     this.textureCoordsBuffer = {};
     this.solarEvents = [];

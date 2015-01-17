@@ -8,7 +8,6 @@ viewportDetail = function(top, left, width, height) {
     this.viewProjectionMatrix = Matrix.I(4);
     this.viewMatrix = Matrix.I(4);
     this.computeProjectionMatrix();
-
 }
 
 viewportDetail.prototype.computeProjectionMatrix = function() {
@@ -22,7 +21,11 @@ viewportDetail.prototype.computeProjectionMatrix = function() {
     this.projectionMatrix.elements[2][2] = -2. / (f - n);
     this.projectionMatrix.elements[2][3] = -(f + n) / (f - n);
 }
+viewportDetail.prototype.convertCanvasToViewport = function(canvasCoords) {
+    var viewportCoords = $V([ canvasCoords.elements[0] - this.left, canvasCoords.elements[1] - this.top ]);
+    return viewportCoords;
 
+}
 viewport = function() {
     this.gui
     this.totalWidth = 512;
@@ -42,7 +45,10 @@ viewport = function() {
     this.updateGui();
 };
 
-viewport.prototype.getIndex = function(x, y) {
+viewport.prototype.getIndex = function(canvasCoord) {
+    var x = canvasCoord.elements[0];
+    var y = canvasCoord.elements[1];
+
     var numviews = this.columns * this.rows;
     var index = -1;
     var i = 0;
@@ -179,8 +185,8 @@ viewport.prototype.updateGui = function() {
             if (this.modes[index] === undefined) {
                 this.loadViewportModesGui(viewportDiv, index);
             }
-            this.viewportDetails[index].top = ll * w;
-            this.viewportDetails[index].left = rr * h;
+            this.viewportDetails[index].left = ll * w;
+            this.viewportDetails[index].top = rr * h;
             this.viewportDetails[index].width = w;
             this.viewportDetails[index].height = h;
         }

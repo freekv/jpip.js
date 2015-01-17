@@ -4,6 +4,23 @@ viewportDetail = function(top, left, width, height) {
     this.width = width;
     this.height = height;
     this.zoom = 1.;
+    this.projectionMatrix = Matrix.I(4);
+    this.viewProjectionMatrix = Matrix.I(4);
+    this.viewMatrix = Matrix.I(4);
+    this.computeProjectionMatrix();
+
+}
+
+viewportDetail.prototype.computeProjectionMatrix = function() {
+    this.projectionMatrix = Matrix.I(4);
+    var r = this.zoom;
+    var t = this.zoom;
+    var f = 100.;
+    var n = 0.1;
+    this.projectionMatrix.elements[0][0] = 1. / r;
+    this.projectionMatrix.elements[1][1] = 1. / t;
+    this.projectionMatrix.elements[2][2] = -2. / (f - n);
+    this.projectionMatrix.elements[2][3] = -(f + n) / (f - n);
 }
 
 viewport = function() {
@@ -23,8 +40,11 @@ viewport = function() {
         this.viewportDetails[i] = new viewportDetail(0, 0, this.totalWidth, this.totalHeight);
     }
     this.updateGui();
-
 };
+
+viewport.prototype.computeProjectionMatrix = function(index) {
+    viewportDetails[index].computeProjectionMatrix();
+}
 
 viewport.prototype.setRows = function(rows) {
     this.rows = parseInt(rows);

@@ -19,7 +19,7 @@ getMatrix = function() {
 function handleMouseDown(event) {
     mouseDown = true;
     var canvasCoordinates = getCanvasCoordinates(event);
-    var vpm = core.projectionMatrix[0].inverse();
+    var vpm = core.viewport.viewportDetails[activeIndex].projectionMatrix.inverse();
 
     var solarCoordinates = vpm.multiply($V([ 2. * (canvasCoordinates.x / core.viewport.totalWidth - 0.5), 2. * (canvasCoordinates.y / core.viewport.totalWidth - 0.5), 0., 0. ]));
     var solarCoordinates3Dz = Math.sqrt(1 - solarCoordinates.dot(solarCoordinates));
@@ -72,7 +72,7 @@ function handleMouseMove(event) {
 
 function handleMouseMove3D(event) {
     var canvasCoordinates = getCanvasCoordinates(event);
-    var vpm = core.projectionMatrix[activeIndex].inverse();
+    var vpm = core.viewport.viewportDetails[activeIndex].projectionMatrix.inverse();
 
     var solarCoordinates = vpm.multiply($V([ 2. * (canvasCoordinates.x / core.viewport.totalWidth - 0.5), 2. * (canvasCoordinates.y / core.viewport.totalWidth - 0.5), 0., 0. ]));
     var solarCoordinates3Dz = Math.sqrt(1 - solarCoordinates.dot(solarCoordinates));
@@ -130,6 +130,6 @@ handleMouseWheel = function(event) {
     if (core.viewport.viewportDetails[index] > 5.0) {
         core.viewport.viewportDetails[index] = 5.0;
     }
-    core.computeProjectionMatrix(index);
+    core.viewport.computeProjectionMatrix(index);
     event.preventDefault();
 }

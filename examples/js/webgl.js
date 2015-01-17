@@ -21,10 +21,6 @@ _core = function() {
     this.elapsed;
     this.mvMatrixStack = [];
     this.gl = null;
-    this.projectionMatrix = {};
-    this.mouseMatrix = {};
-    this.viewMatrix = {};
-    this.viewProjectionMatrix = {};
     this.phi = {};
     this.theta = {};
     this.L0 = 0.;
@@ -38,17 +34,7 @@ _core = function() {
 }
 
 var core = new _core();
-core.computeProjectionMatrix = function(index) {
-    core.projectionMatrix[index] = Matrix.I(4);
-    var r = 1. * core.viewport.viewportDetails[i].zoom;
-    var t = 1. * core.viewport.viewportDetails[i].zoom;
-    var f = 100.;
-    var n = 0.1;
-    core.projectionMatrix[index].elements[0][0] = 1. / r;
-    core.projectionMatrix[index].elements[1][1] = 1. / t;
-    core.projectionMatrix[index].elements[2][2] = -2. / (f - n);
-    core.projectionMatrix[index].elements[2][3] = -(f + n) / (f - n);
-}
+
 core.initWebGL = function() {
     try {
         core.gl = core.canvas.getContext("experimental-webgl");
@@ -111,13 +97,9 @@ core.drawScene = function() {
             // core.mvRotate(fff, [ 1.0, 0.0, 0.0 ]);
             var mode = core.viewport.modes[index];
             var curdate = new Date(core.currentDate);
-            core.viewMatrix[index] = core.getViewMatrix(mode, curdate, index);
-
-            core.viewProjectionMatrix[index] = core.projectionMatrix[index].x(core.viewMatrix[index]);
-            core.viewProjectionMatrix[index] = core.viewProjectionMatrix[index].x(core.mouseMatrix[index]);
-
-            // core.mvRotate(fff, [ 1.0, 0.0, 0.0 ]);
-            // fff++;
+            var viewDetail = core.viewport.viewportDetails[index]
+            viewDetail.viewMatrix = core.getViewMatrix(mode, curdate, index);
+            viewDetail.viewProjectionMatrix = viewDetail.projectionMatrix.x(viewDetail.viewMatrix);
 
             core.gl.viewport(ll * vcl, rr * vrl, vcl, vrl);
 
@@ -136,7 +118,7 @@ core.drawScene = function() {
             for (var i = core.objectList.length - 1; i >= 0; i--) {
                 var object = core.objectList[i];
                 if (object.viewportIndices.indexOf(index) !== -1 && object.supportedModes.indexOf(core.viewport.modes[index]) !== -1) {
-                    object.render(core.gl, core.viewProjectionMatrix[index], core.currentDate, index);
+                    object.render(core.gl, viewDetail.viewProjectionMatrix, core.currentDate, index);
                 }
             }
 
@@ -215,14 +197,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
         core.viewport = vviewport;
         core.gui = vgui;
         for (var i = 0; i < 16; i++) {
-            core.viewMatrix[i] = Matrix.I(4);
-            core.mouseMatrix[i] = Matrix.I(4);
-            core.projectionMatrix[i] = Matrix.I(4);
-            core.computeProjectionMatrix(i);
             core.phi[i] = 0.;
             core.theta[i] = 0.;
-            core.computeProjectionMatrix(i);
-
         }
 
         core.start();

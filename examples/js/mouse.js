@@ -97,28 +97,8 @@ function handleMouseMove3D(event) {
 }
 
 handleMouseWheel = function(event) {
-
-    var target = event.target || event.srcElement;
-    var rect = target.getBoundingClientRect();
-    var offsetX = event.clientX - rect.left;
-    offsetY = event.clientY - rect.top;
-
-    var newX = offsetX;
-    var newY = core.viewport.totalHeight - offsetY;
-
-    var vcl = core.viewport.totalWidth / core.viewport.columns;
-    var vrl = core.viewport.totalHeight / core.viewport.rows;
-    var index;
-    var quit = false;
-
-    for (var ll = 0; !quit && ll < core.viewport.columns; ll++) {
-        for (var rr = 0; !quit && rr < core.viewport.rows; rr++) {
-            if (newX >= ll * vcl && newX <= ll * vcl + vcl && newY >= rr * vrl && newY <= rr * vrl + vrl) {
-                quit = true;
-                index = core.viewport.columns * (core.viewport.rows - 1 - rr) + ll;
-            }
-        }
-    }
+    var canvasCoord = getCanvasCoordinates(event);
+    var index = core.viewport.getIndex(canvasCoord.x, canvasCoord.y);
 
     var wheel = event.wheelDelta / 120;// n or -n
 

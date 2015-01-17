@@ -42,8 +42,22 @@ viewport = function() {
     this.updateGui();
 };
 
+viewport.prototype.getIndex = function(x, y) {
+    var numviews = this.columns * this.rows;
+    var index = -1;
+    var i = 0;
+    while (i < numviews && index === -1) {
+        vd = this.viewportDetails[i];
+        if (vd.top <= y && y <= vd.top + vd.height && vd.left <= x && x <= vd.left + vd.width) {
+            index = i;
+        }
+        i++;
+    }
+    return index;
+}
+
 viewport.prototype.computeProjectionMatrix = function(index) {
-    viewportDetails[index].computeProjectionMatrix();
+    this.viewportDetails[index].computeProjectionMatrix();
 }
 
 viewport.prototype.setRows = function(rows) {
@@ -157,17 +171,17 @@ viewport.prototype.viewportChanged = function() {
 viewport.prototype.updateGui = function() {
     var viewportDiv = document.getElementById("viewportDiv");
     var w = this.totalWidth / this.columns;
-    var h = this.totalHeight / this.columns;
+    var h = this.totalHeight / this.rows;
 
     for (var ll = 0; ll < this.columns; ll++) {
         for (var rr = 0; rr < this.rows; rr++) {
-            var index = this.columns * (this.rows - 1 - rr) + ll;
+            var index = this.rows * (ll) + rr;
             if (this.modes[index] === undefined) {
                 this.loadViewportModesGui(viewportDiv, index);
             }
             this.viewportDetails[index].top = ll * w;
-            this.viewportDetails[index].left = ll * h;
-            this.viewportDetails[index].top.width = w;
+            this.viewportDetails[index].left = rr * h;
+            this.viewportDetails[index].width = w;
             this.viewportDetails[index].height = h;
         }
     }

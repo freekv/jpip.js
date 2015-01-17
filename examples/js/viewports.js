@@ -1,13 +1,28 @@
+viewportDetail = function(top, left, width, height) {
+    this.top = top;
+    this.left = left;
+    this.width = width;
+    this.height = height;
+}
+
 viewport = function() {
     this.gui
     this.totalWidth = 512;
     this.totalHeight = 512;
     this.rows = 1;
     this.columns = 1;
+    this.maxRows = 4;
+    this.maxColumns = 4;
+    this.maxNumberOfViewPorts = this.maxRows * this.maxColumns;
     this.listeners = [];
     this.modeList = [ '2D', '3D', 'limb', 'limb-conformal' ]
     this.modes = {};
+    this.viewportDetails = {};
+    for (var i = 0; i < this.maxNumberOfViewPorts; i++) {
+        this.viewportDetails[i] = new viewportDetail(0, 0, this.totalWidth, this.totalHeight);
+    }
     this.updateGui();
+
 };
 
 viewport.prototype.setRows = function(rows) {
@@ -120,17 +135,23 @@ viewport.prototype.viewportChanged = function() {
 
 viewport.prototype.updateGui = function() {
     var viewportDiv = document.getElementById("viewportDiv");
+    var w = this.totalWidth / this.columns;
+    var h = this.totalHeight / this.columns;
+
     for (var ll = 0; ll < this.columns; ll++) {
         for (var rr = 0; rr < this.rows; rr++) {
             var index = this.columns * (this.rows - 1 - rr) + ll;
             if (this.modes[index] === undefined) {
                 this.loadViewportModesGui(viewportDiv, index);
             }
+            this.viewportDetails[index].top = ll * w;
+            this.viewportDetails[index].left = ll * h;
+            this.viewportDetails[index].top.width = w;
+            this.viewportDetails[index].height = h;
         }
     }
-    for (var index = this.columns * this.rows; index < 16; index++) {
+    for (var index = this.columns * this.rows; index < this.maxNumberOfViewPorts; index++) {
         var el = document.getElementById("comboViewportModeDiv" + index);
-
         if (el !== null) {
             el.parentNode.removeChild(el);
             this.modes[index] = undefined;

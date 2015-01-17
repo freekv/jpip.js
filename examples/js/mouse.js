@@ -123,12 +123,12 @@ handleMouseWheel = function(event) {
     var wheel = event.wheelDelta / 120;// n or -n
 
     var zoom = 1 + wheel / 2;
-    core.zoom[index] = core.zoom[index] * zoom;
-    if (core.zoom[index] < 0.1) {
-        core.zoom[index] = 0.1;
+    core.viewport.viewportDetails[index].zoom = core.viewport.viewportDetails[index].zoom * zoom;
+    if (core.viewport.viewportDetails[index] < 0.1) {
+        core.viewport.viewportDetails[index] = 0.1;
     }
-    if (core.zoom[index] > 5.0) {
-        core.zoom[index] = 5.0;
+    if (core.viewport.viewportDetails[index] > 5.0) {
+        core.viewport.viewportDetails[index] = 5.0;
     }
     core.computeProjectionMatrix(index);
     event.preventDefault();

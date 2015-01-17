@@ -3,6 +3,7 @@ viewportDetail = function(top, left, width, height) {
     this.left = left;
     this.width = width;
     this.height = height;
+    this.zoom = 1.;
 }
 
 viewport = function() {

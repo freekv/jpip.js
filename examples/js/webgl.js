@@ -21,7 +21,6 @@ _core = function() {
     this.elapsed;
     this.mvMatrixStack = [];
     this.gl = null;
-    this.zoom = {};
     this.projectionMatrix = {};
     this.mouseMatrix = {};
     this.viewMatrix = {};
@@ -32,32 +31,24 @@ _core = function() {
     this.B0 = 0.;
     this.L0click = 0.;
     this.B0click = 0.;
-    for (var i = 0; i < 16; i++) {
-        this.zoom[i] = 1.0;
-        this.viewMatrix[i] = Matrix.I(4);
-        this.mouseMatrix[i] = Matrix.I(4);
-        this.projectionMatrix[i] = Matrix.I(4);
-        this.computeProjectionMatrix(i);
-        this.phi[i] = 0.;
-        this.theta[i] = 0.;
-    }
+
     this.stepForward = false;
     this.stepBackward = false;
 
 }
-_core.prototype.computeProjectionMatrix = function(index) {
-    this.projectionMatrix[index] = Matrix.I(4);
-    var r = 1. * this.zoom[index];
-    var t = 1. * this.zoom[index];
+
+var core = new _core();
+core.computeProjectionMatrix = function(index) {
+    core.projectionMatrix[index] = Matrix.I(4);
+    var r = 1. * core.viewport.viewportDetails[i].zoom;
+    var t = 1. * core.viewport.viewportDetails[i].zoom;
     var f = 100.;
     var n = 0.1;
-    this.projectionMatrix[index].elements[0][0] = 1. / r;
-    this.projectionMatrix[index].elements[1][1] = 1. / t;
-    this.projectionMatrix[index].elements[2][2] = -2. / (f - n);
-    this.projectionMatrix[index].elements[2][3] = -(f + n) / (f - n);
+    core.projectionMatrix[index].elements[0][0] = 1. / r;
+    core.projectionMatrix[index].elements[1][1] = 1. / t;
+    core.projectionMatrix[index].elements[2][2] = -2. / (f - n);
+    core.projectionMatrix[index].elements[2][3] = -(f + n) / (f - n);
 }
-var core = new _core();
-
 core.initWebGL = function() {
     try {
         core.gl = core.canvas.getContext("experimental-webgl");
@@ -116,15 +107,6 @@ core.drawScene = function() {
             var index = core.viewport.columns * (core.viewport.rows - 1 - rr) + ll;
             // core.perspectiveMatrix = makePerspective(90 * core.zoom[index],
             // 1024.0 / 1024.0, 0.1, 100.0);
-
-            /*
-             * r = 1. * core.zoom[index]; t = 1. * core.zoom[index]; f = 100.; n =
-             * 0.1; core.mvMatrix.elements[0][0] = 1. / r;
-             * core.mvMatrix.elements[1][1] = 1. / t;
-             * core.mvMatrix.elements[2][2] = -2. / (f - n);
-             * core.mvMatrix.elements[2][3] = -(f + n) / (f - n);
-             */
-
             // core.multMatrix(core.viewMatrix[index]);
             // core.mvRotate(fff, [ 1.0, 0.0, 0.0 ]);
             var mode = core.viewport.modes[index];
@@ -232,6 +214,17 @@ document.addEventListener("DOMContentLoaded", function(event) {
         vviewport.initGui();
         core.viewport = vviewport;
         core.gui = vgui;
+        for (var i = 0; i < 16; i++) {
+            core.viewMatrix[i] = Matrix.I(4);
+            core.mouseMatrix[i] = Matrix.I(4);
+            core.projectionMatrix[i] = Matrix.I(4);
+            core.computeProjectionMatrix(i);
+            core.phi[i] = 0.;
+            core.theta[i] = 0.;
+            core.computeProjectionMatrix(i);
+
+        }
+
         core.start();
         core.canvas.onmousedown = handleMouseDown;
         document.onmouseup = handleMouseUp;

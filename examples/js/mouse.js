@@ -62,15 +62,8 @@ function handleMouseMove3D(event) {
     var vpDetail = core.viewport.viewportDetails[activeIndex];
     var canvasCoordinates = getCanvasCoordinates(event);
     viewportCoordinates = vpDetail.convertCanvasToViewport(canvasCoordinates);
-    var vpm = vpDetail.projectionMatrix.inverse();
-
-    var solarCoordinates = vpm.multiply($V([ 2. * (viewportCoordinates.elements[0] / vpDetail.width - 0.5), -2. * (viewportCoordinates.elements[1] / vpDetail.height - 0.5), 0., 0. ]));
-    var solarCoordinates3Dz = Math.sqrt(1 - solarCoordinates.dot(solarCoordinates));
-    var solarCoordinates3D = solarCoordinates.dup();
-    solarCoordinates3D.elements[2] = solarCoordinates3Dz;
-    var nonrotSolarCoordinates3D = solarCoordinates3D.dup();
-
-    // solarCoordinates3D = getMatrix().x(solarCoordinates3D);
+    var solarCoordinates4D = vpDetail.convertViewportToView(viewportCoordinates);
+    var solarCoordinates3D = solarCoordinates4D.dup();
     solarCoordinates3D.elements.pop();
 
     var _lastsolarCoordinates3D = lastsolarCoordinates3D.dup();
@@ -95,8 +88,7 @@ function handleMouseMove3D(event) {
         crossvec = crossvec.toUnitVector();
         var mm = Matrix.Rotation(a, crossvec).ensure4x4();
         core.mouseMatrix = deltaMatrix.x(mm);// core.mouseMatrix.x(mm);
-        core.setRotMat();
-        lastsolarCoordinates3D = nonrotSolarCoordinates3D;
+        lastsolarCoordinates3D = solarCoordinates4D;
     }
 }
 

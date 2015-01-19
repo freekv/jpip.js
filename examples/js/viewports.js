@@ -27,8 +27,16 @@ viewportDetail.prototype.computeProjectionMatrix = function() {
 viewportDetail.prototype.convertCanvasToViewport = function(canvasCoords) {
     var viewportCoords = $V([ canvasCoords.elements[0] - this.left, canvasCoords.elements[1] - this.top ]);
     return viewportCoords;
-
 }
+viewportDetail.prototype.convertViewportToView = function(viewportCoordinates) {
+    var vpm = this.projectionMatrix.inverse();
+    var solarCoordinates = vpm.multiply($V([ 2. * (viewportCoordinates.elements[0] / this.width - 0.5), -2. * (viewportCoordinates.elements[1] / this.height - 0.5), 0., 0. ]));
+    var solarCoordinates3Dz = Math.sqrt(1 - solarCoordinates.dot(solarCoordinates));
+    var solarCoordinates3D = solarCoordinates.dup();
+    solarCoordinates3D.elements[2] = solarCoordinates3Dz;
+    return solarCoordinates3D;
+}
+
 viewport = function() {
     this.gui
     this.totalWidth = 512;
@@ -161,8 +169,7 @@ viewport.prototype.setHeight = function(height) {
 viewport.prototype.setWidth = function(width) {
     var canvas = document.getElementById("glcanvas");
     canvas.width = width;
-    this.totalWidth = width
-
+    this.totalWidth = width;
 }
 
 viewport.prototype.addListener = function(newlistener) {

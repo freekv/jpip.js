@@ -8,6 +8,7 @@ viewportDetail = function(top, left, width, height, mode, index) {
     this.index = index;
     this.projectionMatrix = Matrix.I(4);
     this.viewProjectionMatrix = Matrix.I(4);
+    this.mouseProjectionMatrix = Matrix.I(4);
     this.viewMatrix = Matrix.I(4);
     this.computeProjectionMatrix();
 }

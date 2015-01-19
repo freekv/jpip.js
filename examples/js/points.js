@@ -22,6 +22,7 @@ sunPoints = function() {
     this.textureCoordsBuffer = {};
     this.solarEvents = [];
     var angs = [ [ 0., 0. ], [ Math.PI / 2., 0. ], [ Math.PI, 0. ], [ 3 * Math.PI / 2., 0. ], [ 0., Math.PI / 4. ] ];
+
     for (var i = 0; i < angs.length; i++) {
         var event = new solarEvent(angs[i], this.textures.indexOf("./images/EventIcons/ar_icon.png"));
         this.solarEvents.push(event);

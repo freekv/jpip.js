@@ -70,7 +70,9 @@ core.setRotMat = function(mode, date, index) {
         M1 = Matrix.Rotation(theta, $V([ 1, 0, 0 ]));
         M2 = Matrix.Rotation(phi, $V([ 0, 1, 0 ]));
         core.rotMat = M2.x(M1).ensure4x4();
-        core.rotMat = core.rotMat.x(core.mouseMatrix);
+        if (mode == '3D') {
+            core.rotMat = core.rotMat.x(core.mouseMatrix);
+        }
     } else {
         core.rotMat = Matrix.I(4);
     }

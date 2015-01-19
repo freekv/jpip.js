@@ -200,7 +200,7 @@ solarJPIP.prototype.initVerticesBuffers = function(gl, key) {
         vertices = [ -1.0, -1.0, 0.0, -1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, -1.0, 0.0, ];
         this.vertexIndices[key] = [ 0, 1, 2, 0, 2, 3, ];
     } else {
-        var res = 20;
+        var res = 30;
         var count = 0;
         for (var i = 0; i < res - 1; i++) {
             for (var j = 0; j < res - 1; j++) {

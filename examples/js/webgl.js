@@ -66,7 +66,7 @@ core.setRotMat = function(mode, date, index) {
     core.B0 = getB0Radians(date);
     var phi = core.L0 + core.phi[index];
     var theta = core.B0 + core.theta[index];
-    if (mode === '3D') {
+    if (mode === '3D' || mode === '2D') {
         M1 = Matrix.Rotation(theta, $V([ 1, 0, 0 ]));
         M2 = Matrix.Rotation(phi, $V([ 0, 1, 0 ]));
         core.rotMat = M2.x(M1).ensure4x4();
@@ -83,7 +83,7 @@ core.getViewMatrix = function(mode, date, index) {
 
     core.setRotMat(mode, date, index);
     M = core.rotMat;
-    if (mode === '3D') {
+    if (mode === '3D' || mode === '2D') {
         Vrota = M.x(Va);
         Vrot = $V([ Vrota.elements[0], Vrota.elements[1], Vrota.elements[2] ]);
         // M = M.ensure4x4();

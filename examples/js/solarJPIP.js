@@ -125,14 +125,14 @@ solarJPIP.prototype.render = function(gl, mvMatrix, time, viewportIndex) {
             gl.uniform2f(gl.getUniformLocation(this.shaderProgram[key], "stretch"), this.texturesAndMetadata[this.currentIndex].plottingMetadata.solarRadiiX, this.texturesAndMetadata[this.currentIndex].plottingMetadata.solarRadiiY);
 
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.verticesIndexBuffer[key]);
-            // var pUniform = gl.getUniformLocation(this.shaderProgram[key],
-            // "uPMatrix");
-            // gl.uniformMatrix4fv(pUniform, false, new
-            // Float32Array(perspectiveMatrix.flatten()));
 
             var mvUniform = gl.getUniformLocation(this.shaderProgram[key], "uMVMatrix");
-            gl.uniformMatrix4fv(mvUniform, false, new Float32Array(mvMatrix.flatten()));
+            lmvMatrix = mvMatrix.x(core.rotMat);
+            gl.uniformMatrix4fv(mvUniform, false, new Float32Array(lmvMatrix.flatten()));
+
             if (key === '3D') {
+                var mvUniform = gl.getUniformLocation(this.shaderProgram[key], "uMVMatrix");
+                gl.uniformMatrix4fv(mvUniform, false, new Float32Array(mvMatrix.flatten()));
                 var theta = this.texturesAndMetadata[this.currentIndex].plottingMetadata.hgltobs * 3.141592654 / 180.;
                 var phi = this.texturesAndMetadata[this.currentIndex].plottingMetadata.hglnobs * 3.141592654 / 180.;
                 var rotmat = $M([ [ Math.cos(phi), 0, -Math.sin(phi) ], [ -Math.sin(theta) * Math.sin(phi), Math.cos(theta), -Math.sin(theta) * Math.cos(phi) ], [ Math.cos(theta) * Math.sin(phi), Math.sin(theta), Math.cos(theta) * Math.cos(phi) ] ]);

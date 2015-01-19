@@ -15,29 +15,23 @@ function handleMouseDown(event) {
     mouseDown = true;
     var canvasCoordinates = getCanvasCoordinates(event);
     activeIndex = core.viewport.getIndex(canvasCoordinates);
-    console.log(activeIndex);
     var vpDetail = core.viewport.viewportDetails[activeIndex];
+    var canvasCoordinates = getCanvasCoordinates(event);
     viewportCoordinates = vpDetail.convertCanvasToViewport(canvasCoordinates);
-    var vpm = vpDetail.projectionMatrix.inverse();
+    var solarCoordinates4D = vpDetail.convertViewportToView(viewportCoordinates);
+    lastSolarCoordinates4D = solarCoordinates4D.dup();
 
-    var solarCoordinates = vpm.multiply($V([ 2. * (viewportCoordinates.elements[0] / vpDetail.width - 0.5), -2. * (viewportCoordinates.elements[1] / vpDetail.height - 0.5), 0., 0. ]));
-    var solarCoordinates3Dz = Math.sqrt(1 - solarCoordinates.dot(solarCoordinates));
-    var solarCoordinates3D = solarCoordinates.dup();
-    solarCoordinates3D.elements[2] = solarCoordinates3Dz;
-    lastsolarCoordinates3D = solarCoordinates3D.dup();
-
-    solarCoordinates3D = getMatrix().x(solarCoordinates3D);
+    solarCoordinates4D = getMatrix().x(solarCoordinates4D);
 
     document.getElementById("canvasCoordinates").innerHTML = "" + canvasCoordinates.elements[0] + " " + canvasCoordinates.elements[1];
     document.getElementById("viewportCoordinates").innerHTML = "" + viewportCoordinates.elements[0] + " " + viewportCoordinates.elements[1];
 
-    document.getElementById("solarCoordinates").innerHTML = "" + solarCoordinates.elements[0] + " " + solarCoordinates.elements[1] + " " + solarCoordinates.elements[2] + " " + solarCoordinates.elements[3];
-    document.getElementById("solarCoordinates3D").innerHTML = "" + solarCoordinates3D.elements[0] + " " + solarCoordinates3D.elements[1] + " " + solarCoordinates3D.elements[2];
+    document.getElementById("solarCoordinates3D").innerHTML = "" + solarCoordinates4D.elements[0] + " " + solarCoordinates4D.elements[1] + " " + solarCoordinates4D.elements[2];
 
-    lastPhi = Math.atan2(solarCoordinates3D.elements[0], solarCoordinates3D.elements[2]);
-    lastTheta = Math.PI / 2. - Math.acos(solarCoordinates3D.elements[1]);
-    core.L0click = (lastPhi);// + core.L0);
-    core.B0click = (-lastTheta);// + core.B0);
+    lastPhi = Math.atan2(solarCoordinates4D.elements[0], solarCoordinates4D.elements[2]);
+    lastTheta = Math.PI / 2. - Math.acos(solarCoordinates4D.elements[1]);
+    core.L0click = lastPhi;
+    core.B0click = -lastTheta;
 
     document.getElementById("thetaPhi").innerHTML = "phi:" + (lastPhi + core.phi[activeIndex]) * 180. / Math.PI + " theta:" + (lastTheta + core.theta[activeIndex]) * 180. / Math.PI;
     document.getElementById("L0B0").innerHTML = "L0:" + (core.L0click) * 180. / Math.PI + " B0:" + (core.B0click) * 180. / Math.PI;
@@ -58,25 +52,10 @@ function handleMouseMove(event) {
     }
 }
 
-function handleMouseMove3D(event) {
-    var vpDetail = core.viewport.viewportDetails[activeIndex];
-    var canvasCoordinates = getCanvasCoordinates(event);
-    viewportCoordinates = vpDetail.convertCanvasToViewport(canvasCoordinates);
-    var solarCoordinates4D = vpDetail.convertViewportToView(viewportCoordinates);
-    var solarCoordinates3D = solarCoordinates4D.dup();
-    solarCoordinates3D.elements.pop();
-
-    var _lastsolarCoordinates3D = lastsolarCoordinates3D.dup();
-    _lastsolarCoordinates3D.elements.pop();
-
-    var crossvec = solarCoordinates3D.cross(_lastsolarCoordinates3D);
-    console.log(solarCoordinates3D.elements);
-    console.log(_lastsolarCoordinates3D.elements);
-
+function createRotationMatrixFromVectors(vec1, vec2) {
+    var crossvec = vec1.cross(vec2);
     var dl = Math.sqrt(crossvec.dot(crossvec));
-    console.log(dl);
-    console.log(crossvec.elements);
-
+    var mm = null;
     if (!isNaN(dl) && dl !== 0) {
         if (dl > 1.) {
             dl = 1.;
@@ -87,8 +66,22 @@ function handleMouseMove3D(event) {
         var a = Math.asin(dl);
         crossvec = crossvec.toUnitVector();
         var mm = Matrix.Rotation(a, crossvec).ensure4x4();
-        core.mouseMatrix = deltaMatrix.x(mm);// core.mouseMatrix.x(mm);
-        lastsolarCoordinates3D = solarCoordinates4D;
+    }
+    return mm;
+}
+
+function handleMouseMove3D(event) {
+    var vpDetail = core.viewport.viewportDetails[activeIndex];
+    var canvasCoordinates = getCanvasCoordinates(event);
+    viewportCoordinates = vpDetail.convertCanvasToViewport(canvasCoordinates);
+    var solarCoordinates4D = vpDetail.convertViewportToView(viewportCoordinates);
+    var solarCoordinates3D = solarCoordinates4D.dup();
+    solarCoordinates3D.elements.pop();
+    var lastSolarCoordinates3D = lastSolarCoordinates4D.dup();
+    lastSolarCoordinates3D.elements.pop();
+    mm = createRotationMatrixFromVectors(solarCoordinates3D, lastSolarCoordinates3D);
+    if (mm != null) {
+        core.mouseMatrix = deltaMatrix.x(mm);
     }
 }
 

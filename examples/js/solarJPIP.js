@@ -127,7 +127,9 @@ solarJPIP.prototype.render = function(gl, mvMatrix, time, viewportIndex) {
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.verticesIndexBuffer[key]);
 
             var mvUniform = gl.getUniformLocation(this.shaderProgram[key], "uMVMatrix");
-            lmvMatrix = mvMatrix.x(core.rotMat);
+
+            var vpDetail = core.viewport.viewportDetails[viewportIndex];
+            lmvMatrix = mvMatrix.x(vpDetail.rotMat);
             gl.uniformMatrix4fv(mvUniform, false, new Float32Array(lmvMatrix.flatten()));
 
             if (key === '3D') {

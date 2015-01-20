@@ -8,7 +8,7 @@ viewportDetail = function(top, left, width, height, mode, index) {
     this.index = index;
     this.projectionMatrix = Matrix.I(4);
     this.viewProjectionMatrix = Matrix.I(4);
-    this.mouseProjectionMatrix = Matrix.I(4);
+    this.mouseMatrix = Matrix.I(4);
     this.viewMatrix = Matrix.I(4);
     this.computeProjectionMatrix();
 }
@@ -35,6 +35,40 @@ viewportDetail.prototype.convertViewportToView = function(viewportCoordinates) {
     var solarCoordinates3D = solarCoordinates.dup();
     solarCoordinates3D.elements[2] = solarCoordinates3Dz;
     return solarCoordinates3D;
+}
+viewportDetail.prototype.setRotMat = function(mode, date, index) {
+    viewportDetail.L0 = getL0Radians(date);
+    viewportDetail.B0 = getB0Radians(date);
+    var phi = viewportDetail.L0;
+    var theta = viewportDetail.B0;
+    if (mode === '3D' || mode === '2D') {
+        M1 = Matrix.Rotation(theta, $V([ 1, 0, 0 ]));
+        M2 = Matrix.Rotation(phi, $V([ 0, 1, 0 ]));
+        this.rotMat = M2.x(M1).ensure4x4();
+        if (mode == '3D') {
+            this.rotMat = this.rotMat.x(this.mouseMatrix);
+        }
+    } else {
+        this.rotMat = Matrix.I(4);
+    }
+}
+
+viewportDetail.prototype.getViewMatrix = function(mode, date, index) {
+    var M, M1, M2, V, Vrot;
+    Va = $V([ 0, 0, -10., 1. ]);
+    V = $V([ Va.elements[0], Va.elements[1], Va.elements[2] ])
+
+    this.setRotMat(mode, date, index);
+    M = this.rotMat;
+    if (mode === '3D' || mode === '2D') {
+        Vrota = M.x(Va);
+        Vrot = $V([ Vrota.elements[0], Vrota.elements[1], Vrota.elements[2] ]);
+        M = M.inverse().ensure4x4();
+        M = M.x(Matrix.Translation(Vrot));
+    } else {
+        M = M.x(Matrix.Translation(V).ensure4x4());
+    }
+    return M;
 }
 
 viewport = function() {

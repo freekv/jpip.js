@@ -21,13 +21,8 @@ _core = function() {
     this.elapsed;
     this.mvMatrixStack = [];
     this.gl = null;
-    this.phi = {};
-    this.theta = {};
-    this.L0 = 0.;
-    this.B0 = 0.;
     this.L0click = 0.;
     this.B0click = 0.;
-    this.mouseMatrix = Matrix.I(4);
     this.stepForward = false;
     this.stepBackward = false;
 
@@ -61,41 +56,6 @@ core.start = function() {
     }
 }
 
-core.setRotMat = function(mode, date, index) {
-    core.L0 = getL0Radians(date);
-    core.B0 = getB0Radians(date);
-    var phi = core.L0 + core.phi[index];
-    var theta = core.B0 + core.theta[index];
-    if (mode === '3D' || mode === '2D') {
-        M1 = Matrix.Rotation(theta, $V([ 1, 0, 0 ]));
-        M2 = Matrix.Rotation(phi, $V([ 0, 1, 0 ]));
-        core.rotMat = M2.x(M1).ensure4x4();
-        if (mode == '3D') {
-            core.rotMat = core.rotMat.x(core.mouseMatrix);
-        }
-    } else {
-        core.rotMat = Matrix.I(4);
-    }
-}
-
-core.getViewMatrix = function(mode, date, index) {
-    var M, M1, M2, V, Vrot;
-    Va = $V([ 0, 0, -10., 1. ]);
-    V = $V([ Va.elements[0], Va.elements[1], Va.elements[2] ])
-
-    core.setRotMat(mode, date, index);
-    M = core.rotMat;
-    if (mode === '3D' || mode === '2D') {
-        Vrota = M.x(Va);
-        Vrot = $V([ Vrota.elements[0], Vrota.elements[1], Vrota.elements[2] ]);
-        // M = M.ensure4x4();
-        M = M.inverse().ensure4x4();
-        M = M.x(Matrix.Translation(Vrot));
-    } else {
-        M = M.x(Matrix.Translation(V).ensure4x4());
-    }
-    return M;
-}
 core.drawScene = function() {
     core.gl.clear(core.gl.COLOR_BUFFER_BIT | core.gl.DEPTH_BUFFER_BIT);
 
@@ -111,7 +71,7 @@ core.drawScene = function() {
             var mode = core.viewport.viewportDetails[index].mode;
             var curdate = new Date(core.currentDate);
             var viewDetail = core.viewport.viewportDetails[index]
-            viewDetail.viewMatrix = core.getViewMatrix(mode, curdate, index);
+            viewDetail.viewMatrix = viewDetail.getViewMatrix(mode, curdate, index);
             viewDetail.viewProjectionMatrix = viewDetail.projectionMatrix.x(viewDetail.viewMatrix);
 
             core.gl.viewport(ll * vcl, rr * vrl, vcl, vrl);
@@ -209,10 +169,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
         vviewport.initGui();
         core.viewport = vviewport;
         core.gui = vgui;
-        for (var i = 0; i < 16; i++) {
-            core.phi[i] = 0.;
-            core.theta[i] = 0.;
-        }
 
         core.start();
         core.canvas.onmousedown = handleMouseDown;

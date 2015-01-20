@@ -8,9 +8,7 @@ getCanvasCoordinates = function(event) {
     var coordinates = $V([ event.clientX - rect.left, event.clientY - rect.top ]);
     return coordinates;
 }
-getMatrix = function() {
-    return core.rotMat;
-}
+
 function handleMouseDown(event) {
     mouseDown = true;
     var canvasCoordinates = getCanvasCoordinates(event);
@@ -21,7 +19,7 @@ function handleMouseDown(event) {
     var solarCoordinates4D = vpDetail.convertViewportToView(viewportCoordinates);
     lastSolarCoordinates4D = solarCoordinates4D.dup();
 
-    solarCoordinates4D = getMatrix().x(solarCoordinates4D);
+    solarCoordinates4D = vpDetail.rotMat.x(solarCoordinates4D);
 
     document.getElementById("canvasCoordinates").innerHTML = "" + canvasCoordinates.elements[0] + " " + canvasCoordinates.elements[1];
     document.getElementById("viewportCoordinates").innerHTML = "" + viewportCoordinates.elements[0] + " " + viewportCoordinates.elements[1];
@@ -30,17 +28,18 @@ function handleMouseDown(event) {
 
     lastPhi = Math.atan2(solarCoordinates4D.elements[0], solarCoordinates4D.elements[2]);
     lastTheta = Math.PI / 2. - Math.acos(solarCoordinates4D.elements[1]);
-    core.L0click = lastPhi;
-    core.B0click = -lastTheta;
+    vpDetail.L0click = lastPhi;
+    vpDetail.B0click = -lastTheta;
 
-    document.getElementById("thetaPhi").innerHTML = "phi:" + (lastPhi + core.phi[activeIndex]) * 180. / Math.PI + " theta:" + (lastTheta + core.theta[activeIndex]) * 180. / Math.PI;
-    document.getElementById("L0B0").innerHTML = "L0:" + (core.L0click) * 180. / Math.PI + " B0:" + (core.B0click) * 180. / Math.PI;
+    document.getElementById("thetaPhi").innerHTML = "phi:" + (lastPhi) * 180. / Math.PI + " theta:" + (lastTheta) * 180. / Math.PI;
+    document.getElementById("L0B0").innerHTML = "L0:" + (vpDetail.L0click) * 180. / Math.PI + " B0:" + (vpDetail.B0click) * 180. / Math.PI;
 
 }
 deltaMatrix = Matrix.I(4);
 function handleMouseUp(event) {
     mouseDown = false;
-    deltaMatrix = core.mouseMatrix;
+    var vpDetail = core.viewport.viewportDetails[activeIndex];
+    deltaMatrix = vpDetail.mouseMatrix;
 }
 
 function handleMouseMove(event) {
@@ -81,7 +80,7 @@ function handleMouseMove3D(event) {
     lastSolarCoordinates3D.elements.pop();
     mm = createRotationMatrixFromVectors(solarCoordinates3D, lastSolarCoordinates3D);
     if (mm != null) {
-        core.mouseMatrix = deltaMatrix.x(mm);
+        vpDetail.mouseMatrix = deltaMatrix.x(mm);
     }
 }
 

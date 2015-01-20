@@ -153,8 +153,9 @@ sunPoints.prototype.render = function(gl, mvMatrix, time, viewportIndex) {
         gl.enableVertexAttribArray(this.textureCoordsAttribute[key]);
         gl.enableVertexAttribArray(this.vertexPositionAttribute[key]);
         {
-            this.solarEvents[this.solarEvents.length - 1].L0 = core.L0click;
-            this.solarEvents[this.solarEvents.length - 1].B0 = core.B0click;
+            var vpDetail = core.viewport.viewportDetails[viewportIndex];
+            this.solarEvents[this.solarEvents.length - 1].L0 = vpDetail.L0click;
+            this.solarEvents[this.solarEvents.length - 1].B0 = vpDetail.B0click;
 
             for (var i = 0; i < this.solarEvents.length; i++) {
                 var event = this.solarEvents[i];

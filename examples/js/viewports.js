@@ -187,10 +187,9 @@ viewport.prototype.updateGui = function() {
     var viewportDiv = document.getElementById("viewportDiv");
     var w = this.totalWidth / this.columns;
     var h = this.totalHeight / this.rows;
-
-    for (var ll = 0; ll < this.columns; ll++) {
-        for (var rr = 0; rr < this.rows; rr++) {
-            var index = this.rows * (ll) + rr;
+    var index = 0;
+    for (var rr = 0; rr < this.rows; rr++) {
+        for (var ll = 0; ll < this.columns; ll++) {
             if (this.viewportDetails[index].mode === undefined) {
                 this.loadViewportModesGui(viewportDiv, index);
                 this.viewportDetails[ll].index = index;
@@ -199,6 +198,7 @@ viewport.prototype.updateGui = function() {
             this.viewportDetails[index].top = rr * h;
             this.viewportDetails[index].width = w;
             this.viewportDetails[index].height = h;
+            index++;
         }
     }
     for (var index = this.columns * this.rows; index < this.maxNumberOfViewPorts; index++) {

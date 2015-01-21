@@ -9,9 +9,12 @@ viewportDetail = function(top, left, width, height, mode, index) {
     this.projectionMatrix = Matrix.I(4);
     this.viewProjectionMatrix = Matrix.I(4);
     this.mouseMatrix = Matrix.I(4);
+    this.translationMatrix = Matrix.I(4);
     this.viewMatrix = Matrix.I(4);
     this.computeProjectionMatrix();
+    this.rotationMatrix;
     this.mouseDown = false;
+
 }
 
 viewportDetail.prototype.computeProjectionMatrix = function() {
@@ -40,20 +43,17 @@ viewportDetail.prototype.convertViewportToView = function(viewportCoordinates) {
     return solarCoordinates3D;
 }
 
-viewportDetail.prototype.setRotMat = function(mode, date, index) {
+viewportDetail.prototype.setRotationMatrix = function(mode, date, index) {
     viewportDetail.L0 = getL0Radians(date);
     viewportDetail.B0 = getB0Radians(date);
     var phi = viewportDetail.L0;
     var theta = viewportDetail.B0;
-    if (mode === '3D' || mode === '2D') {
+    if (mode === '3D') {
         M1 = Matrix.Rotation(theta, $V([ 1, 0, 0 ]));
         M2 = Matrix.Rotation(phi, $V([ 0, 1, 0 ]));
-        this.rotMat = M2.x(M1).ensure4x4();
-        if (mode == '3D') {
-            this.rotMat = this.rotMat.x(this.mouseMatrix);
-        }
+        this.rotationMatrix = M2.x(M1).ensure4x4();
     } else {
-        this.rotMat = Matrix.I(4);
+        this.rotationMatrix = Matrix.I(4);
     }
 }
 
@@ -62,8 +62,8 @@ viewportDetail.prototype.getViewMatrix = function(mode, date, index) {
     Va = $V([ 0, 0, -10., 1. ]);
     V = $V([ Va.elements[0], Va.elements[1], Va.elements[2] ])
 
-    this.setRotMat(mode, date, index);
-    M = this.rotMat;
+    this.setRotationMatrix(mode, date, index);
+    M = this.rotationMatrix;
     if (mode === '3D' || mode === '2D') {
         Vrota = M.x(Va);
         Vrot = $V([ Vrota.elements[0], Vrota.elements[1], Vrota.elements[2] ]);
@@ -72,6 +72,7 @@ viewportDetail.prototype.getViewMatrix = function(mode, date, index) {
     } else {
         M = M.x(Matrix.Translation(V).ensure4x4());
     }
+    M = this.translationMatrix.x(M);
     return M;
 }
 
@@ -97,13 +98,12 @@ viewportDetail.prototype.handleMouseUp = function(event) {
 viewportDetail.prototype.handleMouseDown = function(event) {
     this.mouseDown = true;
     var canvasCoordinates = getCanvasCoordinates(event);
-    var vpDetail = core.viewport.viewportDetails[activeIndex];
     var canvasCoordinates = getCanvasCoordinates(event);
-    var viewportCoordinates = vpDetail.convertCanvasToViewport(canvasCoordinates);
-    var solarCoordinates4D = vpDetail.convertViewportToView(viewportCoordinates);
+    var viewportCoordinates = this.convertCanvasToViewport(canvasCoordinates);
+    var solarCoordinates4D = this.convertViewportToView(viewportCoordinates);
     this.lastSolarCoordinates4D = solarCoordinates4D.dup();
 
-    solarCoordinates4D = vpDetail.rotMat.x(solarCoordinates4D);
+    solarCoordinates4D = this.rotationMatrix.x(solarCoordinates4D);
 
     document.getElementById("canvasCoordinates").innerHTML = "" + canvasCoordinates.elements[0] + " " + canvasCoordinates.elements[1];
     document.getElementById("viewportCoordinates").innerHTML = "" + viewportCoordinates.elements[0] + " " + viewportCoordinates.elements[1];
@@ -116,7 +116,7 @@ viewportDetail.prototype.handleMouseDown = function(event) {
     this.B0click = -lastTheta;
 
     document.getElementById("thetaPhi").innerHTML = "phi:" + (lastPhi) * 180. / Math.PI + " theta:" + (lastTheta) * 180. / Math.PI;
-    document.getElementById("L0B0").innerHTML = "L0:" + (vpDetail.L0click) * 180. / Math.PI + " B0:" + (vpDetail.B0click) * 180. / Math.PI;
+    document.getElementById("L0B0").innerHTML = "L0:" + (this.L0click) * 180. / Math.PI + " B0:" + (this.B0click) * 180. / Math.PI;
 
 }
 
@@ -148,6 +148,11 @@ viewportDetail.prototype.createRotationMatrixFromVectors = function(vec1, vec2) 
     return mm;
 }
 
+viewportDetail.prototype.createTranslationMatrixFromVectors = function(vec1, vec2) {
+    var M1 = Matrix.Translation(vec1.subtract(vec2));
+    return M1;
+}
+
 viewportDetail.prototype.handleMouseMove3D = function(event) {
     var canvasCoordinates = getCanvasCoordinates(event);
     viewportCoordinates = this.convertCanvasToViewport(canvasCoordinates);
@@ -171,9 +176,9 @@ viewportDetail.prototype.handleMouseMove2D = function(event) {
     solarCoordinates3D.elements.pop();
     var lastSolarCoordinates3D = this.lastSolarCoordinates4D.dup();
     lastSolarCoordinates3D.elements.pop();
-    var mm = this.createRotationMatrixFromVectors(solarCoordinates3D, lastSolarCoordinates3D);
+    var mm = this.createTranslationMatrixFromVectors(solarCoordinates3D, lastSolarCoordinates3D);
     if (mm != null) {
-        this.mouseMatrix = this.mouseMatrix.x(mm);
+        this.translationMatrix = this.translationMatrix.x(mm);
         this.lastSolarCoordinates4D = solarCoordinates4D;
     }
 }

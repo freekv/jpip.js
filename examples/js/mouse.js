@@ -1,7 +1,5 @@
 var mouseDown = false;
-var lastMouse = null;
-var lastPhi = 0.;
-var lastTheta = 0.;
+
 var activeIndex = 0;
 getCanvasCoordinates = function(event) {
     var rect = core.canvas.getBoundingClientRect();
@@ -35,11 +33,9 @@ function handleMouseDown(event) {
     document.getElementById("L0B0").innerHTML = "L0:" + (vpDetail.L0click) * 180. / Math.PI + " B0:" + (vpDetail.B0click) * 180. / Math.PI;
 
 }
-deltaMatrix = Matrix.I(4);
+
 function handleMouseUp(event) {
     mouseDown = false;
-    var vpDetail = core.viewport.viewportDetails[activeIndex];
-    deltaMatrix = vpDetail.mouseMatrix;
 }
 
 function handleMouseMove(event) {
@@ -80,7 +76,8 @@ function handleMouseMove3D(event) {
     lastSolarCoordinates3D.elements.pop();
     mm = createRotationMatrixFromVectors(solarCoordinates3D, lastSolarCoordinates3D);
     if (mm != null) {
-        vpDetail.mouseMatrix = deltaMatrix.x(mm);
+        vpDetail.mouseMatrix = vpDetail.mouseMatrix.x(mm);
+        lastSolarCoordinates4D = solarCoordinates4D;
     }
 }
 

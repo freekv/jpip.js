@@ -44,7 +44,9 @@ viewportDetail.prototype.convertViewportToView = function(viewportCoordinates) {
     solarCoordinates.elements[3] = 0.;
 
     var solarCoordinates3Dz = Math.sqrt(1 - solarCoordinates.dot(solarCoordinates));
-
+    if (isNaN(solarCoordinates3Dz)) {
+        solarCoordinates3Dz = 0.;
+    }
     var solarCoordinates3D = solarCoordinates.dup();
     solarCoordinates3D.elements[2] = solarCoordinates3Dz;
     return solarCoordinates3D;

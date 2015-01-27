@@ -43,7 +43,8 @@ sunPoints.prototype.init = function(gl) {
     onfail = function(data) {
         console.log(data)
     };
-    getJSON("http://www.lmsal.com/hek/her?cosec=2&cmd=search&type=column&event_type=ar,fl,ef&event_starttime=2015-01-24T00:00:00&event_endtime=2015-01-25T00:00:00&event_coordsys=helioprojective&x1=-1200&x2=1200&y1=-1200&y2=1200&&param0=FRM_Name&op0==&value0=NOAA%20SWPC%20Observer", onsuccess, onfail);
+    // getJSON("http://www.lmsal.com/hek/her?cosec=2&cmd=search&type=column&event_type=ar,fl,ef&event_starttime=2015-01-24T00:00:00&event_endtime=2015-01-25T00:00:00&event_coordsys=helioprojective&x1=-1200&x2=1200&y1=-1200&y2=1200&&param0=FRM_Name&op0==&value0=NOAA%20SWPC%20Observer",
+    // onsuccess, onfail);
     if (!this.textureLoadStarted) {
         var ref = this;
         for (var i = 0; i < this.textures.length; i++) {

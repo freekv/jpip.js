@@ -4,6 +4,8 @@ gui = function() {
     this.datasetGUIObject = {};
     this.types = {};
     this.controlpanel = document.getElementById("controlpanel");
+    this.controlpanelButton = document.getElementById("controlpanelButton");
+
     this.local_controlpanel = document.getElementById("local_controlpanel");
     this.datePanel = document.getElementById("datePanel");
     this.layersPanel = document.getElementById("layers");
@@ -187,7 +189,7 @@ gui.prototype.createServerPanel = function(data) {
 
     var loadButton = document.createElement("button");
     loadButton.innerHTML = "Load";
-    this.controlpanel.appendChild(loadButton);
+    this.controlpanelButton.appendChild(loadButton);
     loadButton.addEventListener("click", this, false);
     loadButton.setAttribute("data-type", "loadButton");
 
@@ -205,19 +207,18 @@ gui.prototype.createServerPanel = function(data) {
 
 gui.prototype.createDatePanel = function() {
     var dateNumber = 1;
-    var extendBackwardsButton = document.createElement("button");
-    extendBackwardsButton.innerHTML = "Extend Backward";
-    extendBackwardsButton.setAttribute("data-type", "extendBackwardsButton");
-
-    this.datePanel.appendChild(extendBackwardsButton);
-    extendBackwardsButton.addEventListener("click", this, false);
-    this.datePanel.appendChild(document.createElement("br"));
 
     this.createDatebox("startTime", dateNumber);
     this.datePanel.appendChild(document.createElement("br"));
     dateNumber--;
     this.createDatebox("endTime", dateNumber);
     this.datePanel.appendChild(document.createElement("br"));
+    var extendBackwardsButton = document.createElement("button");
+    extendBackwardsButton.innerHTML = "Extend Backward";
+    extendBackwardsButton.setAttribute("data-type", "extendBackwardsButton");
+
+    this.datePanel.appendChild(extendBackwardsButton);
+    extendBackwardsButton.addEventListener("click", this, false);
 }
 
 gui.prototype.initGui = function(data) {
@@ -233,22 +234,7 @@ gui.prototype.handleEvent = function(e) {
             var element = e.target || e.srcElement;
             var elementType = element.attributes["data-type"].value;
             if (elementType == "loadButton") {
-                var success = function(data) {
-                    var jpxfile = data.uri;
-                    var jpxparts = jpxfile.split("movies");
-                    var obs = core.gui.datasetGUIObject["observatoryHtmlElement"];
-                    var observatory = obs.children[obs.selectedIndex].childNodes[0].data;
-                    var ins = core.gui.datasetGUIObject["instrumentHtmlElement"];
-                    var instrument = ins.children[ins.selectedIndex].childNodes[0].data;
-                    var det = core.gui.datasetGUIObject["detectorHtmlElement"];
-                    var detector = det.children[det.selectedIndex].childNodes[0].data;
-                    var meas = core.gui.datasetGUIObject["measurementHtmlElement"];
-                    var measurement = meas.children[meas.selectedIndex].childNodes[0].data;
-                    core.objectList.push(new solarJPIP("http" + jpxparts[0].substring(4, jpxparts[0].length), "movies" + jpxparts[1], data.frames.length, 256, observatory, instrument, detector, measurement, core.beginDate, core.endDate));
-                };
-                getJSON(this.buildUrl(), success, function(e) {
-                });
-                this.setBeginAndEndDate();
+                this.handleLoad();
             } else if (elementType == "extendBackwardsButton") {
                 for (var i = 0; i < core.objectList.length; i++) {
                     core.objectList[i].extendBackwards();
@@ -262,6 +248,26 @@ gui.prototype.handleEvent = function(e) {
             }
     }
 }
+
+gui.prototype.handleLoad = function() {
+    var success = function(data) {
+        var jpxfile = data.uri;
+        var jpxparts = jpxfile.split("movies");
+        var obs = core.gui.datasetGUIObject["observatoryHtmlElement"];
+        var observatory = obs.children[obs.selectedIndex].childNodes[0].data;
+        var ins = core.gui.datasetGUIObject["instrumentHtmlElement"];
+        var instrument = ins.children[ins.selectedIndex].childNodes[0].data;
+        var det = core.gui.datasetGUIObject["detectorHtmlElement"];
+        var detector = det.children[det.selectedIndex].childNodes[0].data;
+        var meas = core.gui.datasetGUIObject["measurementHtmlElement"];
+        var measurement = meas.children[meas.selectedIndex].childNodes[0].data;
+        core.objectList.push(new solarJPIP("http" + jpxparts[0].substring(4, jpxparts[0].length), "movies" + jpxparts[1], data.frames.length, 256, observatory, instrument, detector, measurement, core.beginDate, core.endDate));
+    };
+    getJSON(this.buildUrl(), success, function(e) {
+    });
+    this.setBeginAndEndDate();
+}
+
 gui.prototype.createVideoBar = function() {
     var videoButton = document.getElementById("videoPlayButton");
     videoButton.addEventListener("click", function() {
@@ -304,6 +310,7 @@ gui.prototype.createResizeCanvas = function() {
 gui.prototype.addTypePanel = function(typeName) {
     var li = document.createElement("li")
     li.innerHTML = typeName;
+    li.setAttribute("class", "layertype");
     var ul = document.createElement("ul")
     li.appendChild(ul);
     this.layersPanel.appendChild(li);

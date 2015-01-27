@@ -176,6 +176,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
         document.onmousemove = handleMouseMove;
         core.canvas.onmousewheel = handleMouseWheel;
         core.objectList.push(new sunPoints());
+        core.gui.handleLoad();
 
     };
     getJSON(base_url + "api/?action=getDataSources&verbose=true&enable=[STEREO_A,STEREO_B,PROBA2]", success, success);

@@ -130,7 +130,9 @@ sunPoints.prototype.initShaders = function(gl, key) {
 sunPoints.prototype.prerender = function(gl) {
 
 }
+sunPoints.prototype.extendBackwards = function(gl) {
 
+}
 sunPoints.prototype.computeMatrix = function(L0, B0, mvMatrix) {
     var M1 = Matrix.Rotation(B0, $V([ 1, 0, 0 ]));
     var M2 = Matrix.Rotation(L0, $V([ 0, 1, 0 ]));

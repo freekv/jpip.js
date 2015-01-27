@@ -2,10 +2,11 @@
     <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Communication over jpip demo</title>
+    <link href='http://fonts.googleapis.com/css?family=Lobster' rel='stylesheet' type='text/css'>
+    
     <link rel="stylesheet" href="./css/webgl.css" type="text/css"> 
     <!-- <link rel="stylesheet" href="./css/aaccordion.css" type="text/css"> -->
     <link rel="stylesheet" href="./css/tabs.css" type="text/css"> 
-
     <script src="./WebGL-Inspector/core/embed.js" type="text/javascript"></script>
       
     <script src="./js/globals.js" type="text/javascript"></script>
@@ -329,9 +330,9 @@ discard;
 	
 			<article class="tab">
 				<h3>Dataset options</h3>   
-		      	<div id ="datePanel"></div> 
-	          	<p>     	      
+		      	<div id ="datePanel"></div>  	      
 			  	<div id ="controlpanel"></div> 
+			  	<div id ="controlpanelButton"></div>
 			  	<div id ="local_controlpanel"></div>
 			</article>
 			<article class="tab">
@@ -344,9 +345,10 @@ discard;
 			</article>
 		</section>
 		<p style="clear:both"></p>
-		<section style="width:340px; background:#CCCCCC;">
-	  		<h3>Layer options</h3>
+		<section id="layerOptions" style="width:340px;">
+	  		<h3>Layers</h3>
 	  	  	<div><ul id="layers"></ul></div>
+	  	  	<h3 >Layer options</h3>
 	      	<div id="info"></div>
 	      	<div id ="imagepanel"></div>
 	      	<div id="metadata"></div>

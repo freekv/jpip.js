@@ -484,7 +484,6 @@ solarJPIP.prototype.loadGUIElements = function(e) {
     this.infoDiv = document.createElement("div");
     this.infoDiv.setAttribute("class", "solarjpipinfodiv");
     this.optionsPanel.appendChild(this.infoDiv);
-    this.loadViewport();
     this.loadMetadataPanel();
     this.fireViewportChanged(core.viewport);
 }
@@ -497,6 +496,16 @@ solarJPIP.prototype.handleEvent = function(e) {
             if (elementType == "comboColormap") {
                 var elementViewport = parseInt(e.srcElement.attributes["data-viewport"].value);
                 this.colormapSelected(e, elementViewport);
+            } else if (elementType == "checkboxViewport") {
+                var elementViewport = parseInt(e.srcElement.attributes["data-viewport"].value);
+                if (element.checked) {
+                    this.viewportIndices.push(elementViewport);
+                } else {
+                    var idx = this.viewportIndices.indexOf(elementViewport);
+                    if (idx !== -1) {
+                        this.viewportIndices.splice(idx, 1);
+                    }
+                }
             } else if (elementType == "checkboxDifference") {
                 var elementViewport = parseInt(e.srcElement.attributes["data-viewport"].value);
                 if (element.checked) {
@@ -518,8 +527,6 @@ solarJPIP.prototype.handleEvent = function(e) {
             } else if (elementType == "alphabox") {
                 var elementViewport = parseInt(e.srcElement.attributes["data-viewport"].value);
                 this.alphaValue[elementViewport] = element.value;
-            } else if (elementType == "comboViewportmap") {
-                this.viewportSelected(e);
             }
     }
 }
@@ -528,14 +535,6 @@ solarJPIP.prototype.colormapSelected = function(e, elementViewport) {
     var comboColormap = e.target || e.srcElement;
     var selectedIndex = comboColormap.selectedIndex;
     this.colorTableValue[elementViewport] = comboColormap.children[selectedIndex].value;
-}
-
-solarJPIP.prototype.viewportSelected = function(e) {
-    var comboViewportmap = e.target || e.srcElement;
-    this.viewportIndices = [];
-    for (j = 0; j < comboViewportmap.selectedOptions.length; j++) {
-        this.viewportIndices.push(parseInt(comboViewportmap.selectedOptions[j].value));
-    }
 }
 
 solarJPIP.prototype.loadColormapGui = function(number, viewportDetailDiv) {
@@ -618,33 +617,6 @@ solarJPIP.prototype.loadAlphaValue = function(number, viewportDetailDiv) {
     alphaDiv.appendChild(document.createElement("br"));
 }
 
-solarJPIP.prototype.loadViewport = function() {
-    var viewportNames = [];
-    for (var j = 0; j < core.viewport.rows * core.viewport.columns; j++) {
-        viewportNames.push("" + j);
-    }
-    this.comboViewportmap = document.createElement("select");
-    this.comboViewportmap.setAttribute("class", "comboViewportmap");
-    this.comboViewportmap.setAttribute("multiple", "multiple");
-
-    for (var i = 0; i < viewportNames.length; i++) {
-        var comboViewportOption = document.createElement("option");
-        comboViewportOption.setAttribute("value", i);
-        comboViewportOption.innerHTML = viewportNames[i];
-        this.comboViewportmap.appendChild(comboViewportOption);
-        if (i === 0) {
-            comboViewportOption.setAttribute("selected", true);
-        }
-    }
-    var comboViewportLabel = document.createElement("label");
-    comboViewportLabel.innerHTML = "Viewport:";
-    this.optionsPanel.appendChild(comboViewportLabel);
-    this.optionsPanel.appendChild(this.comboViewportmap);
-    this.optionsPanel.appendChild(document.createElement("br"));
-    this.comboViewportmap.setAttribute("data-type", "comboViewportmap");
-    this.comboViewportmap.addEventListener("change", this, false);
-}
-
 solarJPIP.prototype.loadMetadataPanel = function() {
     this.metadataPanel = document.createElement("div");
 
@@ -664,6 +636,22 @@ solarJPIP.prototype.loadMetadataPanel = function() {
     this.optionsPanel.appendChild(this.metadataPanel);
 
 }
+solarJPIP.prototype.loadViewportCheckbox = function(number, viewportDetailDiv) {
+    var viewportCheckboxDiv = document.createElement("div");
+    viewportCheckboxDiv.setAttribute("class", "viewportCheckbox");
+    viewportDetailDiv.appendChild(viewportCheckboxDiv);
+    var viewportCheckboxLabel = document.createElement("label");
+    viewportCheckboxLabel.innerHTML = "Activate viewport " + number + ":";
+
+    var viewportCheckbox = document.createElement("input");
+    viewportCheckbox.setAttribute("type", "checkbox");
+    viewportCheckbox.setAttribute("data-type", "checkboxViewport");
+    viewportCheckbox.setAttribute("data-viewport", "" + number);
+
+    viewportCheckbox.addEventListener("change", this, false);
+    viewportCheckboxDiv.appendChild(viewportCheckboxLabel);
+    viewportCheckboxDiv.appendChild(viewportCheckbox);
+}
 
 solarJPIP.prototype.loadCombiViewportDetail = function(viewportIndex) {
     if (this.viewportDetailDiv[viewportIndex] === undefined) {
@@ -673,6 +661,7 @@ solarJPIP.prototype.loadCombiViewportDetail = function(viewportIndex) {
         this.isDiff[viewportIndex] = false;
         this.boostboxValue[viewportIndex] = 0.8;
         this.optionsPanel.appendChild(viewportDetailDiv);
+        this.loadViewportCheckbox(viewportIndex, viewportDetailDiv);
         this.loadDifferenceCheckbox(viewportIndex, viewportDetailDiv);
         this.loadColormapGui(viewportIndex, viewportDetailDiv);
         this.loadAlphaValue(viewportIndex, viewportDetailDiv);
@@ -692,21 +681,12 @@ solarJPIP.prototype.fireViewportChanged = function(vp) {
         }
         this.viewportDetailDiv[k] = undefined;
     }
-
-    while (this.comboViewportmap.hasChildNodes()) {
-        this.comboViewportmap.removeChild(this.comboViewportmap.lastChild);
-    }
-    for (var i = 0; i < viewportNames.length; i++) {
-        var comboViewportOption = document.createElement("option");
-        comboViewportOption.setAttribute("value", i);
-        comboViewportOption.innerHTML = viewportNames[i];
-        this.comboViewportmap.appendChild(comboViewportOption);
-        this.loadCombiViewportDetail(i);
-        if (this.viewportIndices.indexOf(i) !== -1) {
-            comboViewportOption.setAttribute("selected", true);
+    for (var k = 0; k < viewportNames.length; k++) {
+        var el = this.viewportDetailDiv[k];
+        if (el === undefined || el === null) {
+            this.loadCombiViewportDetail(k);
         }
     }
-
 }
 
 solarJPIP.prototype.sphericalPoint = function(i, j, res, face, sign) {

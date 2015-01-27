@@ -4,8 +4,24 @@ canvas {
 html {
   background: #E2DA99; }
 
-.accordion section {
-  display: inline-block; }
+body {
+  font-family: 'Roboto', sans-serif; }
+
+#layers, #layers li ul {
+  list-style: none;
+  display: block;
+  padding: 0;
+  margin: 0;
+  width: 100%; }
+
+.layertype {
+  color: #FFFFFF;
+  background: #342800;
+  border-bottom: 1px solid #2B2301;
+  list-style: none;
+  padding-left: 0em;
+  text-indent: 0.4em;
+  width: 100%; }
 
 .activeOptionsPanel {
   display: initial;
@@ -15,25 +31,34 @@ html {
   display: none;
   visibility: hidden; }
 
-.activeLayer {
+.activeLayer, .inactiveLayer {
   color: #342800;
   background: #73AFB6;
   display: block;
-  visibility: visible; }
+  visibility: visible;
+  list-style: none;
+  padding-left: 0em;
+  text-indent: 2.1em;
+  width: 100%; }
 
-.activeLayer:hover {
+.activeLayer {
+  color: #E2DA99; }
+
+.inactiveLayer:hover {
   background: #5E9CA0;
   color: #2B2301; }
 
-.inactiveLayer {
-  background: #73AFB6; }
+#layerOptions {
+  background: #FFFFFF;
+  color: #342800;
+  padding: 4px;
+  border-radius: 5px; }
 
 .aligninput, .alignlabel {
   display: inline-block; }
 
 .alignlabel {
-  width: 75px;
-  /* or whatever size you want them */ }
+  width: 75px; }
 
 body {
   width: 90%;
@@ -284,27 +309,74 @@ input[type=checkbox]:checked ~ #local_controlpanel {
 [data-tips].left-tip:hover:before {
   top: 7px; }
 
-ul {
-  list-style: none;
-  display: block;
-  padding: 0;
-  margin: 0;
-  width: 100%; }
+.tab-area {
+  width: 340px;
+  float: left; }
 
-li {
-  background: #359983;
-  border: 1px solid #7aa881;
-  list-style: none;
-  padding-left: 0em;
-  text-indent: 0.1em;
-  width: 100%; }
+.tabinput {
+  display: none; }
 
-li li {
+.tab-link {
+  font-size: 10px;
+  font-family: arial;
+  cursor: pointer;
+  color: #385446;
+  font-weight: bold;
+  text-decoration: none;
   display: block;
-  border: 0;
-  list-style: none;
-  padding-left: 0em;
-  text-indent: 2.1em;
-  width: 100%; }
+  float: left;
+  width: 55px;
+  padding: 3px 0;
+  margin: 0px 2px 0px 0px;
+  text-align: center;
+  background: #73AFB6;
+  border: 1px solid #bbb;
+  border-radius: 8px 16px 0px 0px;
+  border-left: 0;
+  border-bottom: 0; }
+
+.tab-link:hover {
+  background: #5E9CA0; }
+
+.tab-link:nth-of-type(1) {
+  border-left: 1px solid #bbb; }
+
+.tab {
+  clear: both;
+  background: #FFFFFF;
+  padding: 4px 4px;
+  border-radius: 5px;
+  display: none;
+  min-height: 180px;
+  width: 340px; }
+
+.target-fix {
+  display: block;
+  top: 0;
+  left: 0;
+  position: fixed; }
+
+#tab-C:checked ~ label:nth-of-type(3),
+#tab-B:checked ~ label:nth-of-type(2),
+#tab-B:not(:checked) ~ #tab-C:not(:checked) ~ label:nth-of-type(1) {
+  background: #73AFB6;
+  color: #E2DA99; }
+
+#tab-C:checked ~ label:nth-of-type(3):after,
+#tab-B:checked ~ label:nth-of-type(2):after,
+#tab-B:not(:checked) ~ #tab-C:not(:checked) ~ label:nth-of-type(1):after {
+  position: absolute;
+  content: "";
+  margin: 5px 0 0 0;
+  width: 55px;
+  height: 0px;
+  display: block;
+  background: #73AFB6; }
+
+/* Checked Tabs */
+.tabs-checked input:nth-of-type(2):not(:checked) ~ input:nth-of-type(3):not(:checked) ~ .tab:nth-of-type(1),
+.tabs-checked input:nth-of-type(2):checked ~ .tab:nth-of-type(2),
+.tabs-checked input:nth-of-type(3):checked ~ .tab:nth-of-type(3) {
+  display: block; }
 
 /*# sourceMappingURL=webgl.css.map */

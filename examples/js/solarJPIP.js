@@ -498,14 +498,7 @@ solarJPIP.prototype.handleEvent = function(e) {
                 this.colormapSelected(e, elementViewport);
             } else if (elementType == "checkboxViewport") {
                 var elementViewport = parseInt(e.srcElement.attributes["data-viewport"].value);
-                if (element.checked) {
-                    this.viewportIndices.push(elementViewport);
-                } else {
-                    var idx = this.viewportIndices.indexOf(elementViewport);
-                    if (idx !== -1) {
-                        this.viewportIndices.splice(idx, 1);
-                    }
-                }
+                this.handleViewportcheckBox(element, elementViewport);
             } else if (elementType == "checkboxDifference") {
                 var elementViewport = parseInt(e.srcElement.attributes["data-viewport"].value);
                 if (element.checked) {
@@ -528,6 +521,16 @@ solarJPIP.prototype.handleEvent = function(e) {
                 var elementViewport = parseInt(e.srcElement.attributes["data-viewport"].value);
                 this.alphaValue[elementViewport] = element.value;
             }
+    }
+}
+solarJPIP.prototype.handleViewportcheckBox = function(element, elementViewport) {
+    if (element.checked) {
+        this.viewportIndices.push(elementViewport);
+    } else {
+        var idx = this.viewportIndices.indexOf(elementViewport);
+        if (idx !== -1) {
+            this.viewportIndices.splice(idx, 1);
+        }
     }
 }
 
@@ -647,6 +650,8 @@ solarJPIP.prototype.loadViewportCheckbox = function(number, viewportDetailDiv) {
     viewportCheckbox.setAttribute("type", "checkbox");
     viewportCheckbox.setAttribute("data-type", "checkboxViewport");
     viewportCheckbox.setAttribute("data-viewport", "" + number);
+    viewportCheckbox.checked = true;
+    this.handleViewportcheckBox(viewportCheckbox, number);
 
     viewportCheckbox.addEventListener("change", this, false);
     viewportCheckboxDiv.appendChild(viewportCheckboxLabel);

@@ -1,4 +1,9 @@
 *.swp
 .project
 
+<<<<<<< HEAD
+=======
+*.map
+
+>>>>>>> stash
 *.scssc

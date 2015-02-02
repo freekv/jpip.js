@@ -1630,8 +1630,10 @@ var JpxImage = (function JpxImageClosure() {
 
             var width = resolution.trx1 - resolution.trx0;
             var height = resolution.try1 - resolution.try0;
+            if (width > context.toDecodeResolutions) {
+                break;
+            }
             // Allocate space for the whole sublevel.
-            console.log("allocate array size:" + width + " " + height);
             var coefficients = new Float32Array(width * height);
 
             for (var j = 0, jj = resolution.subbands.length; j < jj; j++) {

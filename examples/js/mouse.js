@@ -8,6 +8,7 @@ getCanvasCoordinates = function(event) {
 }
 
 function handleMouseDown(event) {
+    event.preventDefault();
     var canvasCoordinates = getCanvasCoordinates(event);
     activeIndex = core.viewport.getIndex(canvasCoordinates);
     var vpDetail = core.viewport.viewportDetails[activeIndex];
@@ -25,6 +26,7 @@ function handleMouseMove(event) {
 }
 
 handleMouseWheel = function(event) {
+    event.preventDefault();
     var canvasCoordinates = getCanvasCoordinates(event);
     var index = core.viewport.getIndex(canvasCoordinates);
     var vpDetail = core.viewport.viewportDetails[index];

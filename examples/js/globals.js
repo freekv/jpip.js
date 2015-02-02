@@ -58,7 +58,7 @@ var getJSON = function(url, successHandler, errorHandler) {
     xhr.onreadystatechange = function() {
         var status;
         var data;
-        if (xhr.readyState == 4) { // `DONE`
+        if (xhr.readyState == 4) {
             status = xhr.status;
             if (status == 200) {
                 data = JSON.parse(xhr.responseText);

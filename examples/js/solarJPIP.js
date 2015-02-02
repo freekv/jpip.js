@@ -83,7 +83,7 @@ solarJPIP.prototype.extendBackwards = function() {
 }
 
 solarJPIP.prototype.render = function(gl, mvMatrix, time, viewportIndex) {
-    if (solarJPIP.prototype.shaderProgram === 'undefined') {
+    if (solarJPIP.prototype.shaderProgram === undefined) {
         return;
     }
     var key = core.viewport.viewportDetails[viewportIndex].mode;

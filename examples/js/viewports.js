@@ -301,8 +301,8 @@ viewport.prototype.addWidthHeightControl = function() {
 viewport.prototype.handleEvent = function(e) {
     switch (e.type) {
         case "change":
-            var elementType = e.srcElement.attributes["data-type"].value;
             var element = e.target || e.srcElement;
+            var elementType = element.attributes["data-type"].value;
             if (elementType == "rowNumber") {
                 this.setRows(element.value);
                 this.viewportChanged();
@@ -314,7 +314,7 @@ viewport.prototype.handleEvent = function(e) {
             } else if (elementType == "height") {
                 this.setHeight(element.value);
             } else if (elementType == "comboViewportModes") {
-                var elementViewport = parseInt(e.srcElement.attributes["data-viewport"].value);
+                var elementViewport = parseInt(element.attributes["data-viewport"].value);
                 var selectedIndex = element.selectedIndex;
                 this.viewportDetails[elementViewport].mode = this.modeList[selectedIndex];
             }

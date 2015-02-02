@@ -499,16 +499,16 @@ solarJPIP.prototype.loadGUIElements = function(e) {
 solarJPIP.prototype.handleEvent = function(e) {
     switch (e.type) {
         case "change":
-            var elementType = e.srcElement.attributes["data-type"].value;
             var element = e.target || e.srcElement;
+            var elementType = element.attributes["data-type"].value;
             if (elementType == "comboColormap") {
-                var elementViewport = parseInt(e.srcElement.attributes["data-viewport"].value);
+                var elementViewport = parseInt(element.attributes["data-viewport"].value);
                 this.colormapSelected(e, elementViewport);
             } else if (elementType == "checkboxViewport") {
-                var elementViewport = parseInt(e.srcElement.attributes["data-viewport"].value);
+                var elementViewport = parseInt(element.attributes["data-viewport"].value);
                 this.handleViewportcheckBox(element, elementViewport);
             } else if (elementType == "checkboxDifference") {
-                var elementViewport = parseInt(e.srcElement.attributes["data-viewport"].value);
+                var elementViewport = parseInt(element.attributes["data-viewport"].value);
                 if (element.checked) {
                     this.isDiff[elementViewport] = 1;
                 } else {
@@ -523,10 +523,10 @@ solarJPIP.prototype.handleEvent = function(e) {
                     this.metadataPanel.style.display = 'none';
                 }
             } else if (elementType == "boostboxDifference") {
-                var elementViewport = parseInt(e.srcElement.attributes["data-viewport"].value);
+                var elementViewport = parseInt(element.attributes["data-viewport"].value);
                 this.boostboxValue[elementViewport] = element.value;
             } else if (elementType == "alphabox") {
-                var elementViewport = parseInt(e.srcElement.attributes["data-viewport"].value);
+                var elementViewport = parseInt(element.attributes["data-viewport"].value);
                 this.alphaValue[elementViewport] = element.value;
             }
     }

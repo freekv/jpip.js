@@ -95,7 +95,7 @@ gui.prototype.createDatebox = function(id, number) {
     dateEl.id = id;
     dateEl.setAttribute("type", "textarea");
     var setDate = new Date();
-    setDate.setDate(setDate.getDate() - number);
+    setDate.setDate(setDate.getDate() - number * 2);
     dateEl.value = formatDate(setDate);
     dateEl.addEventListener("scroll", function(e) {
         console.log("EVENT" + e);
@@ -262,6 +262,7 @@ gui.prototype.handleLoad = function() {
         var meas = core.gui.datasetGUIObject["measurementHtmlElement"];
         var measurement = meas.children[meas.selectedIndex].childNodes[0].data;
         core.objectList.push(new solarJPIP("http" + jpxparts[0].substring(4, jpxparts[0].length), "movies" + jpxparts[1], data.frames.length, 256, observatory, instrument, detector, measurement, core.beginDate, core.endDate));
+        requestAnimationFrame(core.drawScene);
     };
     getJSON(this.buildUrl(), success, function(e) {
     });

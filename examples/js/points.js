@@ -159,6 +159,9 @@ sunPoints.prototype.computeMatrix = function(L0, B0, mvMatrix) {
     return MM;
 }
 sunPoints.prototype.render = function(gl, mvMatrix, time, viewportIndex) {
+    if (sunPoints.prototype.shaderProgram === undefined) {
+        return;
+    }
     var key = core.viewport.viewportDetails[viewportIndex].mode;
     gl.useProgram(sunPoints.prototype.shaderProgram[key]);
 

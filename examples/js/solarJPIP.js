@@ -177,7 +177,6 @@ solarJPIP.prototype.init = function(gl) {
         image.onload = function() {
             ref.colormapImage = image;
             ref.colormapInitialized = true;
-            requestAnimationFrame(core.drawScene);
         }
         image.src = "./images/gradient_jhv.png";
     }
@@ -296,7 +295,6 @@ solarJPIP.prototype.initTextures = function(nof) {
         dataObj.height = data[3];
         dataObj.index = curr + toAdd;
         td.textureData.push(dataObj);
-        requestAnimationFrame(core.drawScene);
     }
     var jpip = new JPIP();
     var jpipConn = jpip.open(this.baseurl, this.imgname, this.size, nof);
@@ -363,8 +361,12 @@ solarJPIP.prototype.initShaders = function(gl, key) {
     gl.useProgram(solarJPIP.prototype.shaderProgram[key]);
 
     solarJPIP.prototype.vertexPositionAttribute[key] = gl.getAttribLocation(solarJPIP.prototype.shaderProgram[key], "aVertexPosition");
-    requestAnimationFrame(core.drawScene);
+    // gl.enableVertexAttribArray(solarJPIP.prototype.vertexPositionAttribute[key]);
 
+    // solarJPIP.prototype.textureCoordAttribute[key] =
+    // gl.getAttribLocation(solarJPIP.prototype.shaderProgram[key],
+    // "aTextureCoord");
+    // gl.enableVertexAttribArray(solarJPIP.prototype.textureCoordAttribute[key]);
 }
 
 solarJPIP.prototype.parseXML = function(metadata) {
@@ -528,7 +530,6 @@ solarJPIP.prototype.handleEvent = function(e) {
                 this.alphaValue[elementViewport] = element.value;
             }
     }
-    requestAnimationFrame(core.drawScene);
 }
 solarJPIP.prototype.handleViewportcheckBox = function(element, elementViewport) {
     if (element.checked) {

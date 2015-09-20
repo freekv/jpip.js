@@ -50,20 +50,13 @@ core.start = function() {
         core.gl.clearDepth(1.0);
         core.gl.enable(core.gl.DEPTH_TEST);
         core.gl.depthFunc(core.gl.LEQUAL);
-        requestAnimationFrame(core.drawScene);
+        setInterval(function() {
+            requestAnimationFrame(core.drawScene)
+        }, 30);
     }
 }
-var time;
+
 core.drawScene = function() {
-    var now = new Date().getTime();
-    if (core.running) {
-        var dt = now - (time || now);
-    } else {
-        dt = 0;
-    }
-    time = now;
-    var hours_per_second = 0.1;
-    core.deltat = (1000 * 60 * 24 * dt) * hours_per_second;
     core.gl.clear(core.gl.COLOR_BUFFER_BIT | core.gl.DEPTH_BUFFER_BIT);
 
     var vcl = core.viewport.totalWidth / core.viewport.columns;
@@ -106,14 +99,17 @@ core.drawScene = function() {
                 var object = core.objectList[i];
                 object.updateGUI();
             }
+            core.elapsed = Date.now() - core.bt;
+            core.bt = Date.now();
+
         }
     }
     if (core.running || core.stepForward) {
-        core.currentDate += core.deltat;
+        core.currentDate += core.cadence;
         core.stepForward = false;
     }
     if (core.stepBackward) {
-        core.currentDate -= core.deltat;
+        core.currentDate -= core.cadence;
         core.stepBackward = false;
     }
     if (core.currentDate < core.beginDate) {
@@ -125,9 +121,6 @@ core.drawScene = function() {
     var indicatorElement = document.getElementById("videoIndicator");
     indicatorElement.style.left = indicatorElement.parentNode.clientWidth * (core.currentDate - core.beginDate) / (core.endDate - core.beginDate);
     indicatorElement.setAttribute("data-tips", formatDate(new Date(core.currentDate)));
-    if (core.running) {
-        requestAnimationFrame(core.drawScene);
-    }
 }
 
 core.loadIdentity = function() {
@@ -184,7 +177,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
         core.canvas.onmousewheel = handleMouseWheel;
         core.objectList.push(new sunPoints());
         core.gui.handleLoad();
-        requestAnimationFrame(core.drawScene);
+
     };
     getJSON(base_url + "api/?action=getDataSources&verbose=true&enable=[STEREO_A,STEREO_B,PROBA2]", success, success);
 });
